@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "aHN4ciYSZgc8Vnw6qeWnGeoUvFogUIhtblxgEiqDvzU=",
+  "Source": "AppGateway",
+  "BasePath": "_content/AppGateway",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
