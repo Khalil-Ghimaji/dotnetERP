@@ -34,7 +34,20 @@ namespace ERP.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("CommandeId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ProduitId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Quantite")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CommandeId");
+
+                    b.HasIndex("ProduitId");
 
                     b.ToTable("ArticleCommandes");
                 });
@@ -78,7 +91,15 @@ namespace ERP.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("ProduitId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Quantite")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ProduitId");
 
                     b.ToTable("AricleStocks");
                 });
@@ -87,6 +108,14 @@ namespace ERP.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -100,9 +129,81 @@ namespace ERP.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("ArticleStockId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CategorieId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Prix")
+                        .HasColumnType("REAL");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("ArticleStockId");
+
+                    b.HasIndex("CategorieId");
+
                     b.ToTable("Produits");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Commande.ArticleCommande", b =>
+                {
+                    b.HasOne("Persistence.entities.Commande.Commande", null)
+                        .WithMany("ArticleCommandes")
+                        .HasForeignKey("CommandeId");
+
+                    b.HasOne("Persistence.entities.Stock.Produit", "Produit")
+                        .WithMany()
+                        .HasForeignKey("ProduitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produit");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Stock.ArticleStock", b =>
+                {
+                    b.HasOne("Persistence.entities.Stock.Produit", "Produit")
+                        .WithMany()
+                        .HasForeignKey("ProduitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produit");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Stock.Produit", b =>
+                {
+                    b.HasOne("Persistence.entities.Stock.ArticleStock", "ArticleStock")
+                        .WithMany()
+                        .HasForeignKey("ArticleStockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Persistence.entities.Stock.Categorie", "Categorie")
+                        .WithMany("Produits")
+                        .HasForeignKey("CategorieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ArticleStock");
+
+                    b.Navigation("Categorie");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
+                {
+                    b.Navigation("ArticleCommandes");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Stock.Categorie", b =>
+                {
+                    b.Navigation("Produits");
                 });
 #pragma warning restore 612, 618
         }

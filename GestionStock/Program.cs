@@ -1,8 +1,15 @@
+using GestionStock.Repository;
+using GestionStock.Services;
+using Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddScoped<IStockRepo,StockRepo>();
+builder.Services.AddScoped<IStockService,StockService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
