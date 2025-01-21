@@ -5,7 +5,7 @@ namespace Persistence.entities.Commande;
 
 public class ArticleCommande:Common
 {
-    public Guid ProduitId { get; set; }
+    public int ProduitId { get; set; }
     public int Quantite { get; set; }
     [ForeignKey("ProduitId")]
     public Produit Produit { get; set; }

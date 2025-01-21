@@ -16,7 +16,7 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("ajouterProduit")]
-        public IActionResult AjouterProduit(Guid produitId, int quantite)
+        public IActionResult AjouterProduit(int produitId, int quantite)
         {
             _stockService.AjouterProduit(produitId, quantite);
             return Ok();
@@ -37,28 +37,28 @@ namespace GestionStock.Controllers
         }
 
         [HttpPut("modifierProduit")]
-        public IActionResult ModifierProduit(Guid id, int quantite)
+        public IActionResult ModifierProduit(int id, int quantite)
         {
             _stockService.ModifierProduit(id, quantite);
             return Ok();
         }
 
         [HttpPost("reserverProduit")]
-        public async Task<IActionResult> ReserverProduit(Guid id, int quantite, TimeSpan reservationDuration)
+        public async Task<IActionResult> ReserverProduit(int id, int quantite, TimeSpan reservationDuration)
         {
             await _stockService.ReserverProduit(id, quantite, reservationDuration);
             return Ok();
         }
 
         [HttpPost("confirmerCommande")]
-        public IActionResult ConfirmerCommande(Guid id)
+        public IActionResult ConfirmerCommande(int id)
         {
             _stockService.ConfirmerCommande(id);
             return Ok();
         }
 
         [HttpDelete("supprimerProduit")]
-        public IActionResult SupprimerProduit(Guid id)
+        public IActionResult SupprimerProduit(int id)
         {
             _stockService.SupprimerProduit(id);
             return Ok();

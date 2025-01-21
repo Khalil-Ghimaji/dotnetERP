@@ -5,11 +5,11 @@ namespace GestionStock.Services;
 
 public interface IStockService
 {
-    void AjouterProduit(Guid produitId, int quantite);
+    void AjouterProduit(int produitId, int quantite);
     Task<IEnumerable<ArticleStock>> ConsulterStock();
     Task ExpedierMarchandises(Commande commande);
-    Task ModifierProduit(Guid id, int quantite);
-    Task ReserverProduit(Guid id, int quantite, TimeSpan reservationDuration);
-    void ConfirmerCommande(Guid id);
-    Task SupprimerProduit(Guid id);
+    Task ModifierProduit(int id, int quantite);
+    Task ReserverProduit(int id, int quantite, TimeSpan reservationDuration);
+    void ConfirmerCommande(int id);
+    Task SupprimerProduit(int id);
 }

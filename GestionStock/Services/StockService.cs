@@ -8,15 +8,15 @@ namespace GestionStock.Services
     public class StockService : IStockService
     {
         private readonly IStockRepo _stockRepo;
-        private readonly ConcurrentDictionary<Guid, TaskCompletionSource<bool>> _reservationTasks;
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<bool>> _reservationTasks;
 
         public StockService(IStockRepo stockRepo)
         {
             _stockRepo = stockRepo;
-            _reservationTasks = new ConcurrentDictionary<Guid, TaskCompletionSource<bool>>();
+            _reservationTasks = new ConcurrentDictionary<int, TaskCompletionSource<bool>>();
         }
 
-        public async void AjouterProduit(Guid produitId, int quantite)
+        public async void AjouterProduit(int produitId, int quantite)
         {
             var produit = await _stockRepo.GetProduitById(produitId);
             if (produit == null)
@@ -54,7 +54,7 @@ namespace GestionStock.Services
             }
         }
 
-        public async Task ModifierProduit(Guid id, int quantite)
+        public async Task ModifierProduit(int id, int quantite)
         {
             var articleStock = await _stockRepo.GetByProduitId(id);
             if (articleStock != null)
@@ -64,7 +64,7 @@ namespace GestionStock.Services
             }
         }
 
-        public async Task ReserverProduit(Guid id, int quantite, TimeSpan reservationDuration)
+        public async Task ReserverProduit(int id, int quantite, TimeSpan reservationDuration)
         {
             var articleStock = await _stockRepo.GetByProduitId(id);
             if (articleStock != null && articleStock.Quantite >= quantite)
@@ -92,7 +92,7 @@ namespace GestionStock.Services
             }
         }
 
-        public void ConfirmerCommande(Guid id)
+        public void ConfirmerCommande(int id)
         {
             if (_reservationTasks.TryGetValue(id, out var tcs))
             {
@@ -100,7 +100,7 @@ namespace GestionStock.Services
             }
         }
 
-        public async Task SupprimerProduit(Guid id)
+        public async Task SupprimerProduit(int id)
         {
             await _stockRepo.Delete(id);
         }

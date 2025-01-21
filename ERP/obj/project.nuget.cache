@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "BFM3ErdnWa8=",
+  "dgSpecHash": "5KYL9j3xinY=",
   "success": true,
-  "projectFilePath": "D:\\dotnetERP\\ERP\\ERP.csproj",
+  "projectFilePath": "D:\\dotnetERP\\erp\\ERP.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Dhouibi\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Dhouibi\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

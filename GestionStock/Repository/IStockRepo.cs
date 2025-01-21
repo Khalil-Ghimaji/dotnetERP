@@ -5,7 +5,7 @@ namespace GestionStock.Repository;
 
 public interface IStockRepo:IGenericRepository<ArticleStock>
 {
-    public Task<Produit?> GetProduitById(Guid produitId);
-    public Task<ArticleStock?> GetByProduitId(Guid produitId);
-    public void AddArticleStock(Guid productId, int quantite);
+    public Task<Produit?> GetProduitById(int produitId);
+    public Task<ArticleStock?> GetByProduitId(int produitId);
+    public void AddArticleStock(int productId, int quantite);
 }

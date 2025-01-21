@@ -10,16 +10,16 @@ namespace GestionStock.Repository
         public StockRepo(AppDbContext context) : base(context)
         {
         }
-        public async Task<Produit?> GetProduitById(Guid produitId)
+        public async Task<Produit?> GetProduitById(int produitId)
         {
             return await _context.Produits.FindAsync(produitId);
         }
 
-        public async Task<ArticleStock?> GetByProduitId(Guid produitId)
+        public async Task<ArticleStock?> GetByProduitId(int produitId)
         {
             return await _context.AricleStocks.FirstOrDefaultAsync(a => a.ProduitId == produitId);
         }
-        public async void AddArticleStock(Guid productId, int quantite)
+        public async void AddArticleStock(int productId, int quantite)
         {
             ArticleStock articleStock = new ArticleStock
             {
