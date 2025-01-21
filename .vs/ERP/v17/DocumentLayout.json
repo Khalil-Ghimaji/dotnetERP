@@ -1,0 +1,258 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionclients\\services\\clientservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|solutionrelative:gestionclients\\services\\clientservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionclients\\controllers\\clientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|solutionrelative:gestionclients\\controllers\\clientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionclients\\services\\iclientservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|solutionrelative:gestionclients\\services\\iclientservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionstock\\controllers\\stockcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|solutionrelative:gestionstock\\controllers\\stockcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionclients\\repository\\clientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|solutionrelative:gestionclients\\repository\\clientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionstock\\services\\stockservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|solutionrelative:gestionstock\\services\\stockservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionclients\\repository\\iclientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|solutionrelative:gestionclients\\repository\\iclientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionclients\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86FB47B2-011E-43E5-8BE2-8C806124772E}|GestionClients\\GestionClients.csproj|solutionrelative:gestionclients\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionstock\\repository\\istockrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|solutionrelative:gestionstock\\repository\\istockrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionstock\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|solutionrelative:gestionstock\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{166FD6E2-FFF9-4B57-BE59-133EF65D90A2}|Persistence\\Persistence.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\persistence\\entities\\client\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{166FD6E2-FFF9-4B57-BE59-133EF65D90A2}|Persistence\\Persistence.csproj|solutionrelative:persistence\\entities\\client\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionstock\\services\\istockservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|solutionrelative:gestionstock\\services\\istockservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\gestionstock\\repository\\stockrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CABDC9F-1088-48A9-AB5F-D512D9090084}|GestionStock\\GestionStock.csproj|solutionrelative:gestionstock\\repository\\stockrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4D2F090C-E1AE-4E6A-ABA8-9F587B9C365E}|ERP\\ERP.csproj|c:\\users\\oussa\\onedrive\\bureau\\tools\\dotnet\\erp\\migrations\\20250121195132_client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4D2F090C-E1AE-4E6A-ABA8-9F587B9C365E}|ERP\\ERP.csproj|solutionrelative:erp\\migrations\\20250121195132_client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ClientService.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Services\\ClientService.cs",
+              "RelativeDocumentMoniker": "GestionClients\\Services\\ClientService.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Services\\ClientService.cs*",
+              "RelativeToolTip": "GestionClients\\Services\\ClientService.cs*",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAACcAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T19:56:40.875Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ClientController.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Controllers\\ClientController.cs",
+              "RelativeDocumentMoniker": "GestionClients\\Controllers\\ClientController.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Controllers\\ClientController.cs",
+              "RelativeToolTip": "GestionClients\\Controllers\\ClientController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T20:01:04.055Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "StockController.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Controllers\\StockController.cs",
+              "RelativeDocumentMoniker": "GestionStock\\Controllers\\StockController.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Controllers\\StockController.cs",
+              "RelativeToolTip": "GestionStock\\Controllers\\StockController.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAACsAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T19:57:36.41Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ClientRepo.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Repository\\ClientRepo.cs",
+              "RelativeDocumentMoniker": "GestionClients\\Repository\\ClientRepo.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Repository\\ClientRepo.cs",
+              "RelativeToolTip": "GestionClients\\Repository\\ClientRepo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T20:01:57.555Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IClientService.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Services\\IClientService.cs",
+              "RelativeDocumentMoniker": "GestionClients\\Services\\IClientService.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Services\\IClientService.cs",
+              "RelativeToolTip": "GestionClients\\Services\\IClientService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T19:56:26.528Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "StockService.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Services\\StockService.cs",
+              "RelativeDocumentMoniker": "GestionStock\\Services\\StockService.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Services\\StockService.cs",
+              "RelativeToolTip": "GestionStock\\Services\\StockService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T20:01:42.8Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "IClientRepo.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Repository\\IClientRepo.cs",
+              "RelativeDocumentMoniker": "GestionClients\\Repository\\IClientRepo.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Repository\\IClientRepo.cs",
+              "RelativeToolTip": "GestionClients\\Repository\\IClientRepo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T20:02:56.763Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Program.cs",
+              "RelativeDocumentMoniker": "GestionClients\\Program.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionClients\\Program.cs",
+              "RelativeToolTip": "GestionClients\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T19:57:21.139Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IStockRepo.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Repository\\IStockRepo.cs",
+              "RelativeDocumentMoniker": "GestionStock\\Repository\\IStockRepo.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Repository\\IStockRepo.cs",
+              "RelativeToolTip": "GestionStock\\Repository\\IStockRepo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T20:01:21.064Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Program.cs",
+              "RelativeDocumentMoniker": "GestionStock\\Program.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Program.cs",
+              "RelativeToolTip": "GestionStock\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T20:10:32.696Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "IStockService.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Services\\IStockService.cs",
+              "RelativeDocumentMoniker": "GestionStock\\Services\\IStockService.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Services\\IStockService.cs",
+              "RelativeToolTip": "GestionStock\\Services\\IStockService.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAAAAoAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T20:01:44.429Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Client.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\Persistence\\Entities\\Client\\Client.cs",
+              "RelativeDocumentMoniker": "Persistence\\Entities\\Client\\Client.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\Persistence\\Entities\\Client\\Client.cs",
+              "RelativeToolTip": "Persistence\\Entities\\Client\\Client.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T19:50:26.346Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "StockRepo.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Repository\\StockRepo.cs",
+              "RelativeDocumentMoniker": "GestionStock\\Repository\\StockRepo.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\GestionStock\\Repository\\StockRepo.cs",
+              "RelativeToolTip": "GestionStock\\Repository\\StockRepo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T20:01:20.713Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "20250121195132_client.cs",
+              "DocumentMoniker": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\ERP\\Migrations\\20250121195132_client.cs",
+              "RelativeDocumentMoniker": "ERP\\Migrations\\20250121195132_client.cs",
+              "ToolTip": "C:\\Users\\oussa\\OneDrive\\Bureau\\tools\\dotnet\\ERP\\Migrations\\20250121195132_client.cs",
+              "RelativeToolTip": "ERP\\Migrations\\20250121195132_client.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T19:51:50.246Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
