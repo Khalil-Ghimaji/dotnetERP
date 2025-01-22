@@ -1,6 +1,10 @@
-namespace Facturation.DTO;
+using Persistence.entities.Facturation;
 
-public class UpdateFactureDTO
+namespace Facturation.DTO
 {
-    
+    public class UpdateFactureDTO
+    {
+        public float? MontantTotal { get; set; }
+        public StatusFacture? StatusFacture { get; set; }
+    }
 }

@@ -5,10 +5,10 @@ using Persistence.entities.Facturation;
 using Persistence.entities.Stock;
 using Persistence.Repository;
 
-namespace GestionStock.Repository;
+namespace Facturation.Repository;
 
-public class FacturesRepo : GenericRepository<Facture>,IFactureRepo
+public class FactureRepo : GenericRepository<Facture>,IFactureRepo
 {
-    public FacturesRepo(AppDbContext context) : base(context)
+    public FactureRepo(AppDbContext context) : base(context)
     {}
 }

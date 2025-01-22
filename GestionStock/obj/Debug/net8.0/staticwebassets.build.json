@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "0vcDESzkl98Eo3KLHJI1PuegmoVLVDED12w3I/WRdj0=",
+  "Hash": "1U2yl9UiWdPGkPLTcmCaNlmYJfb9SbyQh87NFIqsv7U=",
   "Source": "GestionStock",
   "BasePath": "_content/GestionStock",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

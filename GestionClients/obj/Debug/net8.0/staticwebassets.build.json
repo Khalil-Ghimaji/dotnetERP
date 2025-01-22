@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "LkTOQxnycoqRu1rOfaWDP8AStLtsxTlUIa7juBS69Tc=",
+  "Hash": "SltHmqaBrPMdbXcKv8T60M9RC1y+/G8MnoYMymPY2CQ=",
   "Source": "GestionClients",
   "BasePath": "_content/GestionClients",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

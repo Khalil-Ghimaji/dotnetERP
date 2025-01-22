@@ -2,7 +2,7 @@ using Persistence.entities.Client;
 using Persistence.entities.Facturation;
 using Persistence.Repository;
 
-namespace GestionStock.Repository;
+namespace Facturation.Repository;
 
 public interface IFactureRepo : IGenericRepository<Facture>
 {

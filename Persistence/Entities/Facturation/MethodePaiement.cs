@@ -1,6 +1,10 @@
-namespace Persistence.entities.Facturation;
-
-public enum MethodePaiement
+namespace Persistence.entities.Facturation
 {
-    
+    public enum MethodePaiement
+    {
+        Cheque,
+        Virement,
+        Espece,
+        CarteBancaire 
+    }
 }

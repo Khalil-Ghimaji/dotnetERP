@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "aHN4ciYSZgc8Vnw6qeWnGeoUvFogUIhtblxgEiqDvzU=",
+  "Hash": "YSDrlVs8gpCPTBcrQBQAkp693ogfawpYybCZ/jZLMRU=",
   "Source": "AppGateway",
   "BasePath": "_content/AppGateway",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }
