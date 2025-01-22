@@ -1,10 +1,12 @@
+using Persistence.entities.Client;
 using Persistence.entities.Commande;
-using Persistence.entities.Stock;
 using Persistence.Repository;
 
-namespace GestionStock.Repository;
+namespace GestionCommande.Repository;
 
-public interface ICommandRepo:IGenericRepository<Commande>
+public interface ICommandeRepo:IGenericRepository<Commande>
 {
+    public Task<List<Commande>> getCommandesByClient(Client client);
+    public ArticleCommande? getArticleCommandeByProduit(int idCommande, int idProduit);
     
 }

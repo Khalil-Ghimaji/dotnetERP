@@ -19,9 +19,9 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Client.Client", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -30,31 +30,63 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Commande.ArticleCommande", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.Property<int?>("CommandeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("prix")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("produitId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("quantite")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("CommandeId");
+
+                    b.HasIndex("produitId");
 
                     b.ToTable("ArticleCommandes");
                 });
 
             modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FactureId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("clientId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("dateCommande")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("status")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("FactureId");
+
+                    b.HasIndex("clientId");
 
                     b.ToTable("Commandes");
                 });
 
             modelBuilder.Entity("Persistence.entities.Facturation.Facture", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -63,9 +95,9 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Facturation.Paiement", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -74,9 +106,9 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Stock.ArticleStock", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -85,9 +117,9 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Stock.Categorie", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -96,13 +128,52 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Stock.Produit", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.ToTable("Produits");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Commande.ArticleCommande", b =>
+                {
+                    b.HasOne("Persistence.entities.Commande.Commande", null)
+                        .WithMany("articles")
+                        .HasForeignKey("CommandeId");
+
+                    b.HasOne("Persistence.entities.Stock.Produit", "produit")
+                        .WithMany()
+                        .HasForeignKey("produitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("produit");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
+                {
+                    b.HasOne("Persistence.entities.Facturation.Facture", "Facture")
+                        .WithMany()
+                        .HasForeignKey("FactureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Persistence.entities.Client.Client", "client")
+                        .WithMany()
+                        .HasForeignKey("clientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Facture");
+
+                    b.Navigation("client");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
+                {
+                    b.Navigation("articles");
                 });
 #pragma warning restore 612, 618
         }
