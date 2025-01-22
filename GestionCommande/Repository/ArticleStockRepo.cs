@@ -10,6 +10,6 @@ public class ArticleStockRepo : GenericRepository<ArticleStock>, IArticleStockRe
 
     public double getPrixArticle(int produitId)
     {
-        return _dbSet.FirstOrDefault(a => a.produitId == produitId)?.prix??0;
+        return _dbSet.FirstOrDefault(a => a.ProduitId == produitId)?.Prix??0;
     }
 }
