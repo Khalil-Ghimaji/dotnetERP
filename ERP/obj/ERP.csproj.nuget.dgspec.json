@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\dotnetERP\\erp\\ERP.csproj": {}
+    "D:\\dotnetERP\\ERP\\ERP.csproj": {}
   },
   "projects": {
-    "D:\\dotnetERP\\erp\\ERP.csproj": {
+    "D:\\dotnetERP\\ERP\\ERP.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\dotnetERP\\erp\\ERP.csproj",
+        "projectUniqueName": "D:\\dotnetERP\\ERP\\ERP.csproj",
         "projectName": "ERP",
-        "projectPath": "D:\\dotnetERP\\erp\\ERP.csproj",
+        "projectPath": "D:\\dotnetERP\\ERP\\ERP.csproj",
         "packagesPath": "C:\\Users\\Dhouibi\\.nuget\\packages\\",
-        "outputPath": "D:\\dotnetERP\\erp\\obj\\",
+        "outputPath": "D:\\dotnetERP\\ERP\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Dhouibi\\AppData\\Roaming\\NuGet\\NuGet.Config"
