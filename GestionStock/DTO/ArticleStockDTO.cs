@@ -1,6 +1,7 @@
 namespace GestionStock.DTO;
 
-public record ArticleStockDTO(
-    int ProduitId,
-    int Quantite
-);
+public class ArticleStockDTO
+{
+    public int Quantite { get; init; }
+    public int ProduitId { get; init; }
+}

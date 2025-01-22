@@ -1,15 +1,8 @@
 namespace GestionStock.DTO;
 
-public record ReserverProduitDTO(
-    int ProduitId,
-    int Quantite,
-    TimeSpan ReservationDuration
-    );
-
-public record ModifierProduitDTO(
-    int ProduitId,
-    int Quantite,
-    int CategoryId,
-    string Nom
-);
-    
+public class ReserverProduitDTO
+{
+    public int ProduitId { get; init; }
+    public int Quantite { get; init; }
+    public TimeSpan ReservationDuration { get; init; }
+}

@@ -6,12 +6,13 @@ namespace GestionStock.Services;
 
 public interface IStockService
 {
-    Task AjouterProduit(CreerProduitDTO dto);
-    Task CreerProduit(CreerProduitDTO dto);
+    Task AjouterProduit(ProduitDTO dto);
     Task<IEnumerable<ArticleStockDTO>> ConsulterStock();
     Task ExpedierMarchandises(Commande commande);
-    Task ModifierProduit(ModifierProduitDTO dto);
+    Task ModifierProduit(ProduitDTO dto);
     Task ReserverProduit(ReserverProduitDTO dto);
     void ConfirmerCommande(int id);
     Task SupprimerProduit(int id);
+    void AjouterQuantite(ArticleStockDTO dto);
+    Task<int> ConsulterProduit(int id);
 }

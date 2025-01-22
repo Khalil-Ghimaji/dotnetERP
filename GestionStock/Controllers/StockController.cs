@@ -16,23 +16,45 @@ namespace GestionStock.Controllers
             _stockService = stockService;
         }
 
-        public IActionResult CreerProduit(CreerProduitDTO dto)
-        {
-            _stockService.CreerProduit(dto);
-            return Created();
-        }
-        
         [HttpPost("ajouterProduit")]
-        public IActionResult AjouterProduit(CreerProduitDTO dto)
+        public IActionResult AjouterProduit(ProduitDTO dto)
         {
             try
             {
                 _stockService.AjouterProduit(dto);
                 return Created();
             }
-            catch (Exception _)
+            catch (Exception e)
             {
-                return NotFound();
+                return NotFound(e.Message);
+            }
+        }
+
+        [HttpPost("ajouterQuantiteStock")]
+        public IActionResult AjouterStock(ArticleStockDTO dto)
+        {
+            try
+            {
+                _stockService.AjouterQuantite(dto);
+                return Created();
+            }
+            catch (Exception e)
+            {
+                return new NotFoundResult();
+            }
+        }
+
+        [HttpGet("consulterProduit")]
+        public IActionResult ConsulterProduit(int id)
+        {
+            try
+            {
+                var produit = _stockService.ConsulterProduit(id);
+                return Ok(produit);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
             }
         }
 
@@ -46,36 +68,64 @@ namespace GestionStock.Controllers
         [HttpPost("expedierMarchandises")]
         public IActionResult ExpedierMarchandises(Commande commande)
         {
-            _stockService.ExpedierMarchandises(commande);
-            return Ok();
+            try
+            {
+                _stockService.ExpedierMarchandises(commande);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
         }
 
         [HttpPut("modifierProduit")]
-        public IActionResult ModifierProduit(ModifierProduitDTO dto)
+        public IActionResult ModifierProduit(ProduitDTO dto)
         {
-            _stockService.ModifierProduit(dto);
-            return Ok();
+            try
+            {
+                _stockService.ModifierProduit(dto);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpPost("reserverProduit")]
         public async Task<IActionResult> ReserverProduit(ReserverProduitDTO dto)
         {
-            await _stockService.ReserverProduit(dto);
-            return Ok();
+            try
+            {
+                await _stockService.ReserverProduit(dto);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
         }
 
         [HttpPost("confirmerCommande")]
         public IActionResult ConfirmerCommande(int id)
         {
             _stockService.ConfirmerCommande(id);
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete("supprimerProduit")]
         public IActionResult SupprimerProduit(int id)
         {
-            _stockService.SupprimerProduit(id);
-            return Ok();
+            try
+            {
+                _stockService.SupprimerProduit(id);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
     }
 }

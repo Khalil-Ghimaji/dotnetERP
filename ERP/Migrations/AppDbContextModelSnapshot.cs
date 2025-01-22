@@ -89,20 +89,16 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Stock.ArticleStock", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ProduitId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<double>("Prix")
+                        .HasColumnType("REAL");
 
                     b.Property<int>("Quantite")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProduitId")
-                        .IsUnique();
+                    b.HasKey("ProduitId");
 
                     b.ToTable("AricleStocks");
                 });
@@ -132,15 +128,15 @@ namespace ERP.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ArticleStockId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("CategorieId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Nom")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<double>("Prix")
-                        .HasColumnType("REAL");
 
                     b.HasKey("Id");
 
@@ -152,7 +148,7 @@ namespace ERP.Migrations
             modelBuilder.Entity("Persistence.entities.Commande.ArticleCommande", b =>
                 {
                     b.HasOne("Persistence.entities.Commande.Commande", null)
-                        .WithMany("ArticleCommandes")
+                        .WithMany("articles")
                         .HasForeignKey("CommandeId");
 
                     b.HasOne("Persistence.entities.Stock.Produit", "Produit")
@@ -188,7 +184,7 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
                 {
-                    b.Navigation("ArticleCommandes");
+                    b.Navigation("articles");
                 });
 
             modelBuilder.Entity("Persistence.entities.Stock.Categorie", b =>

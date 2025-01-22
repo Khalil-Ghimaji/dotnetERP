@@ -2,8 +2,8 @@ using Persistence.entities.Stock;
 
 namespace Persistence.entities.Commande;
 
-public class Commande:Common
+public class Commande
 {
-    public ICollection<ArticleCommande> articles{ get; set; }
-    
+    public int Id { get; set; }
+    public ICollection<ArticleCommande> articles { get; set; }
 }

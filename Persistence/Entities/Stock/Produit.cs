@@ -2,11 +2,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Persistence.entities.Stock;
 
-public class Produit : Common
+public class Produit
 {
+    public int Id { get; set; }
     public string Nom { get; set; }
     public int CategorieId { get; set; }
     [ForeignKey("CategorieId")] public Categorie Categorie { get; set; }
-    
-    public ArticleStock ArticleStock { get; set; }
+
+    public int ArticleStockId { get; set; }
+    [ForeignKey("ArticleStockId")] public ArticleStock ArticleStock { get; set; }
 }

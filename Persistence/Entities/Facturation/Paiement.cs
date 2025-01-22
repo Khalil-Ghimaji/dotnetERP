@@ -1,6 +1,6 @@
 namespace Persistence.entities.Facturation;
 
-public class Paiement:Common
+public class Paiement
 {
-    
+    public int Id { get; set; }
 }

@@ -3,8 +3,9 @@ using Persistence.entities.Stock;
 
 namespace Persistence.entities.Commande;
 
-public class ArticleCommande:Common
+public class ArticleCommande
 {
+    public int Id { get; set; }
     public int ProduitId { get; set; }
     public int Quantite { get; set; }
     [ForeignKey("ProduitId")]

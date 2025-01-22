@@ -2,10 +2,9 @@ using System.Collections.Concurrent;
 using AutoMapper;
 using GestionStock.DTO;
 using GestionStock.Repository;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Persistence;
 using Persistence.entities.Commande;
 using Persistence.entities.Stock;
-using Persistence.Repository;
 
 namespace GestionStock.Services
 {
@@ -13,43 +12,79 @@ namespace GestionStock.Services
     {
         private readonly IStockRepo _stockRepo;
         private readonly IMapper _mapper;
-        private readonly IGenericRepository<Produit> _produitRepo;
+        private readonly IProduitRepo _produitRepo;
+        private readonly ICategoryRepo _categoryRepo;
+        private readonly AppDbContext _context;
         private readonly ConcurrentDictionary<int, TaskCompletionSource<bool>> _reservationTasks;
 
-        public StockService(IStockRepo stockRepo, IMapper mapper,IGenericRepository<Produit> produitRepo)
+        public StockService(IStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo, ICategoryRepo categoryRepo,
+            AppDbContext context)
         {
             _stockRepo = stockRepo;
             _mapper = mapper;
             _reservationTasks = new ConcurrentDictionary<int, TaskCompletionSource<bool>>();
             _produitRepo = produitRepo;
+            _categoryRepo = categoryRepo;
+            _context = context;
         }
 
-        public async Task CreerProduit(CreerProduitDTO dto)
+
+        //permet d'ajouter un produit avec son stock associé
+        public async Task AjouterProduit(ProduitDTO dto)
         {
-            var produit = _mapper.Map<Produit>(dto);
-            produit.ArticleStock = new ArticleStock
+            //check if the product already exists
+            if (await _produitRepo.ProduitExists(dto.ProduitId))
             {
-                Quantite = dto.Quantite,
-                Prix = dto.Prix
-            };
-            await _produitRepo.Add(produit);
-            _stockRepo.AddArticleStock(produit.Id, dto.Quantite, dto.Prix);
-        }
-        
-        public async Task AjouterProduit(CreerProduitDTO dto)
-        {
-            var produit = _mapper.Map<Produit>(dto);
-            var articleStock = await _stockRepo.GetByProduitId(produit.Id);
-            if (articleStock == null)
-            {
-                _stockRepo.AddArticleStock(produit.Id, dto.Quantite,0);
+                throw new Exception("Produit déjà existant.");
             }
-            else
+
+            //check if the category exists
+            if (!await _categoryRepo.CategoryExists(dto.CategoryId))
+            {
+                throw new Exception("Catégorie non trouvée.");
+            }
+
+            //créer le produit avec l'ArticleStock
+            var produit = new Produit()
+            {
+                Nom = dto.Nom,
+                CategorieId = dto.CategoryId
+            };
+            var articleStock = new ArticleStock()
+            {
+                Prix = (dto.Prix >= 0) ? dto.Prix : 0,
+                Quantite = (dto.Quantite >= 0) ? dto.Quantite : 0,
+                Produit = produit
+            };
+            produit.ArticleStock = articleStock;
+            await _stockRepo.Add(articleStock);
+        }
+
+        public async Task<int> ConsulterProduit(int id)
+        {
+            var articleStock = await _stockRepo.GetArticleStockByProduitId(id);
+            if (articleStock != null)
+            {
+                return articleStock.Quantite;
+            }
+
+            throw new Exception("Article non trouvé.");
+        }
+
+        public async void AjouterQuantite(ArticleStockDTO dto)
+        {
+            var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
+            if (articleStock != null)
             {
                 articleStock.Quantite += dto.Quantite;
                 await _stockRepo.Update(articleStock);
             }
+            else
+            {
+                throw new Exception("Article non trouvé.");
+            }
         }
+
 
         public async Task<IEnumerable<ArticleStockDTO>> ConsulterStock()
         {
@@ -57,38 +92,62 @@ namespace GestionStock.Services
             return _mapper.Map<IEnumerable<ArticleStockDTO>>(articleStocks);
         }
 
+
+        //reste à remplacer Commande par un DTO
         public async Task ExpedierMarchandises(Commande commande)
         {
-            foreach (var item in commande.articles)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                var articleStock = await _stockRepo.GetByProduitId(item.ProduitId);
-                if (articleStock != null && articleStock.Quantite >= item.Quantite)
+                foreach (var item in commande.articles)
                 {
+                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
+                    if (articleStock == null || articleStock.Quantite < item.Quantite)
+                    {
+                        throw new Exception("Quantité insuffisante ou article non trouvé.");
+                    }
+
                     articleStock.Quantite -= item.Quantite;
                     await _stockRepo.Update(articleStock);
                 }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                //propager la même exception
+                throw;
             }
         }
 
-        public async Task ModifierProduit(ModifierProduitDTO dto)
+
+        //cette méthode met à jour les informations d'un produit et de son stock
+        public async Task ModifierProduit(ProduitDTO dto)
         {
-            var articleStock = await _stockRepo.GetByProduitId(dto.ProduitId);
+            var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null)
             {
-                if(dto.Quantite >= 0)
+                if (dto.Quantite > 0)
                     articleStock.Quantite = dto.Quantite;
-                //better to check if category exists or not before updating
-                if(dto.CategoryId >0)
+                if (dto.Prix > 0)
+                    articleStock.Prix = dto.Prix;
+                if (dto.CategoryId > 0 && await _categoryRepo.CategoryExists(dto.CategoryId))
                     articleStock.Produit.CategorieId = dto.CategoryId;
-                if(dto.Nom != String.Empty)
+                if (!string.IsNullOrEmpty(dto.Nom))
                     articleStock.Produit.Nom = dto.Nom;
                 await _stockRepo.Update(articleStock);
             }
+            else
+            {
+                throw new Exception("Article non trouvé.");
+            }
         }
+
 
         public async Task ReserverProduit(ReserverProduitDTO dto)
         {
-            var articleStock = await _stockRepo.GetByProduitId(dto.ProduitId);
+            var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null && articleStock.Quantite >= dto.Quantite)
             {
                 articleStock.Quantite -= dto.Quantite;
@@ -114,6 +173,7 @@ namespace GestionStock.Services
             }
         }
 
+
         public void ConfirmerCommande(int id)
         {
             if (_reservationTasks.TryGetValue(id, out var tcs))
@@ -122,9 +182,13 @@ namespace GestionStock.Services
             }
         }
 
+
         public async Task SupprimerProduit(int id)
         {
-            await _stockRepo.Delete(id);
+            if (await _stockRepo.Delete(id) == null)
+            {
+                throw new Exception("Article non trouvé.");
+            }
         }
     }
 }

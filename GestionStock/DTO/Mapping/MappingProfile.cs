@@ -8,7 +8,7 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<ArticleStock, ArticleStockDTO>().ReverseMap();
-        CreateMap<Produit, CreerProduitDTO>().ReverseMap();
-        CreateMap<Produit, ReserverProduitDTO>().ReverseMap();
+        //CreateMap<Produit, ProduitDTO>().ReverseMap();
+        //CreateMap<Produit, ReserverProduitDTO>().ReverseMap();
     }
 }
