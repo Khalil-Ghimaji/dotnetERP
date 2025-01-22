@@ -1,0 +1,8 @@
+# Ignore build output directories
+AppGateway/obj/
+GestionStock/obj/
+
+# Ignore specific files
+AppGateway/obj/Debug/net8.0/AppGateway.AssemblyInfo.cs
+GestionStock/obj/Debug/net8.0/GestionStock.csproj.AssemblyReference.cache
+GestionStock/obj/rider.project.model.nuget.info
