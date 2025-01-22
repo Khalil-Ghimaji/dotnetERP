@@ -1,4 +1,11 @@
+using GestionCommande.Repository;
+using GestionCommande.Services;
+using Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddScoped<ICommandeRepo,CommandeRepo>();
+builder.Services.AddScoped<CommandeService>();
 
 // Add services to the container.
 

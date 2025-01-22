@@ -19,9 +19,9 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Client.Client", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -30,44 +30,63 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Commande.ArticleCommande", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("CommandeId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ProduitId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Quantite")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.Property<int?>("CommandeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("prix")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("produitId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("quantite")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("id");
 
                     b.HasIndex("CommandeId");
 
-                    b.HasIndex("ProduitId");
+                    b.HasIndex("produitId");
 
                     b.ToTable("ArticleCommandes");
                 });
 
             modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FactureId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("clientId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("dateCommande")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("status")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("FactureId");
+
+                    b.HasIndex("clientId");
 
                     b.ToTable("Commandes");
                 });
 
             modelBuilder.Entity("Persistence.entities.Facturation.Facture", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -76,9 +95,9 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Facturation.Paiement", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -87,36 +106,20 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Stock.ArticleStock", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ProduitId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Quantite")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProduitId");
 
                     b.ToTable("AricleStocks");
                 });
 
             modelBuilder.Entity("Persistence.entities.Stock.Categorie", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -125,28 +128,11 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Stock.Produit", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ArticleStockId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("CategorieId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("Prix")
-                        .HasColumnType("REAL");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ArticleStockId");
-
-                    b.HasIndex("CategorieId");
 
                     b.ToTable("Produits");
                 });
@@ -154,56 +140,40 @@ namespace ERP.Migrations
             modelBuilder.Entity("Persistence.entities.Commande.ArticleCommande", b =>
                 {
                     b.HasOne("Persistence.entities.Commande.Commande", null)
-                        .WithMany("ArticleCommandes")
+                        .WithMany("articles")
                         .HasForeignKey("CommandeId");
 
-                    b.HasOne("Persistence.entities.Stock.Produit", "Produit")
+                    b.HasOne("Persistence.entities.Stock.Produit", "produit")
                         .WithMany()
-                        .HasForeignKey("ProduitId")
+                        .HasForeignKey("produitId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Produit");
-                });
-
-            modelBuilder.Entity("Persistence.entities.Stock.ArticleStock", b =>
-                {
-                    b.HasOne("Persistence.entities.Stock.Produit", "Produit")
-                        .WithMany()
-                        .HasForeignKey("ProduitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Produit");
-                });
-
-            modelBuilder.Entity("Persistence.entities.Stock.Produit", b =>
-                {
-                    b.HasOne("Persistence.entities.Stock.ArticleStock", "ArticleStock")
-                        .WithMany()
-                        .HasForeignKey("ArticleStockId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Persistence.entities.Stock.Categorie", "Categorie")
-                        .WithMany("Produits")
-                        .HasForeignKey("CategorieId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ArticleStock");
-
-                    b.Navigation("Categorie");
+                    b.Navigation("produit");
                 });
 
             modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
                 {
-                    b.Navigation("ArticleCommandes");
+                    b.HasOne("Persistence.entities.Facturation.Facture", "Facture")
+                        .WithMany()
+                        .HasForeignKey("FactureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Persistence.entities.Client.Client", "client")
+                        .WithMany()
+                        .HasForeignKey("clientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Facture");
+
+                    b.Navigation("client");
                 });
 
-            modelBuilder.Entity("Persistence.entities.Stock.Categorie", b =>
+            modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
                 {
-                    b.Navigation("Produits");
+                    b.Navigation("articles");
                 });
 #pragma warning restore 612, 618
         }

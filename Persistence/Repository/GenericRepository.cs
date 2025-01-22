@@ -5,7 +5,7 @@ namespace Persistence.Repository;
 public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
     protected readonly AppDbContext _context;
-    private readonly DbSet<T> _dbSet;
+    protected readonly DbSet<T> _dbSet;
 
     public GenericRepository(AppDbContext context)
     {
@@ -13,7 +13,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _dbSet = _context.Set<T>();
     }
 
-    public async Task<T?> GetById(Guid id)
+    public async Task<T?> GetById(int id)
     {
         return await _dbSet.FindAsync(id);
     }
@@ -38,7 +38,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return entity;
     }
 
-    public async Task<T?> Delete(Guid id)
+    public async Task<T?> Delete(int id)
     {
         var entity = await _dbSet.FindAsync(id);
         if (entity == null)
