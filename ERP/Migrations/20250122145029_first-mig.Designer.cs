@@ -11,7 +11,7 @@ using Persistence;
 namespace ERP.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250122144651_first-mig")]
+    [Migration("20250122145029_first-mig")]
     partial class firstmig
     {
         /// <inheritdoc />
