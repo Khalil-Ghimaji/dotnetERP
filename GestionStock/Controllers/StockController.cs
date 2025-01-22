@@ -19,7 +19,7 @@ namespace GestionStock.Controllers
         public IActionResult AjouterProduit(int produitId, int quantite)
         {
             _stockService.AjouterProduit(produitId, quantite);
-            return Ok();
+            return Created();
         }
 
         [HttpGet("consulterStock")]
