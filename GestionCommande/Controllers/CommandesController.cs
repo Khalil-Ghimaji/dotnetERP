@@ -17,9 +17,9 @@ namespace GestionCommande.Controllers
     [ApiController]
     public class CommandesController : ControllerBase
     {
-        private readonly CommandeService _commandeService;
+        private readonly ICommandeService _commandeService;
 
-        public CommandesController(CommandeService commandeService)
+        public CommandesController(ICommandeService commandeService)
         {
             _commandeService = commandeService;
         }

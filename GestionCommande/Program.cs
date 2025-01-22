@@ -5,7 +5,7 @@ using Persistence;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<ICommandeRepo,CommandeRepo>();
-builder.Services.AddScoped<CommandeService>();
+builder.Services.AddScoped<ICommandeService, CommandeService>();
 
 // Add services to the container.
 

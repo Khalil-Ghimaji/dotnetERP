@@ -3,7 +3,7 @@ using Persistence.entities.Commande;
 
 namespace GestionCommande.Services;
 
-public class CommandeService
+public class CommandeService : ICommandeService
 {
     private readonly ICommandeRepo _commandeRepo;
     private readonly IProduitRepo _produitRepo;
@@ -179,6 +179,7 @@ public class CommandeService
     //     commande.status = StatusCommande.PAYEE;
     //     await _repo.Update(commande);
     // }
+    
     
     // public async void rembourserCommande(Commande commande)
     // {
