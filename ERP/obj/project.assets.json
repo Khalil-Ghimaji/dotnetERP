@@ -5096,11 +5096,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\ERP\\ERP.csproj",
+      "projectUniqueName": "C:\\Users\\44ray\\Desktop\\dotnetERP\\ERP\\ERP.csproj",
       "projectName": "ERP",
-      "projectPath": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\ERP\\ERP.csproj",
+      "projectPath": "C:\\Users\\44ray\\Desktop\\dotnetERP\\ERP\\ERP.csproj",
       "packagesPath": "C:\\Users\\44ray\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\ERP\\obj\\",
+      "outputPath": "C:\\Users\\44ray\\Desktop\\dotnetERP\\ERP\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -5121,8 +5121,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\Persistence\\Persistence.csproj": {
-              "projectPath": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\Persistence\\Persistence.csproj"
+            "C:\\Users\\44ray\\Desktop\\dotnetERP\\Persistence\\Persistence.csproj": {
+              "projectPath": "C:\\Users\\44ray\\Desktop\\dotnetERP\\Persistence\\Persistence.csproj"
             }
           }
         }

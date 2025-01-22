@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "es9d6kkq4Qo=",
+  "dgSpecHash": "ovPk/Ra76sc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\GestionClients\\GestionClients.csproj",
+  "projectFilePath": "C:\\Users\\44ray\\Desktop\\dotnetERP\\GestionClients\\GestionClients.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\44ray\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\44ray\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

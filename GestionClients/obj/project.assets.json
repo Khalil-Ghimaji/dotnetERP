@@ -3632,11 +3632,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\GestionClients\\GestionClients.csproj",
+      "projectUniqueName": "C:\\Users\\44ray\\Desktop\\dotnetERP\\GestionClients\\GestionClients.csproj",
       "projectName": "GestionClients",
-      "projectPath": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\GestionClients\\GestionClients.csproj",
+      "projectPath": "C:\\Users\\44ray\\Desktop\\dotnetERP\\GestionClients\\GestionClients.csproj",
       "packagesPath": "C:\\Users\\44ray\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\GestionClients\\obj\\",
+      "outputPath": "C:\\Users\\44ray\\Desktop\\dotnetERP\\GestionClients\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3657,8 +3657,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\Persistence\\Persistence.csproj": {
-              "projectPath": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\Persistence\\Persistence.csproj"
+            "C:\\Users\\44ray\\Desktop\\dotnetERP\\Persistence\\Persistence.csproj": {
+              "projectPath": "C:\\Users\\44ray\\Desktop\\dotnetERP\\Persistence\\Persistence.csproj"
             }
           }
         }

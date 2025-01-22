@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "8hTL5NUUMkE=",
+  "dgSpecHash": "6F85kgrLQDo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\44ray\\Desktop\\final\\dotnetERP\\Persistence\\Persistence.csproj",
+  "projectFilePath": "C:\\Users\\44ray\\Desktop\\dotnetERP\\Persistence\\Persistence.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\44ray\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\44ray\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
