@@ -27,7 +27,7 @@ public class CommandeService : ICommandeService
     
     public async Task<Commande?> getCommandeById(int id)
     {
-        return await _commandeRepo.GetById(id);
+        return await _commandeRepo.getEagerById(id);
     }
 
     public async Task<Commande?> preparerCommande(Commande commande)
@@ -39,11 +39,13 @@ public class CommandeService : ICommandeService
         commande.status = StatusCommande.PREPARATION;
         return await _commandeRepo.Add(commande);
     }
+    
     public async Task<Commande?> modifierCommande(Commande commande)
     {
         var command = await getCommandeById(commande.Id);
         if (command != null && command.status == StatusCommande.PREPARATION && commande.status==StatusCommande.PREPARATION)
         {
+            _commandeRepo.Detach(command); // Detach the existing entity
             return await _commandeRepo.Update(commande);
         }
         return null;
