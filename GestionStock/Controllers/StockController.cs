@@ -18,7 +18,7 @@ namespace GestionStock.Controllers
 
         public IActionResult CreerProduit(CreerProduitDTO dto)
         {
-            
+            _stockService.CreerProduit(dto);
             return Created();
         }
         
@@ -51,9 +51,9 @@ namespace GestionStock.Controllers
         }
 
         [HttpPut("modifierProduit")]
-        public IActionResult ModifierProduit(int id, int quantite)
+        public IActionResult ModifierProduit(ModifierProduitDTO dto)
         {
-            _stockService.ModifierProduit(id, quantite);
+            _stockService.ModifierProduit(dto);
             return Ok();
         }
 

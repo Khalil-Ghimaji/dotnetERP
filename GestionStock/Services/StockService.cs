@@ -2,8 +2,10 @@ using System.Collections.Concurrent;
 using AutoMapper;
 using GestionStock.DTO;
 using GestionStock.Repository;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Persistence.entities.Commande;
 using Persistence.entities.Stock;
+using Persistence.Repository;
 
 namespace GestionStock.Services
 {
@@ -11,18 +13,27 @@ namespace GestionStock.Services
     {
         private readonly IStockRepo _stockRepo;
         private readonly IMapper _mapper;
+        private readonly IGenericRepository<Produit> _produitRepo;
         private readonly ConcurrentDictionary<int, TaskCompletionSource<bool>> _reservationTasks;
 
-        public StockService(IStockRepo stockRepo, IMapper mapper)
+        public StockService(IStockRepo stockRepo, IMapper mapper,IGenericRepository<Produit> produitRepo)
         {
             _stockRepo = stockRepo;
             _mapper = mapper;
             _reservationTasks = new ConcurrentDictionary<int, TaskCompletionSource<bool>>();
+            _produitRepo = produitRepo;
         }
 
-        public async Task CreerProduit()
+        public async Task CreerProduit(CreerProduitDTO dto)
         {
-            
+            var produit = _mapper.Map<Produit>(dto);
+            produit.ArticleStock = new ArticleStock
+            {
+                Quantite = dto.Quantite,
+                Prix = dto.Prix
+            };
+            await _produitRepo.Add(produit);
+            _stockRepo.AddArticleStock(produit.Id, dto.Quantite, dto.Prix);
         }
         
         public async Task AjouterProduit(CreerProduitDTO dto)
@@ -31,7 +42,7 @@ namespace GestionStock.Services
             var articleStock = await _stockRepo.GetByProduitId(produit.Id);
             if (articleStock == null)
             {
-                _stockRepo.AddArticleStock(produit.Id, dto.Quantite);
+                _stockRepo.AddArticleStock(produit.Id, dto.Quantite,0);
             }
             else
             {
@@ -48,10 +59,10 @@ namespace GestionStock.Services
 
         public async Task ExpedierMarchandises(Commande commande)
         {
-            foreach (var item in commande.ArticleCommandes)
+            foreach (var item in commande.articles)
             {
                 var articleStock = await _stockRepo.GetByProduitId(item.ProduitId);
-                if (articleStock != null)
+                if (articleStock != null && articleStock.Quantite >= item.Quantite)
                 {
                     articleStock.Quantite -= item.Quantite;
                     await _stockRepo.Update(articleStock);
@@ -66,6 +77,7 @@ namespace GestionStock.Services
             {
                 if(dto.Quantite >= 0)
                     articleStock.Quantite = dto.Quantite;
+                //better to check if category exists or not before updating
                 if(dto.CategoryId >0)
                     articleStock.Produit.CategorieId = dto.CategoryId;
                 if(dto.Nom != String.Empty)

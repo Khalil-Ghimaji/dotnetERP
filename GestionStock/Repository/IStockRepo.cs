@@ -7,5 +7,5 @@ public interface IStockRepo:IGenericRepository<ArticleStock>
 {
     public Task<Produit?> GetProduitById(int produitId);
     public Task<ArticleStock?> GetByProduitId(int produitId);
-    public void AddArticleStock(int productId, int quantite);
+    public void AddArticleStock(int productId, int quantite,double prix);
 }

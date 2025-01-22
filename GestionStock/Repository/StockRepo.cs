@@ -19,12 +19,13 @@ namespace GestionStock.Repository
         {
             return await _context.AricleStocks.FirstOrDefaultAsync(a => a.ProduitId == produitId);
         }
-        public async void AddArticleStock(int productId, int quantite)
+        public async void AddArticleStock(int productId, int quantite,double prix)
         {
             ArticleStock articleStock = new ArticleStock
             {
                 ProduitId = productId,
-                Quantite = quantite
+                Quantite = quantite,
+                Prix = prix
             };
             await Add(articleStock);
         }
