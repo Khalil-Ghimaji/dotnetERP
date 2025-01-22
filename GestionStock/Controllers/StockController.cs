@@ -1,3 +1,4 @@
+using GestionStock.DTO;
 using GestionStock.Services;
 using Microsoft.AspNetCore.Mvc;
 using Persistence.entities.Commande;
@@ -15,11 +16,24 @@ namespace GestionStock.Controllers
             _stockService = stockService;
         }
 
-        [HttpPost("ajouterProduit")]
-        public IActionResult AjouterProduit(int produitId, int quantite)
+        public IActionResult CreerProduit(CreerProduitDTO dto)
         {
-            _stockService.AjouterProduit(produitId, quantite);
+            
             return Created();
+        }
+        
+        [HttpPost("ajouterProduit")]
+        public IActionResult AjouterProduit(CreerProduitDTO dto)
+        {
+            try
+            {
+                _stockService.AjouterProduit(dto);
+                return Created();
+            }
+            catch (Exception _)
+            {
+                return NotFound();
+            }
         }
 
         [HttpGet("consulterStock")]
@@ -44,9 +58,9 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("reserverProduit")]
-        public async Task<IActionResult> ReserverProduit(int id, int quantite, TimeSpan reservationDuration)
+        public async Task<IActionResult> ReserverProduit(ReserverProduitDTO dto)
         {
-            await _stockService.ReserverProduit(id, quantite, reservationDuration);
+            await _stockService.ReserverProduit(dto);
             return Ok();
         }
 

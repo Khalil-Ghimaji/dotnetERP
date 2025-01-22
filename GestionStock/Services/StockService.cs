@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using AutoMapper;
+using GestionStock.DTO;
 using GestionStock.Repository;
 using Persistence.entities.Commande;
 using Persistence.entities.Stock;
@@ -8,44 +10,47 @@ namespace GestionStock.Services
     public class StockService : IStockService
     {
         private readonly IStockRepo _stockRepo;
+        private readonly IMapper _mapper;
         private readonly ConcurrentDictionary<int, TaskCompletionSource<bool>> _reservationTasks;
 
-        public StockService(IStockRepo stockRepo)
+        public StockService(IStockRepo stockRepo, IMapper mapper)
         {
             _stockRepo = stockRepo;
+            _mapper = mapper;
             _reservationTasks = new ConcurrentDictionary<int, TaskCompletionSource<bool>>();
         }
 
-        public async void AjouterProduit(int produitId, int quantite)
+        public async Task CreerProduit()
         {
-            var produit = await _stockRepo.GetProduitById(produitId);
-            if (produit == null)
-            {
-                throw new ArgumentException("Le produit n'existe pas.");
-            }
-
-            var articleStock = await _stockRepo.GetByProduitId(produitId);
+            
+        }
+        
+        public async Task AjouterProduit(CreerProduitDTO dto)
+        {
+            var produit = _mapper.Map<Produit>(dto);
+            var articleStock = await _stockRepo.GetByProduitId(produit.Id);
             if (articleStock == null)
             {
-                _stockRepo.AddArticleStock(produitId, quantite);
+                _stockRepo.AddArticleStock(produit.Id, dto.Quantite);
             }
             else
             {
-                articleStock.Quantite += quantite;
+                articleStock.Quantite += dto.Quantite;
                 await _stockRepo.Update(articleStock);
             }
         }
 
-        public async Task<IEnumerable<ArticleStock>> ConsulterStock()
+        public async Task<IEnumerable<ArticleStockDTO>> ConsulterStock()
         {
-            return await _stockRepo.GetAll();
+            var articleStocks = await _stockRepo.GetAll();
+            return _mapper.Map<IEnumerable<ArticleStockDTO>>(articleStocks);
         }
 
         public async Task ExpedierMarchandises(Commande commande)
         {
             foreach (var item in commande.ArticleCommandes)
             {
-                var articleStock = await _stockRepo.GetById(item.ProduitId);
+                var articleStock = await _stockRepo.GetByProduitId(item.ProduitId);
                 if (articleStock != null)
                 {
                     articleStock.Quantite -= item.Quantite;
@@ -54,37 +59,42 @@ namespace GestionStock.Services
             }
         }
 
-        public async Task ModifierProduit(int id, int quantite)
+        public async Task ModifierProduit(ModifierProduitDTO dto)
         {
-            var articleStock = await _stockRepo.GetByProduitId(id);
+            var articleStock = await _stockRepo.GetByProduitId(dto.ProduitId);
             if (articleStock != null)
             {
-                articleStock.Quantite = quantite;
+                if(dto.Quantite >= 0)
+                    articleStock.Quantite = dto.Quantite;
+                if(dto.CategoryId >0)
+                    articleStock.Produit.CategorieId = dto.CategoryId;
+                if(dto.Nom != String.Empty)
+                    articleStock.Produit.Nom = dto.Nom;
                 await _stockRepo.Update(articleStock);
             }
         }
 
-        public async Task ReserverProduit(int id, int quantite, TimeSpan reservationDuration)
+        public async Task ReserverProduit(ReserverProduitDTO dto)
         {
-            var articleStock = await _stockRepo.GetByProduitId(id);
-            if (articleStock != null && articleStock.Quantite >= quantite)
+            var articleStock = await _stockRepo.GetByProduitId(dto.ProduitId);
+            if (articleStock != null && articleStock.Quantite >= dto.Quantite)
             {
-                articleStock.Quantite -= quantite;
+                articleStock.Quantite -= dto.Quantite;
                 await _stockRepo.Update(articleStock);
 
                 var tcs = new TaskCompletionSource<bool>();
-                _reservationTasks[id] = tcs;
+                _reservationTasks[dto.ProduitId] = tcs;
 
-                var delayTask = Task.Delay(reservationDuration);
+                var delayTask = Task.Delay(dto.ReservationDuration);
                 var completedTask = await Task.WhenAny(delayTask, tcs.Task);
 
                 if (completedTask == delayTask)
                 {
-                    articleStock.Quantite += quantite;
+                    articleStock.Quantite += dto.Quantite;
                     await _stockRepo.Update(articleStock);
                 }
 
-                _reservationTasks.TryRemove(id, out _);
+                _reservationTasks.TryRemove(dto.ProduitId, out _);
             }
             else
             {

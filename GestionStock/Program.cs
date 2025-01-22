@@ -1,3 +1,4 @@
+using GestionStock.DTO.Mapping;
 using GestionStock.Repository;
 using GestionStock.Services;
 using Persistence;
@@ -10,6 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<IStockRepo,StockRepo>();
 builder.Services.AddScoped<IStockService,StockService>();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

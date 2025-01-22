@@ -1,3 +1,4 @@
+using GestionStock.DTO;
 using Persistence.entities.Commande;
 using Persistence.entities.Stock;
 
@@ -5,11 +6,12 @@ namespace GestionStock.Services;
 
 public interface IStockService
 {
-    void AjouterProduit(int produitId, int quantite);
-    Task<IEnumerable<ArticleStock>> ConsulterStock();
+    Task AjouterProduit(CreerProduitDTO dto);
+    Task CreerProduit(CreerProduitDTO dto);
+    Task<IEnumerable<ArticleStockDTO>> ConsulterStock();
     Task ExpedierMarchandises(Commande commande);
-    Task ModifierProduit(int id, int quantite);
-    Task ReserverProduit(int id, int quantite, TimeSpan reservationDuration);
+    Task ModifierProduit(ModifierProduitDTO dto);
+    Task ReserverProduit(ReserverProduitDTO dto);
     void ConfirmerCommande(int id);
     Task SupprimerProduit(int id);
 }
