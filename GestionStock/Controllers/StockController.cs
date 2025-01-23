@@ -22,7 +22,7 @@ namespace GestionStock.Controllers
             try
             {
                 await _stockService.AjouterProduit(dto);
-                return CreatedAtAction(nameof(AjouterProduit), dto);
+                return CreatedAtAction(nameof(ConsulterProduit), dto);
             }
             catch (Exception e)
             {

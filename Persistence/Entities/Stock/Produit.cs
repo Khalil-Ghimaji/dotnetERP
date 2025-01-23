@@ -10,7 +10,5 @@ public class Produit
     public string Nom { get; set; }
     public int CategorieId { get; set; }
     [ForeignKey("CategorieId")] public virtual Categorie Categorie { get; set; }
-
-    public int ArticleStockId { get; set; }
-    [ForeignKey("ArticleStockId")] public virtual ArticleStock ArticleStock { get; set; }
+    [ForeignKey("Id")] public virtual ArticleStock ArticleStock { get; set; }
 }

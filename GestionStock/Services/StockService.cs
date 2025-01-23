@@ -44,20 +44,21 @@ namespace GestionStock.Services
                 throw new HttpRequestException("Catégorie non trouvée.");
             }
 
-            //créer le produit avec l'ArticleStock
+            // Create the produit
             var produit = new Produit()
             {
                 Nom = dto.Nom,
                 CategorieId = dto.CategoryId
             };
+            produit = await _produitRepo.Add(produit);
+            // Create the articleStock
             var articleStock = new ArticleStock()
             {
                 Prix = (dto.Prix >= 0) ? dto.Prix : 0,
                 Quantite = (dto.Quantite >= 0) ? dto.Quantite : 0,
-                Produit = produit
+                ProduitId = produit.Id
             };
-            produit.ArticleStock = articleStock;
-            await _stockRepo.Add(articleStock);
+            articleStock = await _stockRepo.Add(articleStock);
         }
 
         public async Task<ArticleStockDTO> ConsulterProduit(int id)
@@ -169,6 +170,7 @@ namespace GestionStock.Services
                             articleStock.Quantite += dto.Quantite;
                             await _stockRepo.Update(articleStock);
                         }
+
                         _reservationTasks.TryRemove(reservationId, out _);
                     });
                 }
