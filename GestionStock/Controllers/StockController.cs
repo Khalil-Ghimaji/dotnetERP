@@ -1,3 +1,4 @@
+using GestionStock.DTO;
 using GestionStock.Services;
 using Microsoft.AspNetCore.Mvc;
 using Persistence.entities.Commande;
@@ -16,52 +17,115 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("ajouterProduit")]
-        public IActionResult AjouterProduit(Guid produitId, int quantite)
+        public async Task<IActionResult> AjouterProduit(ProduitDTO dto)
         {
-            _stockService.AjouterProduit(produitId, quantite);
-            return Ok();
+            try
+            {
+                await _stockService.AjouterProduit(dto);
+                return CreatedAtAction(nameof(AjouterProduit), dto);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+
+        [HttpPost("ajouterQuantiteStock")]
+        public IActionResult AjouterStock(ArticleStockDTO dto)
+        {
+            try
+            {
+                _stockService.AjouterQuantite(dto);
+                return Created();
+            }
+            catch (Exception e)
+            {
+                return new NotFoundResult();
+            }
+        }
+
+        [HttpGet("consulterProduit")]
+        public async Task<IActionResult> ConsulterProduit(int id)
+        {
+            try
+            {
+                var produit = await _stockService.ConsulterProduit(id);
+                return Ok(produit);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpGet("consulterStock")]
-        public IActionResult ConsulterStock()
+        public async Task<IActionResult> ConsulterStock()
         {
-            var stock = _stockService.ConsulterStock();
+            var stock = await _stockService.ConsulterStock();
             return Ok(stock);
         }
 
         [HttpPost("expedierMarchandises")]
-        public IActionResult ExpedierMarchandises(Commande commande)
+        public async Task<IActionResult> ExpedierMarchandises(Commande commande)
         {
-            _stockService.ExpedierMarchandises(commande);
-            return Ok();
+            try
+            {
+                await _stockService.ExpedierMarchandises(commande);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
         }
 
         [HttpPut("modifierProduit")]
-        public IActionResult ModifierProduit(Guid id, int quantite)
+        public async Task<IActionResult> ModifierProduit(ProduitDTO dto)
         {
-            _stockService.ModifierProduit(id, quantite);
-            return Ok();
+            try
+            {
+                await _stockService.ModifierProduit(dto);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpPost("reserverProduit")]
-        public async Task<IActionResult> ReserverProduit(Guid id, int quantite, TimeSpan reservationDuration)
+        public async Task<IActionResult> ReserverProduit(ReserverProduitDTO dto)
         {
-            await _stockService.ReserverProduit(id, quantite, reservationDuration);
-            return Ok();
+            try
+            {
+                var reservationId = await _stockService.ReserverProduit(dto);
+                return Ok(new { ReservationId = reservationId });
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
         }
 
         [HttpPost("confirmerCommande")]
         public IActionResult ConfirmerCommande(Guid id)
         {
             _stockService.ConfirmerCommande(id);
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete("supprimerProduit")]
-        public IActionResult SupprimerProduit(Guid id)
+        public async Task<IActionResult> SupprimerProduit(int id)
         {
-            _stockService.SupprimerProduit(id);
-            return Ok();
+            try
+            {
+                await _stockService.SupprimerProduit(id);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
     }
 }
