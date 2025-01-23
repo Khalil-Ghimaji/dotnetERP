@@ -5,16 +5,25 @@ using Persistence.entities.Facturation;
 
 namespace Facturation.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class FacturationController : ControllerBase
     {
-        private readonly IFactureService _factureService;
+        /*
+        private readonly AppDbContext _context; // Remplacez AppDbContext par le nom de votre contexte
 
+        public FacturationController(AppDbContext context)
+        {
+            _context = context;
+        }*/
+        private readonly IFactureService _factureService;
+        
         public FacturationController(IFactureService factureService)
         {
             _factureService = factureService;
         }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Facture>> ConsulterFacture(int id)
@@ -33,6 +42,7 @@ namespace Facturation.Controllers
         }
 
         [HttpPost]
+        
         public async Task<ActionResult<Facture>> CreerFacture([FromBody] CreerFactureDTO creerFactureDTO)
         {
             if (creerFactureDTO == null)
@@ -41,6 +51,25 @@ namespace Facturation.Controllers
             var facture = await _factureService.CreerFacture(creerFactureDTO);
             return CreatedAtAction(nameof(ConsulterFacture), new { id = facture.FactureId }, facture);
         }
+        /*
+        public async Task<ActionResult<Facture>> CreerFacture([FromBody] CreerFactureDTO creerFactureDTO)
+        {
+            
+            var facture = new Facture
+            {
+                CommandeId = creerFactureDTO.CommandeId,
+                DateGeneration = DateTime.UtcNow,
+                MontantTotal = creerFactureDTO.MontantTotal,
+                StatusFacture = StatusFacture.Créée // ou une valeur par défaut si applicable
+            };
+
+            // Ajouter au contexte
+            _context.Factures.Add(facture);
+
+            // Enregistrer les changements
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(ConsulterFacture), new { id = facture.FactureId }, facture);
+        }*/
 
         [HttpDelete("{factureId}")]
         public async Task<ActionResult> SupprimerFacture(int factureId)
@@ -106,5 +135,28 @@ namespace Facturation.Controllers
             
             return Ok(paiement);
         }
+        [HttpGet("{factureId}/pdf")]
+        public async Task<IActionResult> GenererFacturePdf(int factureId)
+        {
+            try
+            {
+                var facturePdf = await _factureService.GenererFacturePdf(factureId);
+
+                if (facturePdf == null)
+                    return NotFound("Facture non trouvée ou problème lors de la génération du PDF.");
+
+                // Retourner le PDF en tant que fichier dans la réponse
+                return File(facturePdf, "application/pdf", $"Facture_{factureId}.pdf");
+            }
+            catch (Exception ex)
+            {
+                // Gérer les erreurs
+                return StatusCode(500, $"Erreur lors de la génération du PDF : {ex.Message}");
+            }
+        }
+        
+        
+
     }
+    
 }

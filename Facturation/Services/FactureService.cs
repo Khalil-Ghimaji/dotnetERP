@@ -8,11 +8,15 @@ namespace Facturation.Services
     {
         private readonly IFactureRepo _factureRepo;
         private readonly IPaiementRepo _paiementRepo;
+        private readonly IPDFService _pdfService;
 
-        public FactureService(IFactureRepo factureRepo, IPaiementRepo paiementRepo)
+
+
+        public FactureService(IFactureRepo factureRepo, IPaiementRepo paiementRepo,IPDFService pdfService)
         {
             _factureRepo = factureRepo;
             _paiementRepo = paiementRepo;
+            _pdfService = pdfService;
         }
 
         public async Task<Facture?> ConsulterFacture(int id)
@@ -27,6 +31,7 @@ namespace Facturation.Services
 
         public async Task<Facture> CreerFacture(CreerFactureDTO creerFactureDTO)
         {
+            
             var facture = new Facture
             {
                 CommandeId = creerFactureDTO.CommandeId,
@@ -105,5 +110,16 @@ namespace Facturation.Services
 
             return await _paiementRepo.Update(paiement);
         }
+        public async Task<byte[]> GenererFacturePdf(int factureId)
+        {
+            var facture = await _factureRepo.GetById(factureId);
+            if (facture == null)
+            {
+                throw new Exception("Facture non trouvée.");
+            }
+
+            return _pdfService.GenererFacturePDF(facture); 
+        }
+        
     }
 }

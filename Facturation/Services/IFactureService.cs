@@ -15,5 +15,6 @@ namespace Facturation.Services
         Task<Paiement> CreePaiement(int factureId, double montant);
         Task<Paiement?> SupprimerPaiement(int paiementId);
         Task<Paiement> UpdatePaiement(int paiementId, UpdatePaiementDTO updatePaiementDTO);
+        Task<byte[]> GenererFacturePdf(int factureId);
     }
 }

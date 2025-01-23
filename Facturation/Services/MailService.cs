@@ -1,6 +1,6 @@
 namespace Facturation.Services;
 
-public class MailService
+public class MailService: IMailService
 {
     
 }
