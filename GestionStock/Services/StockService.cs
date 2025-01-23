@@ -101,13 +101,13 @@ namespace GestionStock.Services
             {
                 foreach (var item in commande.articles)
                 {
-                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
-                    if (articleStock == null || articleStock.Quantite < item.Quantite)
+                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.produit.Id);
+                    if (articleStock == null || articleStock.Quantite < item.quantite)
                     {
                         throw new HttpRequestException("Quantité insuffisante ou article non trouvé.");
                     }
 
-                    articleStock.Quantite -= item.Quantite;
+                    articleStock.Quantite -= item.quantite;
                     await _stockRepo.Update(articleStock);
                 }
 
