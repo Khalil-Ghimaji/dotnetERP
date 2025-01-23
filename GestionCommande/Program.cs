@@ -1,7 +1,10 @@
 using GestionCommande.DTOs.Mapper;
-using GestionCommande.Repository;
 using GestionCommande.Services;
 using Persistence;
+using Persistence.Repository.ClientRepositories;
+using Persistence.Repository.CommandeRepositories;
+using Persistence.Repository.StockRepositories.Contracts;
+using Persistence.Repository.StockRepositories.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>();

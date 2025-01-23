@@ -1,5 +1,7 @@
-using GestionCommande.Repository;
 using Persistence.entities.Commande;
+using Persistence.Repository.ClientRepositories;
+using Persistence.Repository.CommandeRepositories;
+using Persistence.Repository.StockRepositories.Contracts;
 
 namespace GestionCommande.Services;
 

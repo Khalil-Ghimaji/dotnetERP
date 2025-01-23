@@ -1,6 +1,6 @@
-using Facturation.Repository;
 using Facturation.Services;
 using Persistence;
+using Persistence.Repository.FacturationRepositories;
 using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);

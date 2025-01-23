@@ -1,23 +1,23 @@
 using System.Collections.Concurrent;
 using AutoMapper;
 using GestionStock.DTO;
-using GestionStock.Repository;
 using Persistence;
 using Persistence.entities.Commande;
 using Persistence.entities.Stock;
+using Persistence.Repository.StockRepositories.Contracts;
 
 namespace GestionStock.Services
 {
     public class StockService : IStockService
     {
-        private readonly IStockRepo _stockRepo;
+        private readonly IArticleStockRepo _stockRepo;
         private readonly IMapper _mapper;
         private readonly IProduitRepo _produitRepo;
         private readonly ICategoryRepo _categoryRepo;
         private readonly AppDbContext _context;
         private readonly ConcurrentDictionary<Guid, TaskCompletionSource<bool>> _reservationTasks;
 
-        public StockService(IStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo, ICategoryRepo categoryRepo,
+        public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo, ICategoryRepo categoryRepo,
             AppDbContext context)
         {
             _stockRepo = stockRepo;

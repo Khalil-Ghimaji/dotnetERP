@@ -1,6 +1,6 @@
 using Facturation.DTO;
-using Facturation.Repository;
 using Persistence.entities.Facturation;
+using Persistence.Repository.FacturationRepositories;
 
 namespace Facturation.Services
 {
