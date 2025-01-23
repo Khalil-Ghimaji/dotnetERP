@@ -16,15 +16,6 @@ namespace Persistence
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseSqlite("Data Source=../Persistence/app.db", x => x.MigrationsAssembly("ERP"));
-            optionsBuilder.UseLazyLoadingProxies();
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ArticleStock>()
-                .HasOne(a => a.Produit)
-                .WithOne(p => p.ArticleStock)
-                .HasForeignKey<ArticleStock>(a => a.ProduitId);
         }
 
         public DbSet<Client> Clients { get; set; }

@@ -1,23 +1,24 @@
 using System.Collections.Concurrent;
 using AutoMapper;
 using GestionStock.DTO;
-using GestionStock.Repository;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Persistence;
 using Persistence.entities.Commande;
 using Persistence.entities.Stock;
+using Persistence.Repository.StockRepositories.Contracts;
 
 namespace GestionStock.Services
 {
     public class StockService : IStockService
     {
-        private readonly IStockRepo _stockRepo;
+        private readonly IArticleStockRepo _stockRepo;
         private readonly IMapper _mapper;
         private readonly IProduitRepo _produitRepo;
         private readonly ICategoryRepo _categoryRepo;
         private readonly AppDbContext _context;
         private readonly ConcurrentDictionary<Guid, TaskCompletionSource<bool>> _reservationTasks;
 
-        public StockService(IStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo, ICategoryRepo categoryRepo,
+        public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo, ICategoryRepo categoryRepo,
             AppDbContext context)
         {
             _stockRepo = stockRepo;
@@ -44,24 +45,21 @@ namespace GestionStock.Services
                 throw new HttpRequestException("Catégorie non trouvée.");
             }
 
-            // Create the produit
+            //créer le produit avec l'ArticleStock
             var produit = new Produit()
             {
                 Nom = dto.Nom,
                 CategorieId = dto.CategoryId
             };
-            produit = await _produitRepo.Add(produit);
-            // Create the articleStock
+            await _produitRepo.Add(produit);
+            
             var articleStock = new ArticleStock()
             {
                 Prix = (dto.Prix >= 0) ? dto.Prix : 0,
                 Quantite = (dto.Quantite >= 0) ? dto.Quantite : 0,
-                ProduitId = produit.Id
+                ProduitId = produit.Id,
             };
             await _stockRepo.Add(articleStock);
-            // Set the reference between produit and articleStock
-            produit.ArticleStock = articleStock;
-            await _produitRepo.Update(produit);
         }
 
         public async Task<ArticleStockDTO> ConsulterProduit(int id)
@@ -105,13 +103,13 @@ namespace GestionStock.Services
             {
                 foreach (var item in commande.articles)
                 {
-                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
-                    if (articleStock == null || articleStock.Quantite < item.Quantite)
+                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.produit.Id);
+                    if (articleStock == null || articleStock.Quantite < item.quantite)
                     {
                         throw new HttpRequestException("Quantité insuffisante ou article non trouvé.");
                     }
 
-                    articleStock.Quantite -= item.Quantite;
+                    articleStock.Quantite -= item.quantite;
                     await _stockRepo.Update(articleStock);
                 }
 
@@ -173,7 +171,6 @@ namespace GestionStock.Services
                             articleStock.Quantite += dto.Quantite;
                             await _stockRepo.Update(articleStock);
                         }
-
                         _reservationTasks.TryRemove(reservationId, out _);
                     });
                 }

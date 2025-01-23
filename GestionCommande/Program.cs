@@ -1,5 +1,19 @@
-var builder = WebApplication.CreateBuilder(args);
+using GestionCommande.DTOs.Mapper;
+using GestionCommande.Services;
+using Persistence;
+using Persistence.Repository.ClientRepositories;
+using Persistence.Repository.CommandeRepositories;
+using Persistence.Repository.StockRepositories.Contracts;
+using Persistence.Repository.StockRepositories.Implementations;
 
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddScoped<ICommandeRepo,CommandeRepo>();
+builder.Services.AddScoped<IProduitRepo,ProduitRepo>();
+builder.Services.AddScoped<IArticleStockRepo,ArticleStockRepo>();
+builder.Services.AddScoped<IClientRepo,ClientRepo>();
+builder.Services.AddScoped<ICommandeService, CommandeService>();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Add services to the container.
 
 builder.Services.AddControllers();

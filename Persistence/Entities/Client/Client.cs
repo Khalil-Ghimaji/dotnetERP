@@ -1,7 +1,5 @@
 namespace Persistence.entities.Client;
 
-public class Client
+public class Client:Common
 {
-    public string Id { get; set; }
-    public string Name { get; set; }
 }
