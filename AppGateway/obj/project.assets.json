@@ -428,31 +428,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\khali\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Dhouibi\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\khali\\RiderProjects\\ERP\\AppGateway\\AppGateway.csproj",
+      "projectUniqueName": "D:\\dotnetERP\\AppGateway\\AppGateway.csproj",
       "projectName": "AppGateway",
-      "projectPath": "C:\\Users\\khali\\RiderProjects\\ERP\\AppGateway\\AppGateway.csproj",
-      "packagesPath": "C:\\Users\\khali\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\khali\\RiderProjects\\ERP\\AppGateway\\obj\\",
+      "projectPath": "D:\\dotnetERP\\AppGateway\\AppGateway.csproj",
+      "packagesPath": "C:\\Users\\Dhouibi\\.nuget\\packages\\",
+      "outputPath": "D:\\dotnetERP\\AppGateway\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\khali\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Dhouibi\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -500,7 +493,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
