@@ -1,14 +1,16 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.entities.Stock;
 
+[Index(nameof(Nom), IsUnique = true)]
 public class Produit
 {
     public int Id { get; set; }
     public string Nom { get; set; }
     public int CategorieId { get; set; }
-    [ForeignKey("CategorieId")] public Categorie Categorie { get; set; }
+    [ForeignKey("CategorieId")] public virtual Categorie Categorie { get; set; }
 
     public int ArticleStockId { get; set; }
-    [ForeignKey("ArticleStockId")] public ArticleStock ArticleStock { get; set; }
+    [ForeignKey("ArticleStockId")] public virtual ArticleStock ArticleStock { get; set; }
 }

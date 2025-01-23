@@ -115,3 +115,5 @@ D:\dotnetERP\gestionstock\obj\Debug\net8.0\refint\GestionStock.dll
 D:\dotnetERP\gestionstock\obj\Debug\net8.0\GestionStock.pdb
 D:\dotnetERP\gestionstock\obj\Debug\net8.0\GestionStock.genruntimeconfig.cache
 D:\dotnetERP\gestionstock\obj\Debug\net8.0\ref\GestionStock.dll
+D:\dotnetERP\GestionStock\bin\Debug\net8.0\Castle.Core.dll
+D:\dotnetERP\GestionStock\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Proxies.dll

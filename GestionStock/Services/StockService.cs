@@ -33,15 +33,15 @@ namespace GestionStock.Services
         public async Task AjouterProduit(ProduitDTO dto)
         {
             //check if the product already exists
-            if (await _produitRepo.ProduitExists(dto.ProduitId))
+            if (await _produitRepo.ProduitExists(dto.ProduitId, dto.Nom))
             {
-                throw new Exception("Produit déjà existant.");
+                throw new HttpRequestException("Produit déjà existant.");
             }
 
             //check if the category exists
             if (!await _categoryRepo.CategoryExists(dto.CategoryId))
             {
-                throw new Exception("Catégorie non trouvée.");
+                throw new HttpRequestException("Catégorie non trouvée.");
             }
 
             //créer le produit avec l'ArticleStock
@@ -60,15 +60,15 @@ namespace GestionStock.Services
             await _stockRepo.Add(articleStock);
         }
 
-        public async Task<int> ConsulterProduit(int id)
+        public async Task<ArticleStockDTO> ConsulterProduit(int id)
         {
             var articleStock = await _stockRepo.GetArticleStockByProduitId(id);
             if (articleStock != null)
             {
-                return articleStock.Quantite;
+                return _mapper.Map<ArticleStockDTO>(articleStock);
             }
 
-            throw new Exception("Article non trouvé.");
+            throw new HttpRequestException("Article non trouvé.");
         }
 
         public async void AjouterQuantite(ArticleStockDTO dto)
@@ -81,7 +81,7 @@ namespace GestionStock.Services
             }
             else
             {
-                throw new Exception("Article non trouvé.");
+                throw new HttpRequestException("Article non trouvé.");
             }
         }
 
@@ -104,7 +104,7 @@ namespace GestionStock.Services
                     var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
                     if (articleStock == null || articleStock.Quantite < item.Quantite)
                     {
-                        throw new Exception("Quantité insuffisante ou article non trouvé.");
+                        throw new HttpRequestException("Quantité insuffisante ou article non trouvé.");
                     }
 
                     articleStock.Quantite -= item.Quantite;
@@ -140,7 +140,7 @@ namespace GestionStock.Services
             }
             else
             {
-                throw new Exception("Article non trouvé.");
+                throw new HttpRequestException("Article non trouvé.");
             }
         }
 
@@ -187,7 +187,7 @@ namespace GestionStock.Services
         {
             if (await _stockRepo.Delete(id) == null)
             {
-                throw new Exception("Article non trouvé.");
+                throw new HttpRequestException("Article non trouvé.");
             }
         }
     }

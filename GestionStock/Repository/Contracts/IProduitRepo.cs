@@ -5,6 +5,6 @@ namespace GestionStock.Repository;
 
 public interface IProduitRepo : IGenericRepository<Produit>
 {
-    Task<bool> ProduitExists(string nom);
-    Task<bool> ProduitExists(int id);
+    //chercher un produit par son nom ou son id
+    Task<bool> ProduitExists(int id, string nom);
 }

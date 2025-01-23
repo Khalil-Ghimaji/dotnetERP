@@ -114,3 +114,5 @@ D:\dotnetERP\GestionClients\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.
 D:\dotnetERP\GestionClients\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 D:\dotnetERP\GestionClients\bin\Debug\net8.0\Persistence.dll
 D:\dotnetERP\GestionClients\bin\Debug\net8.0\Persistence.pdb
+D:\dotnetERP\GestionClients\bin\Debug\net8.0\Castle.Core.dll
+D:\dotnetERP\GestionClients\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Proxies.dll

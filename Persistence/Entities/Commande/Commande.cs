@@ -5,5 +5,5 @@ namespace Persistence.entities.Commande;
 public class Commande
 {
     public int Id { get; set; }
-    public ICollection<ArticleCommande> articles { get; set; }
+    public virtual ICollection<ArticleCommande> articles { get; set; }
 }

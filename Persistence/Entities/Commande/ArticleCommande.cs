@@ -9,5 +9,5 @@ public class ArticleCommande
     public int ProduitId { get; set; }
     public int Quantite { get; set; }
     [ForeignKey("ProduitId")]
-    public Produit Produit { get; set; }
+    public virtual Produit Produit { get; set; }
 }

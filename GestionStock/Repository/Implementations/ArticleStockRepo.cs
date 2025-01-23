@@ -10,6 +10,7 @@ namespace GestionStock.Repository
         public StockRepo(AppDbContext context) : base(context)
         {
         }
+
         public async Task<ArticleStock?> GetArticleStockByProduitId(int produitId)
         {
             return await _context.AricleStocks.FirstOrDefaultAsync(a => a.ProduitId == produitId);

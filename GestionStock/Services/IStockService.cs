@@ -14,5 +14,5 @@ public interface IStockService
     void ConfirmerCommande(int id);
     Task SupprimerProduit(int id);
     void AjouterQuantite(ArticleStockDTO dto);
-    Task<int> ConsulterProduit(int id);
+    Task<ArticleStockDTO> ConsulterProduit(int id);
 }

@@ -16,6 +16,7 @@ namespace Persistence
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseSqlite("Data Source=../Persistence/app.db", x => x.MigrationsAssembly("ERP"));
+            optionsBuilder.UseLazyLoadingProxies();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

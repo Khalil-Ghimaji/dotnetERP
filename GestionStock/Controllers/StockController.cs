@@ -17,12 +17,12 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("ajouterProduit")]
-        public IActionResult AjouterProduit(ProduitDTO dto)
+        public async Task<IActionResult> AjouterProduit(ProduitDTO dto)
         {
             try
             {
-                _stockService.AjouterProduit(dto);
-                return Created();
+                await _stockService.AjouterProduit(dto);
+                return CreatedAtAction(nameof(AjouterProduit), dto);
             }
             catch (Exception e)
             {
@@ -45,11 +45,11 @@ namespace GestionStock.Controllers
         }
 
         [HttpGet("consulterProduit")]
-        public IActionResult ConsulterProduit(int id)
+        public async Task<IActionResult> ConsulterProduit(int id)
         {
             try
             {
-                var produit = _stockService.ConsulterProduit(id);
+                var produit = await _stockService.ConsulterProduit(id);
                 return Ok(produit);
             }
             catch (Exception e)
@@ -59,18 +59,18 @@ namespace GestionStock.Controllers
         }
 
         [HttpGet("consulterStock")]
-        public IActionResult ConsulterStock()
+        public async Task<IActionResult> ConsulterStock()
         {
-            var stock = _stockService.ConsulterStock();
+            var stock = await _stockService.ConsulterStock();
             return Ok(stock);
         }
 
         [HttpPost("expedierMarchandises")]
-        public IActionResult ExpedierMarchandises(Commande commande)
+        public async Task<IActionResult> ExpedierMarchandises(Commande commande)
         {
             try
             {
-                _stockService.ExpedierMarchandises(commande);
+                await _stockService.ExpedierMarchandises(commande);
                 return NoContent();
             }
             catch (Exception e)
@@ -80,11 +80,11 @@ namespace GestionStock.Controllers
         }
 
         [HttpPut("modifierProduit")]
-        public IActionResult ModifierProduit(ProduitDTO dto)
+        public async Task<IActionResult> ModifierProduit(ProduitDTO dto)
         {
             try
             {
-                _stockService.ModifierProduit(dto);
+                await _stockService.ModifierProduit(dto);
                 return NoContent();
             }
             catch (Exception e)
@@ -115,11 +115,11 @@ namespace GestionStock.Controllers
         }
 
         [HttpDelete("supprimerProduit")]
-        public IActionResult SupprimerProduit(int id)
+        public async Task<IActionResult> SupprimerProduit(int id)
         {
             try
             {
-                _stockService.SupprimerProduit(id);
+                await _stockService.SupprimerProduit(id);
                 return NoContent();
             }
             catch (Exception e)
