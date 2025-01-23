@@ -1,10 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
 namespace Persistence.entities.Stock;
 
-public class ArticleStock:Common
+[PrimaryKey(nameof(ProduitId))]
+public class ArticleStock
 {
-    public int Id { get; set; }
-    public int produitId { get; set; }
-    public Produit produit { get; set; }
-    public double prix { get; set; }
-    public int quantite { get; set; }
+    public int ProduitId { get; set; }
+    [Range(0, double.MaxValue)] public double Prix { get; set; }
+    [ForeignKey("ProduitId")] public virtual Produit Produit { get; set; }
+    [Required] [Range(0, int.MaxValue)] public int Quantite { get; set; }
 }
