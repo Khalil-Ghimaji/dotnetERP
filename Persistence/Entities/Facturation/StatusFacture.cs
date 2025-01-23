@@ -7,5 +7,5 @@ public enum StatusFacture
     Annulée,
     Payée,
     Impayée,
-    EnAttente
+    EnAttente 
 }

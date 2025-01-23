@@ -7,5 +7,12 @@ namespace GestionCommande.Repository;
 public class ClientRepo : GenericRepository<Client>, IClientRepo
 {
     public ClientRepo(AppDbContext context) : base(context)
-    { }
+    {
+        
+    }
+    // public List<Client> getClientsFiltered(Func<Client,bool> filter)
+    // {
+    //     return _dbSet.Where(filter).ToList();
+    // }
+    
 }
