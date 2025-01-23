@@ -58,7 +58,10 @@ namespace GestionStock.Services
                 Quantite = (dto.Quantite >= 0) ? dto.Quantite : 0,
                 ProduitId = produit.Id
             };
-            articleStock = await _stockRepo.Add(articleStock);
+            await _stockRepo.Add(articleStock);
+            // Set the reference between produit and articleStock
+            produit.ArticleStock = articleStock;
+            await _produitRepo.Update(produit);
         }
 
         public async Task<ArticleStockDTO> ConsulterProduit(int id)
