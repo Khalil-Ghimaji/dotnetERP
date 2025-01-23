@@ -98,8 +98,8 @@ namespace GestionStock.Controllers
         {
             try
             {
-                await _stockService.ReserverProduit(dto);
-                return NoContent();
+                var reservationId = await _stockService.ReserverProduit(dto);
+                return Ok(new { ReservationId = reservationId });
             }
             catch (Exception e)
             {
@@ -108,7 +108,7 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("confirmerCommande")]
-        public IActionResult ConfirmerCommande(int id)
+        public IActionResult ConfirmerCommande(Guid id)
         {
             _stockService.ConfirmerCommande(id);
             return NoContent();

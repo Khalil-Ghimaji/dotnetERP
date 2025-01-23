@@ -15,14 +15,14 @@ namespace GestionStock.Services
         private readonly IProduitRepo _produitRepo;
         private readonly ICategoryRepo _categoryRepo;
         private readonly AppDbContext _context;
-        private readonly ConcurrentDictionary<int, TaskCompletionSource<bool>> _reservationTasks;
+        private readonly ConcurrentDictionary<Guid, TaskCompletionSource<bool>> _reservationTasks;
 
         public StockService(IStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo, ICategoryRepo categoryRepo,
             AppDbContext context)
         {
             _stockRepo = stockRepo;
             _mapper = mapper;
-            _reservationTasks = new ConcurrentDictionary<int, TaskCompletionSource<bool>>();
+            _reservationTasks = new ConcurrentDictionary<Guid, TaskCompletionSource<bool>>();
             _produitRepo = produitRepo;
             _categoryRepo = categoryRepo;
             _context = context;
@@ -145,7 +145,7 @@ namespace GestionStock.Services
         }
 
 
-        public async Task ReserverProduit(ReserverProduitDTO dto)
+        public async Task<Guid> ReserverProduit(ReserverProduitDTO dto)
         {
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null && articleStock.Quantite >= dto.Quantite)
@@ -153,19 +153,32 @@ namespace GestionStock.Services
                 articleStock.Quantite -= dto.Quantite;
                 await _stockRepo.Update(articleStock);
 
+                var reservationId = Guid.NewGuid();
                 var tcs = new TaskCompletionSource<bool>();
-                _reservationTasks[dto.ProduitId] = tcs;
+                _reservationTasks[reservationId] = tcs;
 
-                var delayTask = Task.Delay(dto.ReservationDuration);
-                var completedTask = await Task.WhenAny(delayTask, tcs.Task);
-
-                if (completedTask == delayTask)
+                if (TimeSpan.TryParse(dto.ReservationDuration, out var reservationDuration))
                 {
-                    articleStock.Quantite += dto.Quantite;
-                    await _stockRepo.Update(articleStock);
+                    _ = Task.Run(async () =>
+                    {
+                        var delayTask = Task.Delay(reservationDuration);
+                        var completedTask = await Task.WhenAny(delayTask, tcs.Task);
+
+                        if (completedTask == delayTask)
+                        {
+                            articleStock.Quantite += dto.Quantite;
+                            await _stockRepo.Update(articleStock);
+                        }
+
+                        _reservationTasks.TryRemove(reservationId, out _);
+                    });
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid TimeSpan format.");
                 }
 
-                _reservationTasks.TryRemove(dto.ProduitId, out _);
+                return reservationId;
             }
             else
             {
@@ -173,8 +186,7 @@ namespace GestionStock.Services
             }
         }
 
-
-        public void ConfirmerCommande(int id)
+        public void ConfirmerCommande(Guid id)
         {
             if (_reservationTasks.TryGetValue(id, out var tcs))
             {
