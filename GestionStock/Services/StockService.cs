@@ -169,7 +169,6 @@ namespace GestionStock.Services
                             articleStock.Quantite += dto.Quantite;
                             await _stockRepo.Update(articleStock);
                         }
-
                         _reservationTasks.TryRemove(reservationId, out _);
                     });
                 }
