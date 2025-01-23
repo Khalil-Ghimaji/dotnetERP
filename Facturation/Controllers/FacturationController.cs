@@ -106,10 +106,10 @@ namespace Facturation.Controllers
             return Ok(paiements);
         }
 
-        [HttpGet("{factureId}/paiement")]
-        public async Task<ActionResult<Paiement>> ConsulterPaiement(int factureId)
+        [HttpGet("paiement/{paiementId}")]
+        public async Task<ActionResult<Paiement>> ConsulterPaiement(int paiementId)
         {
-            var paiement = await _factureService.ConsulterPaiements(factureId);
+            var paiement = await _factureService.ConsulterPaiement(paiementId);
             if (paiement == null)
                 return NotFound("Aucun paiement trouvé.");
             
@@ -145,12 +145,10 @@ namespace Facturation.Controllers
                 if (facturePdf == null)
                     return NotFound("Facture non trouvée ou problème lors de la génération du PDF.");
 
-                // Retourner le PDF en tant que fichier dans la réponse
                 return File(facturePdf, "application/pdf", $"Facture_{factureId}.pdf");
             }
             catch (Exception ex)
             {
-                // Gérer les erreurs
                 return StatusCode(500, $"Erreur lors de la génération du PDF : {ex.Message}");
             }
         }

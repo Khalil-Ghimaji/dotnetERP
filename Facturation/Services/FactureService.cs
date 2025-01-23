@@ -67,6 +67,7 @@ namespace Facturation.Services
 
             var paiement = new Paiement
             {
+                FactureId = factureId,
                 Date = DateTime.Now,
                 Montant = creerPaiementDTO.Montant,
                 MethodePaiement = creerPaiementDTO.MethodePaiement
@@ -81,6 +82,10 @@ namespace Facturation.Services
         public async Task<IEnumerable<Paiement>> ConsulterPaiements(int factureId)
         {
             return await _paiementRepo.GetPaiementsByFactureId(factureId);
+        }
+        public async Task<Paiement> ConsulterPaiement(int paiementId)
+        {
+            return await _paiementRepo.GetById(paiementId);
         }
 
         public async Task<Paiement> CreePaiement(int factureId, double montant)

@@ -12,6 +12,8 @@ namespace Facturation.Services
         Task<Facture> UpdateFacture(int factureId, UpdateFactureDTO updateFactureDTO);
         Task<Paiement> AjouterPaiement(int factureId, CreerPaiementDTO creerPaiementDTO);
         Task<IEnumerable<Paiement>> ConsulterPaiements(int factureId);
+        Task<Paiement> ConsulterPaiement(int paiementId);
+
         Task<Paiement> CreePaiement(int factureId, double montant);
         Task<Paiement?> SupprimerPaiement(int paiementId);
         Task<Paiement> UpdatePaiement(int paiementId, UpdatePaiementDTO updatePaiementDTO);
