@@ -3,16 +3,18 @@ using Persistence.entities.Commande;
 
 namespace GestionCommande.Services;
 
-public class CommandeService
+public class CommandeService : ICommandeService
 {
     private readonly ICommandeRepo _commandeRepo;
     private readonly IProduitRepo _produitRepo;
     private readonly IArticleStockRepo _articleStockRepo;
-    public CommandeService(ICommandeRepo commandeRepo, IProduitRepo produitRepo, IArticleStockRepo articleStockRepo)
+    private readonly IClientRepo _clientRepo;
+    public CommandeService(ICommandeRepo commandeRepo, IProduitRepo produitRepo, IArticleStockRepo articleStockRepo, IClientRepo clientRepo)
     {
         _commandeRepo = commandeRepo;
         _produitRepo = produitRepo;
         _articleStockRepo = articleStockRepo;
+        _clientRepo = clientRepo;
     }
     
     public async Task<IEnumerable<Commande>> getAllCommandes()
@@ -27,23 +29,25 @@ public class CommandeService
     
     public async Task<Commande?> getCommandeById(int id)
     {
-        return await _commandeRepo.GetById(id);
+        return await _commandeRepo.getEagerById(id);
     }
 
     public async Task<Commande?> preparerCommande(Commande commande)
     {
-        if (await commandeExists(commande.Id))
+        var client = await _clientRepo.GetById(commande.client.Id);
+        if (client == null)
         {
             return null;
         }
-        commande.status = StatusCommande.PREPARATION;
         return await _commandeRepo.Add(commande);
     }
+    
     public async Task<Commande?> modifierCommande(Commande commande)
     {
         var command = await getCommandeById(commande.Id);
         if (command != null && command.status == StatusCommande.PREPARATION && commande.status==StatusCommande.PREPARATION)
         {
+            _commandeRepo.Detach(command); // Detach the existing entity
             return await _commandeRepo.Update(commande);
         }
         return null;
@@ -179,6 +183,7 @@ public class CommandeService
     //     commande.status = StatusCommande.PAYEE;
     //     await _repo.Update(commande);
     // }
+    
     
     // public async void rembourserCommande(Commande commande)
     // {
