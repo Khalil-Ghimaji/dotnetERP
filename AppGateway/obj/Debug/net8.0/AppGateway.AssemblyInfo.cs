@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AppGateway")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f31d8e3d04937b0dccebcec724ad383d4456b640")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b455ed7234fea2602b6b2dca530b9aac2287b541")]
 [assembly: System.Reflection.AssemblyProductAttribute("AppGateway")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AppGateway")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
