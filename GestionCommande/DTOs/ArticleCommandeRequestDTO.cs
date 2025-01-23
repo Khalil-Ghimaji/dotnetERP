@@ -1,6 +1,6 @@
 namespace GestionCommande.DTOs;
 
-public record ArticleCommandeDTO()
+public record ArticleCommandeRequestDTO()
 {
     // public int IdCommande { get; set; }
     public int IdProduit { get; set; }

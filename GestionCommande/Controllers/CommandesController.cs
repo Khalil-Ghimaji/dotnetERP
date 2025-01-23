@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using GestionCommande.DTOs;
 using GestionCommande.Services;
 using Microsoft.AspNetCore.Http;
@@ -18,23 +19,26 @@ namespace GestionCommande.Controllers
     public class CommandesController : ControllerBase
     {
         private readonly ICommandeService _commandeService;
+        private readonly IMapper _mapper;
 
-        public CommandesController(ICommandeService commandeService)
+        public CommandesController(ICommandeService commandeService, IMapper mapper)
         {
             _commandeService = commandeService;
+            _mapper = mapper;
         }
 
         // GET: api/Commandes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Commande>>> GetCommandes()
+        public async Task<ActionResult<IEnumerable<CommandeResponseDTO>>> GetCommandes()
         {
             var commandes = await _commandeService.getAllCommandes();
-            return commandes.ToList();
+            
+            return _mapper.Map<List<CommandeResponseDTO>>(commandes.ToList());
         }
 
         // GET: api/Commandes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Commande>> GetCommande(int id)
+        public async Task<ActionResult<CommandeResponseDTO>> GetCommande(int id)
         {
             var commande = await _commandeService.getCommandeById(id);
 
@@ -43,42 +47,42 @@ namespace GestionCommande.Controllers
                 return NotFound();
             }
 
-            return commande;
+            return _mapper.Map<CommandeResponseDTO>(commande);
         }
 
         // PUT: api/Commandes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> ModifierCommande(int id, Commande commande)
+        public async Task<ActionResult<CommandeResponseDTO>> ModifierCommande(int id, CommandeRequestDTO commandeDto)
         {
-            if (id != commande.Id)
-            {
-                return BadRequest();
-            }
+            // if (id != commande.Id)
+            // {
+            //     return BadRequest();
+            // }
             if (!await _commandeService.commandeExists(id))
             {
                 return NotFound();
             }
-            var command = await _commandeService.modifierCommande(commande);
+            var command = await _commandeService.modifierCommande(_mapper.Map<Commande>(commandeDto));
             if (command == null)
             {
                 return BadRequest();
             }
-            return NoContent();
+            return _mapper.Map<CommandeResponseDTO>(command);
         }
 
         // POST: api/Commandes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Commande>> CreerCommande(Commande commande)
+        public async Task<ActionResult<CommandeResponseDTO>> CreerCommande(CommandeRequestDTO commandeDto)
         {
-            var command = await _commandeService.preparerCommande(commande);
+            var command = await _commandeService.preparerCommande(_mapper.Map<Commande>(commandeDto));
             if (command == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            return CreatedAtAction("GetCommande", new { id = commande.Id }, commande);
+            return CreatedAtAction("GetCommande", new { id = command.Id });
         }
 
         // DELETE: api/Commandes/5
@@ -94,7 +98,7 @@ namespace GestionCommande.Controllers
         }
         
         [HttpPost("ajouterArticle/{idCommande}")]
-        public async Task<IActionResult> AjouterArticle(int idCommande, ArticleCommandeDTO articleCommande)
+        public async Task<ActionResult<CommandeResponseDTO>> AjouterArticle(int idCommande, ArticleCommandeRequestDTO articleCommande)
         {
             if (!await _commandeService.commandeExists(idCommande))
             {
@@ -105,11 +109,11 @@ namespace GestionCommande.Controllers
             {
                 return BadRequest();
             }
-            return NoContent();
+            return _mapper.Map<CommandeResponseDTO>(commande);
         }
         
         [HttpPost("retirerArticle/{idCommande}")]
-        public async Task<IActionResult> RetirerArticle(int idCommande, ArticleCommandeDTO articleCommande)
+        public async Task<ActionResult<CommandeResponseDTO>> RetirerArticle(int idCommande, ArticleCommandeRequestDTO articleCommande)
         {
             if (!await _commandeService.commandeExists(idCommande))
             {
@@ -120,11 +124,11 @@ namespace GestionCommande.Controllers
             {
                 return BadRequest();
             }
-            return NoContent();
+            return _mapper.Map<CommandeResponseDTO>(commande);
         }
         
         [HttpPost("valider/{id}")]
-        public async Task<ActionResult<Commande>> ValiderCommande(int id)
+        public async Task<ActionResult<CommandeResponseDTO>> ValiderCommande(int id)
         {
             if (!await _commandeService.commandeExists(id))
             {
@@ -135,11 +139,11 @@ namespace GestionCommande.Controllers
             {
                 return BadRequest();
             }
-            return commande;
+            return _mapper.Map<CommandeResponseDTO>(commande);
         }
         
         [HttpPost("annuler/{id}")]
-        public async Task<ActionResult<Commande>> AnnulerCommande(int id)
+        public async Task<ActionResult<CommandeResponseDTO>> AnnulerCommande(int id)
         {
             if (!await _commandeService.commandeExists(id))
             {
@@ -150,11 +154,11 @@ namespace GestionCommande.Controllers
             {
                 return BadRequest();
             }
-            return commande;
+            return _mapper.Map<CommandeResponseDTO>(commande);
         }
 
         [HttpPost("expedier/{id}")]
-        public async Task<ActionResult<Commande>> ExpedierCommande(int id)
+        public async Task<ActionResult<CommandeResponseDTO>> ExpedierCommande(int id)
         {
             if (!await _commandeService.commandeExists(id))
             {
@@ -165,11 +169,11 @@ namespace GestionCommande.Controllers
             {
                 return BadRequest();
             }
-            return commande;
+            return _mapper.Map<CommandeResponseDTO>(commande);
         }
 
         [HttpPost("livrer/{id}")]
-        public async Task<ActionResult<Commande>> LivrerCommande(int id)
+        public async Task<ActionResult<CommandeResponseDTO>> LivrerCommande(int id)
         {
             if (!await _commandeService.commandeExists(id))
             {
@@ -181,11 +185,11 @@ namespace GestionCommande.Controllers
             {
                 return BadRequest();
             }
-            return commande;
+            return _mapper.Map<CommandeResponseDTO>(commande);
         }
 
         [HttpPost("facturer/{id}")]
-        public async Task<ActionResult<Commande>> FacturerCommande(int id)
+        public async Task<ActionResult<CommandeResponseDTO>> FacturerCommande(int id)
         {
             if (!await _commandeService.commandeExists(id))
             {
@@ -196,7 +200,7 @@ namespace GestionCommande.Controllers
             {
                 return BadRequest();
             }
-            return commande;
+            return _mapper.Map<CommandeResponseDTO>(commande);
         }
 
         // [HttpPost("payer/{id}")]

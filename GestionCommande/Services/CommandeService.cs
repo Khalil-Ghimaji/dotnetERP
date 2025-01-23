@@ -8,11 +8,13 @@ public class CommandeService : ICommandeService
     private readonly ICommandeRepo _commandeRepo;
     private readonly IProduitRepo _produitRepo;
     private readonly IArticleStockRepo _articleStockRepo;
-    public CommandeService(ICommandeRepo commandeRepo, IProduitRepo produitRepo, IArticleStockRepo articleStockRepo)
+    private readonly IClientRepo _clientRepo;
+    public CommandeService(ICommandeRepo commandeRepo, IProduitRepo produitRepo, IArticleStockRepo articleStockRepo, IClientRepo clientRepo)
     {
         _commandeRepo = commandeRepo;
         _produitRepo = produitRepo;
         _articleStockRepo = articleStockRepo;
+        _clientRepo = clientRepo;
     }
     
     public async Task<IEnumerable<Commande>> getAllCommandes()
@@ -32,11 +34,11 @@ public class CommandeService : ICommandeService
 
     public async Task<Commande?> preparerCommande(Commande commande)
     {
-        if (await commandeExists(commande.Id))
+        var client = await _clientRepo.GetById(commande.client.Id);
+        if (client == null)
         {
             return null;
         }
-        commande.status = StatusCommande.PREPARATION;
         return await _commandeRepo.Add(commande);
     }
     

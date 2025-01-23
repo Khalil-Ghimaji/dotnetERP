@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AppGateway")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8063a9b9a958bdaf355c633419a2ae82dbc76cda")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7e9cc06a90162cdb5fa95230e884f0cc7d4cd0c6")]
 [assembly: System.Reflection.AssemblyProductAttribute("AppGateway")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AppGateway")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

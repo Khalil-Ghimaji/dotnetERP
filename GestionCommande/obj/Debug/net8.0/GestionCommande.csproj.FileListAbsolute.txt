@@ -331,3 +331,4 @@ C:\Users\khali\RiderProjects\ERP\GestionCommande\obj\Debug\net8.0\ref\GestionCom
 C:\Users\khali\RiderProjects\ERP\GestionCommande\bin\Debug\net8.0\GestionCommande.staticwebassets.endpoints.json
 C:\Users\khali\RiderProjects\ERP\GestionCommande\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 C:\Users\khali\RiderProjects\ERP\GestionCommande\obj\Debug\net8.0\staticwebassets\msbuild.GestionCommande.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Users\khali\RiderProjects\ERP\GestionCommande\bin\Debug\net8.0\AutoMapper.dll
