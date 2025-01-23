@@ -1,8 +1,11 @@
 namespace GestionStock.DTO;
 
-public class ReserverProduitDTO
+public class ReserverProduitRequestDTO : ArticleExpedierMarchandisesDTO
 {
-    public int ProduitId { get; init; }
-    public int Quantite { get; init; }
     public string ReservationDuration { get; init; }
+}
+
+public class ReserverProduitResponseDTO
+{
+    public string ReservationId { get; init; }
 }

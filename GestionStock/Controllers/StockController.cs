@@ -1,7 +1,7 @@
 using GestionStock.DTO;
 using GestionStock.Services;
 using Microsoft.AspNetCore.Mvc;
-using Persistence.entities.Commande;
+using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
 
 namespace GestionStock.Controllers
 {
@@ -17,12 +17,15 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("ajouterProduit")]
-        public async Task<IActionResult> AjouterProduit(ProduitDTO dto)
+        public async Task<ActionResult<AjouterProduitResponseDTO>> AjouterProduit(AjouterProduitRequestDTO dto)
         {
             try
             {
-                await _stockService.AjouterProduit(dto);
-                return CreatedAtAction(nameof(ConsulterProduit), dto);
+                var id = await _stockService.AjouterProduit(dto);
+                return CreatedAtAction(nameof(ConsulterProduit), new { id }, new AjouterProduitResponseDTO()
+                {
+                    Id = id
+                });
             }
             catch (Exception e)
             {
@@ -31,11 +34,11 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("ajouterQuantiteStock")]
-        public IActionResult AjouterStock(ArticleStockDTO dto)
+        public async Task<IActionResult> AjouterStock(AjouterQuantiteRequestDTO dto)
         {
             try
             {
-                _stockService.AjouterQuantite(dto);
+                await _stockService.AjouterQuantite(dto);
                 return Created();
             }
             catch (Exception e)
@@ -45,7 +48,7 @@ namespace GestionStock.Controllers
         }
 
         [HttpGet("consulterProduit")]
-        public async Task<IActionResult> ConsulterProduit(int id)
+        public async Task<ActionResult<ArticleStockDTO>> ConsulterProduit(int id)
         {
             try
             {
@@ -59,14 +62,13 @@ namespace GestionStock.Controllers
         }
 
         [HttpGet("consulterStock")]
-        public async Task<IActionResult> ConsulterStock()
+        public async Task<ActionResult<List<ArticleStockDTO>>> ConsulterStock()
         {
-            var stock = await _stockService.ConsulterStock();
-            return Ok(stock);
+            return Ok(await _stockService.ConsulterStock());
         }
 
         [HttpPost("expedierMarchandises")]
-        public async Task<IActionResult> ExpedierMarchandises(Commande commande)
+        public async Task<IActionResult> ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
         {
             try
             {
@@ -94,7 +96,7 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("reserverProduit")]
-        public async Task<IActionResult> ReserverProduit(ReserverProduitDTO dto)
+        public async Task<ActionResult<ReserverProduitResponseDTO>> ReserverProduit(ReserverProduitRequestDTO dto)
         {
             try
             {

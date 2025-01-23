@@ -1,9 +1,8 @@
 using System.Collections.Concurrent;
 using AutoMapper;
 using GestionStock.DTO;
-using Microsoft.AspNetCore.Http.HttpResults;
+using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
 using Persistence;
-using Persistence.entities.Commande;
 using Persistence.entities.Stock;
 using Persistence.Repository.StockRepositories.Contracts;
 
@@ -16,14 +15,17 @@ namespace GestionStock.Services
         private readonly IProduitRepo _produitRepo;
         private readonly ICategoryRepo _categoryRepo;
         private readonly AppDbContext _context;
-        private readonly ConcurrentDictionary<Guid, TaskCompletionSource<bool>> _reservationTasks;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private static readonly ConcurrentDictionary<Guid, CancellationTokenSource> _reservationTasks=new ConcurrentDictionary<Guid, CancellationTokenSource>();
 
-        public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo, ICategoryRepo categoryRepo,
+        public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo,
+            IServiceScopeFactory scopeFactory,
+            ICategoryRepo categoryRepo,
             AppDbContext context)
         {
             _stockRepo = stockRepo;
             _mapper = mapper;
-            _reservationTasks = new ConcurrentDictionary<Guid, TaskCompletionSource<bool>>();
+            _scopeFactory = scopeFactory;
             _produitRepo = produitRepo;
             _categoryRepo = categoryRepo;
             _context = context;
@@ -31,10 +33,10 @@ namespace GestionStock.Services
 
 
         //permet d'ajouter un produit avec son stock associé
-        public async Task AjouterProduit(ProduitDTO dto)
+        public async Task<int> AjouterProduit(AjouterProduitRequestDTO dto)
         {
             //check if the product already exists
-            if (await _produitRepo.ProduitExists(dto.ProduitId, dto.Nom))
+            if (await _produitRepo.ProduitExists(dto.Nom))
             {
                 throw new HttpRequestException("Produit déjà existant.");
             }
@@ -52,7 +54,7 @@ namespace GestionStock.Services
                 CategorieId = dto.CategoryId
             };
             await _produitRepo.Add(produit);
-            
+
             var articleStock = new ArticleStock()
             {
                 Prix = (dto.Prix >= 0) ? dto.Prix : 0,
@@ -60,6 +62,7 @@ namespace GestionStock.Services
                 ProduitId = produit.Id,
             };
             await _stockRepo.Add(articleStock);
+            return produit.Id;
         }
 
         public async Task<ArticleStockDTO> ConsulterProduit(int id)
@@ -73,16 +76,19 @@ namespace GestionStock.Services
             throw new HttpRequestException("Article non trouvé.");
         }
 
-        public async void AjouterQuantite(ArticleStockDTO dto)
+        public async Task AjouterQuantite(AjouterQuantiteRequestDTO dto)
         {
+            Console.WriteLine("Entering AjouterQuantite method.");
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null)
             {
                 articleStock.Quantite += dto.Quantite;
                 await _stockRepo.Update(articleStock);
+                Console.WriteLine("Quantity updated successfully.");
             }
             else
             {
+                Console.WriteLine("Article not found.");
                 throw new HttpRequestException("Article non trouvé.");
             }
         }
@@ -96,20 +102,20 @@ namespace GestionStock.Services
 
 
         //reste à remplacer Commande par un DTO
-        public async Task ExpedierMarchandises(Commande commande)
+        public async Task ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
         {
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                foreach (var item in commande.articles)
+                foreach (var item in commande.Articles)
                 {
-                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.produit.Id);
-                    if (articleStock == null || articleStock.Quantite < item.quantite)
+                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
+                    if (articleStock == null || articleStock.Quantite < item.Quantite)
                     {
                         throw new HttpRequestException("Quantité insuffisante ou article non trouvé.");
                     }
 
-                    articleStock.Quantite -= item.quantite;
+                    articleStock.Quantite -= item.Quantite;
                     await _stockRepo.Update(articleStock);
                 }
 
@@ -147,7 +153,7 @@ namespace GestionStock.Services
         }
 
 
-        public async Task<Guid> ReserverProduit(ReserverProduitDTO dto)
+        public async Task<Guid> ReserverProduit(ReserverProduitRequestDTO dto)
         {
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null && articleStock.Quantite >= dto.Quantite)
@@ -156,22 +162,32 @@ namespace GestionStock.Services
                 await _stockRepo.Update(articleStock);
 
                 var reservationId = Guid.NewGuid();
-                var tcs = new TaskCompletionSource<bool>();
-                _reservationTasks[reservationId] = tcs;
+                var cts = new CancellationTokenSource();
+                _reservationTasks[reservationId] = cts;
 
                 if (TimeSpan.TryParse(dto.ReservationDuration, out var reservationDuration))
                 {
                     _ = Task.Run(async () =>
                     {
-                        var delayTask = Task.Delay(reservationDuration);
-                        var completedTask = await Task.WhenAny(delayTask, tcs.Task);
-
-                        if (completedTask == delayTask)
+                        try
                         {
-                            articleStock.Quantite += dto.Quantite;
-                            await _stockRepo.Update(articleStock);
+                            await Task.Delay(reservationDuration, cts.Token);
+                            cts.Token.ThrowIfCancellationRequested();
+                            using (var scope = _scopeFactory.CreateScope())
+                            {
+                                var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
+                                articleStock.Quantite += dto.Quantite;
+                                await scopedStockRepo.Update(articleStock);
+                            }
                         }
-                        _reservationTasks.TryRemove(reservationId, out _);
+                        catch (TaskCanceledException)
+                        {
+                            Console.WriteLine($"Task canceled for reservationId: {reservationId}");
+                        }
+                        finally
+                        {
+                            _reservationTasks.TryRemove(reservationId, out _);
+                        }
                     });
                 }
                 else
@@ -189,18 +205,31 @@ namespace GestionStock.Services
 
         public void ConfirmerCommande(Guid id)
         {
-            if (_reservationTasks.TryGetValue(id, out var tcs))
+            if (_reservationTasks.TryGetValue(id, out var cts))
             {
-                tcs.SetResult(true);
+                cts.Cancel();
+                _reservationTasks.TryRemove(id, out _);
             }
         }
 
 
         public async Task SupprimerProduit(int id)
         {
-            if (await _stockRepo.Delete(id) == null)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                throw new HttpRequestException("Article non trouvé.");
+                if (await _stockRepo.Delete(id) == null || await _produitRepo.Delete(id) == null)
+                {
+                    throw new HttpRequestException("Article non trouvé.");
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                //propager la même exception
+                throw;
             }
         }
     }

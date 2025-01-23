@@ -1,12 +1,11 @@
 {
   "Version": 1,
-  "Hash": "ZW2WyckNFbgJLOBrNCNJnM0jSX4MgCVxQxlT6lEQ6iE=",
+  "Hash": "FT7ORBPhVcA0ap6KycmDpwS4g6OYIaTjhQm5SUijEhg=",
   "Source": "Facturation",
   "BasePath": "_content/Facturation",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "Assets": []
 }
