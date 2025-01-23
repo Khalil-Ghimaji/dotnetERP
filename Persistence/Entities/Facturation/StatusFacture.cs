@@ -1,11 +1,12 @@
-namespace Persistence.entities.Facturation;
-
-public enum StatusFacture
+namespace Persistence.entities.Facturation
 {
-    Créée,
-    Validée,
-    Annulée,
-    Payée,
-    Impayée,
-    EnAttente 
+    public enum StatusFacture
+    {
+        Créée,
+        Validée,
+        Annulée,
+        Payée,
+        Impayée,
+        EnAttente 
+    }
 }
