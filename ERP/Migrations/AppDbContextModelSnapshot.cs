@@ -167,9 +167,6 @@ namespace ERP.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ArticleStockId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("CategorieId")
                         .HasColumnType("INTEGER");
 
@@ -178,8 +175,6 @@ namespace ERP.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ArticleStockId");
 
                     b.HasIndex("CategorieId");
 
@@ -233,7 +228,7 @@ namespace ERP.Migrations
             modelBuilder.Entity("Persistence.entities.Stock.ArticleStock", b =>
                 {
                     b.HasOne("Persistence.entities.Stock.Produit", "Produit")
-                        .WithOne()
+                        .WithOne("ArticleStock")
                         .HasForeignKey("Persistence.entities.Stock.ArticleStock", "ProduitId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -243,19 +238,11 @@ namespace ERP.Migrations
 
             modelBuilder.Entity("Persistence.entities.Stock.Produit", b =>
                 {
-                    b.HasOne("Persistence.entities.Stock.ArticleStock", "ArticleStock")
-                        .WithMany()
-                        .HasForeignKey("ArticleStockId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Persistence.entities.Stock.Categorie", "Categorie")
                         .WithMany("Produits")
                         .HasForeignKey("CategorieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ArticleStock");
 
                     b.Navigation("Categorie");
                 });
@@ -271,6 +258,12 @@ namespace ERP.Migrations
             modelBuilder.Entity("Persistence.entities.Stock.Categorie", b =>
                 {
                     b.Navigation("Produits");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Stock.Produit", b =>
+                {
+                    b.Navigation("ArticleStock")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

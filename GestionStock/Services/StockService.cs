@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using AutoMapper;
 using GestionStock.DTO;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Persistence;
 using Persistence.entities.Commande;
 using Persistence.entities.Stock;
@@ -50,13 +51,14 @@ namespace GestionStock.Services
                 Nom = dto.Nom,
                 CategorieId = dto.CategoryId
             };
+            await _produitRepo.Add(produit);
+            
             var articleStock = new ArticleStock()
             {
                 Prix = (dto.Prix >= 0) ? dto.Prix : 0,
                 Quantite = (dto.Quantite >= 0) ? dto.Quantite : 0,
-                Produit = produit
+                ProduitId = produit.Id,
             };
-            produit.ArticleStock = articleStock;
             await _stockRepo.Add(articleStock);
         }
 
