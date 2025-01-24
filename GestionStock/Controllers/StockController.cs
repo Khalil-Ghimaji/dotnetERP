@@ -109,11 +109,32 @@ namespace GestionStock.Controllers
             }
         }
 
+        [HttpDelete("annulerCommande")]
+        public async Task<IActionResult> AnnulerCommande(Guid id)
+        {
+            try
+            {
+                await _stockService.AnnulerCommande(id);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+
         [HttpPost("confirmerCommande")]
         public IActionResult ConfirmerCommande(Guid id)
         {
-            _stockService.ConfirmerCommande(id);
-            return NoContent();
+            try
+            {
+                _stockService.ConfirmerCommande(id);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpDelete("supprimerProduit")]

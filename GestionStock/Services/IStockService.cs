@@ -13,4 +13,5 @@ public interface IStockService
     Task SupprimerProduit(int id);
     Task AjouterQuantite(AjouterQuantiteRequestDTO dto);
     Task<ArticleStockDTO> ConsulterProduit(int id);
+    Task AnnulerCommande(Guid id);
 }

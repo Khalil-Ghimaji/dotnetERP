@@ -16,7 +16,11 @@ namespace GestionStock.Services
         private readonly ICategoryRepo _categoryRepo;
         private readonly AppDbContext _context;
         private readonly IServiceScopeFactory _scopeFactory;
-        private static readonly ConcurrentDictionary<Guid, CancellationTokenSource> _reservationTasks=new ConcurrentDictionary<Guid, CancellationTokenSource>();
+
+        private static readonly
+            ConcurrentDictionary<(Guid reservationId, int produitId), (CancellationTokenSource cts, int quantite)>
+            _reservationTasks =
+                new ConcurrentDictionary<(Guid, int), (CancellationTokenSource, int)>();
 
         public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo,
             IServiceScopeFactory scopeFactory,
@@ -163,7 +167,7 @@ namespace GestionStock.Services
 
                 var reservationId = Guid.NewGuid();
                 var cts = new CancellationTokenSource();
-                _reservationTasks[reservationId] = cts;
+                _reservationTasks[(reservationId, dto.ProduitId)] = (cts, dto.Quantite);
 
                 if (TimeSpan.TryParse(dto.ReservationDuration, out var reservationDuration))
                 {
@@ -186,7 +190,7 @@ namespace GestionStock.Services
                         }
                         finally
                         {
-                            _reservationTasks.TryRemove(reservationId, out _);
+                            _reservationTasks.TryRemove((reservationId, dto.ProduitId), out _);
                         }
                     });
                 }
@@ -203,15 +207,50 @@ namespace GestionStock.Services
             }
         }
 
-        public void ConfirmerCommande(Guid id)
+        public async Task AnnulerCommande(Guid id)
         {
-            if (_reservationTasks.TryGetValue(id, out var cts))
+            var reservation = _reservationTasks.FirstOrDefault(r => r.Key.reservationId == id);
+            if (reservation.Key != default)
             {
+                var (reservationId, produitId) = reservation.Key;
+                var (cts, quantite) = reservation.Value;
+
                 cts.Cancel();
-                _reservationTasks.TryRemove(id, out _);
+                _reservationTasks.TryRemove((reservationId, produitId), out _);
+
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
+                    var articleStock = await scopedStockRepo.GetArticleStockByProduitId(produitId);
+                    if (articleStock != null)
+                    {
+                        articleStock.Quantite += quantite;
+                        await scopedStockRepo.Update(articleStock);
+                    }
+                }
+            }
+            else
+            {
+                throw new KeyNotFoundException("Reservation not found.");
             }
         }
 
+        public void ConfirmerCommande(Guid id)
+        {
+            var reservation = _reservationTasks.FirstOrDefault(r => r.Key.reservationId == id);
+            if (reservation.Key != default)
+            {
+                var (reservationId, produitId) = reservation.Key;
+                var (cts, _) = reservation.Value;
+
+                cts.Cancel();
+                _reservationTasks.TryRemove((reservationId, produitId), out _);
+            }
+            else
+            {
+                throw new KeyNotFoundException("Reservation not found.");
+            }
+        }
 
         public async Task SupprimerProduit(int id)
         {
