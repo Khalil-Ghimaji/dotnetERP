@@ -23,6 +23,29 @@ namespace ERP.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("address")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("estRestreint")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("nbNotes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("nom")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("note")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("sumNotes")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("telephone")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("Clients");
