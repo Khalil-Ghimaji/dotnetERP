@@ -1,15 +1,3 @@
 .vs
-AppGateway/obj
-AppGateway/bin
-ERP/obj
-ERP/bin
-Facturacion/obj
-Facturacion/bin
-GestionClients/obj
-GestionClients/bin
-GestionCommande/obj
-GestionCommande/bin
-GestionStock/obj
-GestionStock/bin
-Persistence/obj
-Persistence/bin
+**/obj/
+**/bin/
