@@ -44,7 +44,6 @@ namespace ERP.Migrations
                         .HasColumnType("REAL");
 
                     b.Property<int>("telephone")
-                        .HasMaxLength(8)
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
