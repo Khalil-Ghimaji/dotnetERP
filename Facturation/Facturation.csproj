@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutoMapper" Version="13.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.1" />
         <PackageReference Include="QuestPDF" Version="2025.1.0-alpha0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>

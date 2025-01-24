@@ -63,7 +63,10 @@ namespace GestionCommande.Controllers
             {
                 return NotFound();
             }
-            var command = await _commandeService.modifierCommande(_mapper.Map<Commande>(commandeDto));
+
+            var command = _mapper.Map<Commande>(commandeDto);
+            command.Id = id;
+            command = await _commandeService.modifierCommande(command);
             if (command == null)
             {
                 return BadRequest();
@@ -82,7 +85,7 @@ namespace GestionCommande.Controllers
                 return NotFound();
             }
 
-            return CreatedAtAction("GetCommande", new { id = command.Id });
+            return CreatedAtAction("GetCommande", new { id = command.Id }, _mapper.Map<CommandeResponseDTO>(command));
         }
 
         // DELETE: api/Commandes/5
