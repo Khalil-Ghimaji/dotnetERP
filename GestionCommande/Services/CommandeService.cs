@@ -41,6 +41,7 @@ public class CommandeService : ICommandeService
         {
             return null;
         }
+        commande.client = client;
         return await _commandeRepo.Add(commande);
     }
     
@@ -63,11 +64,12 @@ public class CommandeService : ICommandeService
             var produit = await _produitRepo.GetById(idProduit);
             if (produit != null)
             {
-                var prix = _articleStockRepo.getPrixArticle(idProduit);
-                if (prix == 0)
+                var articleStock = await _articleStockRepo.GetArticleStockByProduitId(idProduit);
+                if (articleStock == null)
                 {
                     return null;
                 }
+                var prix = articleStock.Prix;
                 var articleCommande = _commandeRepo.getArticleCommandeByProduit(idCommande, idProduit);
                 if (articleCommande == null)
                 {
