@@ -1,4 +1,5 @@
 using GestionClients.Services;
+using Persistence;
 using Persistence.Repository.ClientRepositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<IClientRepo, ClientRepo>();
 builder.Services.AddScoped<IClientService, ClientService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
