@@ -1,18 +1,16 @@
 using GestionStock.DTO;
-using Persistence.entities.Commande;
-using Persistence.entities.Stock;
-
+using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
 namespace GestionStock.Services;
 
 public interface IStockService
 {
-    Task AjouterProduit(ProduitDTO dto);
+    Task<int> AjouterProduit(AjouterProduitRequestDTO dto);
     Task<IEnumerable<ArticleStockDTO>> ConsulterStock();
-    Task ExpedierMarchandises(Commande commande);
+    Task ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande);
     Task ModifierProduit(ProduitDTO dto);
-    Task<Guid> ReserverProduit(ReserverProduitDTO dto);
+    Task<Guid> ReserverProduit(ReserverProduitRequestDTO dto);
     void ConfirmerCommande(Guid id);
     Task SupprimerProduit(int id);
-    void AjouterQuantite(ArticleStockDTO dto);
+    Task AjouterQuantite(AjouterQuantiteRequestDTO dto);
     Task<ArticleStockDTO> ConsulterProduit(int id);
 }

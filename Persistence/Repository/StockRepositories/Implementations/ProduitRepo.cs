@@ -10,8 +10,8 @@ public class ProduitRepo : GenericRepository<Produit>, IProduitRepo
     {
     }
     
-    public async Task<bool> ProduitExists(int id,string nom)
+    public async Task<bool> ProduitExists(string nom)
     {
-        return await _context.Produits.AnyAsync(p => p.Id == id || p.Nom == nom);
+        return await _context.Produits.AnyAsync(p => p.Nom == nom);
     }
 }

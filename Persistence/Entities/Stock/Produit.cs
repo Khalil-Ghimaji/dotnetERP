@@ -10,7 +10,7 @@ public class Produit
     public string Nom { get; set; }
     public int CategorieId { get; set; }
     [ForeignKey("CategorieId")] 
-    public Categorie Categorie { get; set; }
+    public virtual Categorie Categorie { get; set; }
 
     public virtual ArticleStock ArticleStock { get; set; }
 }
