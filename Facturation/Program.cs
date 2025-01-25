@@ -1,5 +1,5 @@
-using System.Text.Json.Serialization;
 using Facturation.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Persistence;
 using Persistence.Repository.FacturationRepositories;
 using QuestPDF.Infrastructure;
@@ -14,7 +14,7 @@ builder.Services.AddScoped<IFactureRepo, FactureRepo>();
 builder.Services.AddScoped<IPaiementRepo, PaiementRepo>();
 builder.Services.AddScoped<IFactureService, FactureService>();
 builder.Services.AddScoped<IPDFService, PDFService>();
-builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IEmailSender, MailService>();
 builder.Services.AddControllers();
 
 // Add AutoMapper to the DI container
