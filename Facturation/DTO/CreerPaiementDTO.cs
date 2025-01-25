@@ -1,3 +1,4 @@
+using System;
 using Persistence.entities.Facturation;
 
 namespace Facturation.DTO

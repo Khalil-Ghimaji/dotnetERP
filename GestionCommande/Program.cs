@@ -12,6 +12,7 @@ builder.Services.AddScoped<ICommandeRepo,CommandeRepo>();
 builder.Services.AddScoped<IProduitRepo,ProduitRepo>();
 builder.Services.AddScoped<IArticleStockRepo,ArticleStockRepo>();
 builder.Services.AddScoped<IClientRepo,ClientRepo>();
+builder.Services.AddScoped<IArticleCommandeRepo,ArticleCommandeRepo>();
 builder.Services.AddScoped<ICommandeService, CommandeService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Add services to the container.

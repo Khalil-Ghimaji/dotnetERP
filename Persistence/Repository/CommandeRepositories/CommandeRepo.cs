@@ -19,14 +19,14 @@ public class CommandeRepo : GenericRepository<Commande>,ICommandeRepo
             .ToListAsync();
     }
 
-    public async Task<Commande?> getEagerById(int id)
-    {
-        return await _dbSet
-            .Include(c=>c.client)
-            .Include(c=>c.articles)
-            .Include(c=>c.Facture)
-            .FirstOrDefaultAsync(c => c.Id == id);
-    }
+    // public async Task<Commande?> getEagerById(int id)
+    // {
+    //     return await _dbSet
+    //         .Include(c=>c.client)
+    //         .Include(c=>c.articles)
+    //         .Include(c=>c.Facture)
+    //         .FirstOrDefaultAsync(c => c.Id == id);
+    // }
     public async Task<List<Commande>> getCommandesByClient(Client client)
     {
         return await _dbSet.Where(c => c.client == client)
