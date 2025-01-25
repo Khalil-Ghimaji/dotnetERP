@@ -22,7 +22,7 @@ public class MailService : IEmailSender
 
         var mailMessage = new MailMessage
         {
-            From = new MailAddress(_configuration["Smtp:From"], displayName: "Aziz"),
+            From = new MailAddress(_configuration["Smtp:From"], displayName: "Mini-ERP"),
             Subject = subject,
             Body = message,
             IsBodyHtml = true,
