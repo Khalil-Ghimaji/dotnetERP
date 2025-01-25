@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Data;
 using AutoMapper;
 using GestionStock.DTO;
 using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
@@ -42,13 +43,13 @@ namespace GestionStock.Services
             //check if the product already exists
             if (await _produitRepo.ProduitExists(dto.Nom))
             {
-                throw new HttpRequestException("Produit déjà existant.");
+                throw new DuplicateNameException("Produit déjà existant.");
             }
 
             //check if the category exists
             if (!await _categoryRepo.CategoryExists(dto.CategoryId))
             {
-                throw new HttpRequestException("Catégorie non trouvée.");
+                throw new KeyNotFoundException("Catégorie non trouvée.");
             }
 
             //créer le produit avec l'ArticleStock
@@ -77,23 +78,20 @@ namespace GestionStock.Services
                 return _mapper.Map<ArticleStockDTO>(articleStock);
             }
 
-            throw new HttpRequestException("Article non trouvé.");
+            throw new KeyNotFoundException("Article non trouvé.");
         }
 
         public async Task AjouterQuantite(AjouterQuantiteRequestDTO dto)
         {
-            Console.WriteLine("Entering AjouterQuantite method.");
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null)
             {
                 articleStock.Quantite += dto.Quantite;
                 await _stockRepo.Update(articleStock);
-                Console.WriteLine("Quantity updated successfully.");
             }
             else
             {
-                Console.WriteLine("Article not found.");
-                throw new HttpRequestException("Article non trouvé.");
+                throw new KeyNotFoundException("Article non trouvé.");
             }
         }
 
@@ -114,9 +112,14 @@ namespace GestionStock.Services
                 foreach (var item in commande.Articles)
                 {
                     var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
-                    if (articleStock == null || articleStock.Quantite < item.Quantite)
+                    if (articleStock == null)
                     {
-                        throw new HttpRequestException("Quantité insuffisante ou article non trouvé.");
+                        throw new KeyNotFoundException("Article non trouvé.");
+                    }
+
+                    if (articleStock.Quantite < item.Quantite)
+                    {
+                        throw new InvalidOperationException("Quantité insuffisante.");
                     }
 
                     articleStock.Quantite -= item.Quantite;
@@ -152,7 +155,7 @@ namespace GestionStock.Services
             }
             else
             {
-                throw new HttpRequestException("Article non trouvé.");
+                throw new KeyNotFoundException("Article non trouvé.");
             }
         }
 
@@ -186,7 +189,6 @@ namespace GestionStock.Services
                         }
                         catch (TaskCanceledException)
                         {
-                            Console.WriteLine($"Task canceled for reservationId: {reservationId}");
                         }
                         finally
                         {
@@ -196,14 +198,19 @@ namespace GestionStock.Services
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid TimeSpan format.");
+                    throw new InvalidOperationException("Timespan invalide.");
                 }
 
                 return reservationId;
             }
             else
             {
-                throw new ArgumentException("Quantité insuffisante ou article non trouvé.");
+                if (articleStock == null)
+                {
+                    throw new KeyNotFoundException("Article non trouvé.");
+                }
+
+                throw new InvalidOperationException("Quantité insuffisante");
             }
         }
 
@@ -231,7 +238,7 @@ namespace GestionStock.Services
             }
             else
             {
-                throw new KeyNotFoundException("Reservation not found.");
+                throw new KeyNotFoundException("Reservation non trouvée.");
             }
         }
 
@@ -248,7 +255,7 @@ namespace GestionStock.Services
             }
             else
             {
-                throw new KeyNotFoundException("Reservation not found.");
+                throw new KeyNotFoundException("Reservation non trouvée.");
             }
         }
 
