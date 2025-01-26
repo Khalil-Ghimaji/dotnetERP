@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AppGateway.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class GestionCommandes : ControllerBase
     {
@@ -57,8 +57,8 @@ namespace AppGateway.Controllers
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
 
-        [HttpPost("Commandes/ajouterProduit/{idCommande}")]
-        public async Task<ActionResult<CommandeResponseDTO>> AjouterProduit(int idCommande,
+        [HttpPost("Commandes/{idCommande}/AjouterArticle")]
+        public async Task<ActionResult<CommandeResponseDTO>> AjouterArticle(int idCommande,
             ArticleCommandeRequestDTO articleCommandeRequestDto)
         {
             var json = JsonSerializer.Serialize(articleCommandeRequestDto);

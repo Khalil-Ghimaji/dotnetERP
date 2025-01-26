@@ -5,6 +5,7 @@ using GestionStock.DTO;
 using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
 using Persistence;
 using Persistence.entities.Stock;
+using Persistence.Repository.CommandeRepositories;
 using Persistence.Repository.StockRepositories.Contracts;
 
 namespace GestionStock.Services
@@ -15,6 +16,7 @@ namespace GestionStock.Services
         private readonly IMapper _mapper;
         private readonly IProduitRepo _produitRepo;
         private readonly ICategoryRepo _categoryRepo;
+        private readonly ICommandeRepo _commandeRepo;
         private readonly AppDbContext _context;
         private readonly IServiceScopeFactory _scopeFactory;
 
@@ -26,9 +28,11 @@ namespace GestionStock.Services
         public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo,
             IServiceScopeFactory scopeFactory,
             ICategoryRepo categoryRepo,
+            ICommandeRepo commandeRepo,
             AppDbContext context)
         {
             _stockRepo = stockRepo;
+            _commandeRepo = commandeRepo;
             _mapper = mapper;
             _scopeFactory = scopeFactory;
             _produitRepo = produitRepo;
@@ -199,6 +203,35 @@ namespace GestionStock.Services
                 }
 
                 throw new InvalidOperationException("Quantité insuffisante");
+            }
+        }
+
+        public async Task ReserverCommande(ReserverCommandeRequestDTO reserverCommande)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var commande = await _commandeRepo.GetById(reserverCommande.idCommande);
+                if (commande == null)
+                {
+                    throw new KeyNotFoundException("Commande non trouvée.");
+                }
+
+                foreach (var article in commande.articles)
+                {
+                    await ReserverProduit(new ReserverProduitRequestDTO()
+                    {
+                        ReservationDuration = reserverCommande.ReservationDuration,
+                        ProduitId = article.produit.Id,
+                        Quantite = article.quantite
+                    });
+                }
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
