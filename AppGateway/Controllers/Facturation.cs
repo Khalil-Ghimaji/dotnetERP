@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Persistence.DTO.Facturation;
+using Persistence.entities.Commande;
 
 namespace AppGateway.Controllers
 {
@@ -10,7 +11,8 @@ namespace AppGateway.Controllers
     public class FacturationController : ControllerBase
     {
         private readonly HttpClient _httpClient;
-        private readonly string _facturationUrl = "http://localhost:7044/api/Facturation/"; 
+        private readonly string _facturationUrl = "http://localhost:5105/api/Facturation/"; 
+        private readonly string _gestionCommandesUrl = "http://localhost:5012/api/Commandes/"; // URL mise à jour
 
         public FacturationController(IHttpClientFactory httpClientFactory)
         {
@@ -149,5 +151,37 @@ namespace AppGateway.Controllers
                 return StatusCode((int)response.StatusCode, errorContent);
             }
         }
+        
+        
+        
+        //lezm netfaker nhotha fi blasetha baad ki nthabet mel endpoint
+        private async Task VerifierEtMettreAJourStatutCommande(int factureId, int commandeId)
+        {
+            try
+            {
+                var checkPaymentResponse = await _httpClient.GetAsync($"{_facturationUrl}{factureId}/est_payée");
+                var checkPaymentContent = await checkPaymentResponse.Content.ReadAsStringAsync();
+                bool isPaid = bool.Parse(checkPaymentContent); 
+
+                if (isPaid)
+                {
+                    var orderStatusUpdate = new { Status = StatusCommande.PAYEE };  
+                    var orderUpdateJson = JsonSerializer.Serialize(orderStatusUpdate);
+                    var orderContent = new StringContent(orderUpdateJson, Encoding.UTF8, "application/json");
+
+                    var orderResponse = await _httpClient.PutAsync($"{_gestionCommandesUrl}{commandeId}/update-status", orderContent);
+
+                    if (!orderResponse.IsSuccessStatusCode)
+                    {
+                        throw new Exception("Échec de la mise à jour du statut de la commande.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erreur dans la vérification et la mise à jour du statut de la commande : {ex.Message}");
+            }
+        }
+
+        }
     }
-}

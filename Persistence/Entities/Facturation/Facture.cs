@@ -13,6 +13,7 @@ namespace Persistence.entities.Facturation
         public virtual Commande Commande { get; set; } 
         public DateTime DateGeneration { get; set; }
         public float MontantTotal { get; set; }
+
         public StatusFacture StatusFacture { get; set; }
         public float MontantPayé { get; set; }
 

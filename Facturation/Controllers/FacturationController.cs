@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Persistence.DTO.Facturation;
 using Facturation.Services;
+using Persistence.entities.Facturation;
 
 namespace Facturation.Controllers
 {
@@ -33,11 +34,27 @@ namespace Facturation.Controllers
         [HttpPost]
         public async Task<ActionResult<FactureResponseDTO>> CreerFacture([FromBody] CreerFactureDTO creerFactureDTO)
         {
-            if (creerFactureDTO == null) return BadRequest("Données de facture invalides.");
+            if (creerFactureDTO == null)
+            {
+                return BadRequest("Données de facture invalides.");
+            }
 
-            var facture = await _factureService.CreerFacture(creerFactureDTO);
-            return CreatedAtAction(nameof(ConsulterFacture), new { id = facture.FactureId }, facture);
+            try
+            {
+                var facture = await _factureService.CreerFacture(creerFactureDTO);
+                return CreatedAtAction(nameof(ConsulterFacture), new { id = facture.FactureId }, facture);
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+            {
+                if (ex.InnerException is Microsoft.Data.Sqlite.SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
+                {
+                    return Conflict("La commande existe déjà avec ce même ID.");
+                }
+
+                return StatusCode(500, "Une erreur est survenue lors de la création de la facture.");
+            }
         }
+
 
         [HttpDelete("{factureId}")]
         public async Task<ActionResult> SupprimerFacture(int factureId)
@@ -119,5 +136,27 @@ namespace Facturation.Controllers
                 return StatusCode(500, $"Erreur lors de l'envoi de l'e-mail : {ex.Message}");
             }
         }
+        
+        [HttpGet("{factureId}/est_payée")]
+        public async Task<ActionResult<bool>> VerifierStatutFacture(int factureId)
+        {
+            try
+            {
+                var facture = await _factureService.ConsulterFacture(factureId);
+                if (facture == null)
+                {
+                    return NotFound("Facture non trouvée.");
+                }
+
+                bool isPayee = facture.StatusFacture == StatusFacture.Payée;
+
+                return Ok(isPayee); 
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la vérification du statut de la facture : {ex.Message}");
+            }
+        }
+
     }
 }

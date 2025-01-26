@@ -41,7 +41,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-app.UseMiddleware<APIKeyMiddleware>();
+//app.UseMiddleware<APIKeyMiddleware>();
 app.MapControllers();
 
 app.Run();

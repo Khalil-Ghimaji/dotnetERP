@@ -53,7 +53,6 @@ namespace Facturation.Services
 
             var facture = _mapper.Map<Facture>(creerFactureDTO);
             facture.Commande = commande;
-            facture.MontantPayé = 0;
 
             var result = await _factureRepo.Add(facture);
             return _mapper.Map<FactureResponseDTO>(result);
@@ -95,12 +94,35 @@ namespace Facturation.Services
             var facture = await _factureRepo.GetById(factureId);
             if (facture == null) throw new Exception("Facture non trouvée.");
 
+            var echeancesExistantes = await _echeanceRepo.GetEcheancesByFactureId(factureId);
+
+            var totalPayé = echeancesExistantes.Sum(e => e.Montant);
+
+            var montantRestant = facture.MontantTotal - facture.MontantPayé;
+            if (creerEcheanceDto.Montant + totalPayé > montantRestant)
+            {
+                throw new Exception("Le montant total des échéances dépasse le montant restant à payer pour cette facture.");
+            }
+
             var echeance = _mapper.Map<Echeance>(creerEcheanceDto);
             echeance.FactureId = factureId;
+
+            if (echeance.StatutEcheance == StatutEcheance.Payée)
+            {
+                facture.MontantPayé += echeance.Montant;
+                await _factureRepo.Update(facture);
+            }
+
+            if (facture.MontantPayé == facture.MontantTotal)
+            {
+                facture.StatusFacture = StatusFacture.Payée;
+                await _factureRepo.Update(facture);
+            }
 
             var result = await _echeanceRepo.Add(echeance);
             return _mapper.Map<EcheanceResponseDTO>(result);
         }
+
 
         public async Task<IEnumerable<EcheanceResponseDTO>> ConsulterEcheances(int factureId)
         {
@@ -138,37 +160,51 @@ namespace Facturation.Services
         }
 
         public async Task<EcheanceResponseDTO> UpdateEcheance(int echeanceId, UpdateEcheanceDTO updateEcheanceDto)
-        {
-            var echeance = await _echeanceRepo.GetById(echeanceId);
-            if (echeance == null) throw new Exception("Echeance non trouvé.");
+{
+    var echeance = await _echeanceRepo.GetById(echeanceId);
+    if (echeance == null) throw new Exception("Echeance non trouvé.");
 
-            var facture = await _factureRepo.GetById(echeance.FactureId);
-            if (facture == null) throw new Exception("Facture non trouvée.");
+    var facture = await _factureRepo.GetById(echeance.FactureId);
+    if (facture == null) throw new Exception("Facture non trouvée.");
 
-            var ancienMontant = echeance.Montant;
-            var ancienStatut = echeance.StatutEcheance;
+    var ancienMontant = echeance.Montant;
 
-            _mapper.Map(updateEcheanceDto, echeance);
+    var echeancesExistantes = await _echeanceRepo.GetEcheancesByFactureId(echeance.FactureId);
 
-            if (echeance.StatutEcheance == StatutEcheance.Payée && ancienStatut != StatutEcheance.Payée)
-            {
-                facture.MontantPayé += echeance.Montant;
-                await _factureRepo.Update(facture);
-            }
-            else if (ancienStatut == StatutEcheance.Payée && echeance.StatutEcheance != StatutEcheance.Payée)
-            {
-                facture.MontantPayé -= ancienMontant;
-                await _factureRepo.Update(facture);
-            }
-            else if (echeance.StatutEcheance == StatutEcheance.Payée && echeance.Montant != ancienMontant)
-            {
-                facture.MontantPayé += (echeance.Montant - ancienMontant);
-                await _factureRepo.Update(facture);
-            }
+    var totalPayé = echeancesExistantes.Sum(e => e.Montant);
 
-            var result = await _echeanceRepo.Update(echeance);
-            return _mapper.Map<EcheanceResponseDTO>(result);
-        }
+    var montantRestant = facture.MontantTotal - facture.MontantPayé;
+
+    var montantTotalApresModification = totalPayé - ancienMontant + updateEcheanceDto.Montant;
+
+    if (montantTotalApresModification > montantRestant)
+    {
+        throw new Exception("Le montant total des échéances dépasse le montant restant à payer pour cette facture.");
+    }
+
+    _mapper.Map(updateEcheanceDto, echeance);
+
+    if (echeance.StatutEcheance == StatutEcheance.Payée)
+    {
+        facture.MontantPayé += echeance.Montant - ancienMontant;
+        await _factureRepo.Update(facture);
+    }
+    else if (ancienMontant > echeance.Montant && echeance.StatutEcheance == StatutEcheance.Impayée)
+    {
+        facture.MontantPayé -= (ancienMontant - echeance.Montant);
+        await _factureRepo.Update(facture);
+    }
+
+    if (facture.MontantPayé == facture.MontantTotal)
+    {
+        facture.StatusFacture = StatusFacture.Payée;
+        await _factureRepo.Update(facture);
+    }
+
+    var result = await _echeanceRepo.Update(echeance);
+    return _mapper.Map<EcheanceResponseDTO>(result);
+}
+
 
         public async Task<byte[]> GenererFacturePdf(int factureId)
         {

@@ -8,12 +8,38 @@ namespace Facturation.Mapping
     {
         public FacturationMappingProfile()
         {
-            CreateMap<CreerFactureDTO, Facture>();
-            CreateMap<UpdateFactureDTO, Facture>().ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-            CreateMap<CreerEcheanceDTO, Echeance>();
-            CreateMap<UpdateEcheanceDTO, Echeance>().ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-            CreateMap<Facture, FactureResponseDTO>();
-            CreateMap<Echeance, EcheanceResponseDTO>();
+            CreateMap<CreerFactureDTO, Facture>()
+                .ForMember(dest => dest.MontantTotal, opt => opt.MapFrom(src => src.MontantTotal))
+                .ForMember(dest => dest.StatusFacture, opt => opt.MapFrom(src => src.StatusFacture))
+                .ForMember(dest => dest.MontantPayé, opt => opt.MapFrom(src => src.MontantPayé));
+
+            CreateMap<UpdateFactureDTO, Facture>()
+                .ForMember(dest => dest.MontantTotal, opt => opt.Condition(src => src.MontantTotal.HasValue))
+                .ForMember(dest => dest.StatusFacture, opt => opt.Condition(src => src.StatusFacture.HasValue))
+                .ForMember(dest => dest.MontantPayé, opt => opt.Condition(src => src.MontantPayé.HasValue));
+
+            CreateMap<CreerEcheanceDTO, Echeance>()
+                .ForMember(dest => dest.Montant, opt => opt.MapFrom(src => src.Montant))
+                .ForMember(dest => dest.StatutEcheance, opt => opt.MapFrom(src => src.StatutEcheance))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
+                .ForMember(dest => dest.MethodePaiement, opt => opt.MapFrom(src => src.MethodePaiement));
+
+            CreateMap<UpdateEcheanceDTO, Echeance>()
+                .ForMember(dest => dest.Montant, opt => opt.Condition(src => src.Montant.HasValue))
+                .ForMember(dest => dest.StatutEcheance, opt => opt.Condition(src => src.StatutEcheance.HasValue))
+                .ForMember(dest => dest.Date, opt => opt.Condition(src => src.Date.HasValue))
+                .ForMember(dest => dest.MethodePaiement, opt => opt.Condition(src => src.MethodePaiement.HasValue));
+
+            CreateMap<Facture, FactureResponseDTO>()
+                .ForMember(dest => dest.MontantTotal, opt => opt.MapFrom(src => src.MontantTotal))
+                .ForMember(dest => dest.StatusFacture, opt => opt.MapFrom(src => src.StatusFacture))
+                .ForMember(dest => dest.MontantPayé, opt => opt.MapFrom(src => src.MontantPayé));
+
+            CreateMap<Echeance, EcheanceResponseDTO>()
+                .ForMember(dest => dest.Montant, opt => opt.MapFrom(src => src.Montant))
+                .ForMember(dest => dest.StatutEcheance, opt => opt.MapFrom(src => src.StatutEcheance))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
+                .ForMember(dest => dest.MethodePaiement, opt => opt.MapFrom(src => src.MethodePaiement));
         }
     }
 }
