@@ -12,8 +12,15 @@ namespace GestionClients.Services
         {
             _ClientRepo = clientRepo;
         }
-        public async Task  ajouterClient(ClientIn dto)
+        public async Task ajouterClient(ClientIn dto)
         {
+            var existingClients = await _ClientRepo.GetAll();
+            foreach (var existingClient in existingClients) {
+                if (existingClient.nom == dto.nom && existingClient.address == dto.address && existingClient.telephone == dto.telephone)
+                {
+                    throw new InvalidOperationException("Un client avec les mêmes informations (nom, adresse, téléphone) existe déjà.");
+                }
+            }
             var client = new Client
             {
                 nom = dto.nom,
@@ -24,10 +31,11 @@ namespace GestionClients.Services
                 note = 0,
                 estRestreint = false
             };
+
             await _ClientRepo.Add(client);
-            
         }
-        
+
+
         public async Task<ClientOut?> consulterClient(int id)
         {
             var client = await _ClientRepo.GetById(id);
@@ -82,17 +90,25 @@ namespace GestionClients.Services
             
             
         }
-        public async Task modifierClient(ClientIn client, int id)
+        public async Task modifierClient(int id,string nom,string adresse, int telephone)
         {
             var existingClient = await _ClientRepo.GetById(id);
             if (existingClient == null)
             {
                 throw new KeyNotFoundException($"Client avec l'ID {id} introuvable.");
             }
-
-            existingClient.nom = client.nom;
-            existingClient.address = client.address;
-            existingClient.telephone = client.telephone;
+            if(nom != null && nom != "")
+            {
+                existingClient.nom = nom;
+            }
+            if(adresse != null && adresse != "")
+            {
+                existingClient.address = adresse;
+            }
+            if (telephone != 0)
+            {
+                existingClient.telephone = telephone;
+            }
             await _ClientRepo.Update(existingClient);
         }
 

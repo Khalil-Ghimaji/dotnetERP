@@ -1,6 +1,7 @@
 ﻿using GestionClients.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Persistence.DTO.GestionClients;
 using Persistence.entities.Client;
 
@@ -17,11 +18,31 @@ namespace GestionClients.Controllers
             _clientService = stockService;
         }
         [HttpPost("ajouterClient")]
-        public IActionResult AjouterClient(ClientIn client )
+        public async Task<IActionResult> AjouterClient(ClientIn client)
         {
-            _clientService.ajouterClient(client);
-            return CreatedAtAction("ConsulterClient", new {id = client.Id});
+            try
+            {
+                await _clientService.ajouterClient(client);
+                var clientOut = await _clientService.listerClients();
+                foreach (var c in clientOut)
+                {
+                    if (c.nom == client.nom && c.telephone == client.telephone && c.address == client.address)
+                    {
+                        return CreatedAtAction("ConsulterClient", new { id = c.Id });
+                    }
+                }
+                return BadRequest(new { message = "Aucun client correspondant trouvé après l'ajout." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Une erreur est survenue.", details = ex.Message });
+            }
         }
+
 
         [HttpGet("consulterClient")]
         public IActionResult ConsulterClient(int id)
@@ -49,11 +70,11 @@ namespace GestionClients.Controllers
         }
 
         [HttpPut("modifierClient")]
-        public async Task<IActionResult> ModifierClient([FromBody] ClientIn client, int id)
+        public async Task<IActionResult> ModifierClient( int id, ClientIn client)
         {
             try
             {
-                await _clientService.modifierClient(client,id);
+                await _clientService.modifierClient(id, client.nom, client.address, client.telephone);
                 return Ok(new { message = "Client modifié avec succès." });
             }
             catch (KeyNotFoundException ex)
@@ -67,7 +88,7 @@ namespace GestionClients.Controllers
             }
         }
         [HttpGet("FiltrerClients")]
-        public async Task<IActionResult> FiltrerClients([FromQuery] string? nom = null, [FromQuery] bool? estRestreint = null, [FromQuery] float? note = null)
+        public async Task<IActionResult> FiltrerClients([FromQuery] string? nom = null, [FromQuery] bool? estRestreint = null, [FromQuery] float? note = null, [FromQuery] string? adresse = null)
         {
             try
             {
@@ -85,6 +106,10 @@ namespace GestionClients.Controllers
                     if (note.HasValue)
                     {
                         match &= client.note >= note.Value;
+                    }
+                    if(!string.IsNullOrEmpty(adresse))
+                    {
+                        match &= client.address != null && client.address.Contains(adresse, StringComparison.OrdinalIgnoreCase);
                     }
 
                     return match;

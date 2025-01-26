@@ -9,7 +9,7 @@ namespace GestionClients.Services
         public Task<ClientOut?>  consulterClient(int id);
         public Task evaluerClient(int id ,float note);
         public Task<IEnumerable<ClientOut>> listerClients();
-        public Task modifierClient(ClientIn client, int id);
+        public Task modifierClient( int id,string nom , string adresse , int telephone);
         public Task<List<ClientOut>> filtrerClients(Func<Client, bool> condition);
         public Task restaurerClient(int id);
         public Task restreindreClient(int id);
