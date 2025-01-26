@@ -98,6 +98,7 @@ public class CommandeService : ICommandeService
                 }
                 return await _commandeRepo.Update(commande);
             }
+            throw new HttpRequestException("Produit inexistant");
         }
         throw new BadHttpRequestException("Commande n'est pas en préparation");
     }
@@ -128,6 +129,7 @@ public class CommandeService : ICommandeService
                 }
                 return await _commandeRepo.Update(commande);
             }
+            throw new HttpRequestException("Article inexistant");
         }
         throw new BadHttpRequestException("Commande n'est pas en préparation");
     }
