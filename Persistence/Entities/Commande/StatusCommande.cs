@@ -8,6 +8,7 @@ public enum StatusCommande
     EXPEDIEE,
     LIVREE,
     FACTUREE,
+    RESERVEE,
     PAYEE,
     REMBOURSEE,
     RETOURNEE,

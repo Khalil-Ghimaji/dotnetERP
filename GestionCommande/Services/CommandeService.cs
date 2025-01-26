@@ -175,13 +175,14 @@ public class CommandeService : ICommandeService
             throw new HttpRequestException($"Commande n{id} n'existe pas");
         }
 
-        if ((commande.status == StatusCommande.VALIDEE || commande.status == StatusCommande.PREPARATION))
+        if (commande.status == StatusCommande.VALIDEE || commande.status == StatusCommande.PREPARATION ||
+                commande.status == StatusCommande.RESERVEE || commande.status == StatusCommande.FACTUREE)
         {
             commande.status = StatusCommande.ANNULEE;
             return await _commandeRepo.Update(commande);
         }
 
-        throw new BadHttpRequestException("Commande n'est pas en préparation ou validée");
+        throw new BadHttpRequestException("Commande ne peut plus etre annulée");
     }
 
     public async Task<Commande> facturerCommande(int id)
@@ -200,6 +201,23 @@ public class CommandeService : ICommandeService
 
         throw new BadHttpRequestException($"Commande n{id} n'est pas validée");
     }
+    
+    public async Task<Commande> reserverCommande(int id)
+    {
+        var commande = await getCommandeById(id);
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
+
+        if (commande.status == StatusCommande.FACTUREE)
+        {
+            commande.status = StatusCommande.RESERVEE;
+            return await _commandeRepo.Update(commande);
+        }
+
+        throw new BadHttpRequestException("Commande n'est pas facturée");
+    }
 
     public async Task<Commande> expedierCommande(int id)
     {
@@ -209,7 +227,7 @@ public class CommandeService : ICommandeService
             throw new HttpRequestException($"Commande n{id} n'existe pas");
         }
 
-        if (commande.status == StatusCommande.FACTUREE)
+        if (commande.status == StatusCommande.FACTUREE || commande.status == StatusCommande.RESERVEE)
         {
             commande.status = StatusCommande.EXPEDIEE;
             return await _commandeRepo.Update(commande);
@@ -225,13 +243,13 @@ public class CommandeService : ICommandeService
         {
             throw new HttpRequestException($"Commande n{id} n'existe pas");
         }
-
+    
         if (commande.status == StatusCommande.EXPEDIEE)
         {
             commande.status = StatusCommande.LIVREE;
             return await _commandeRepo.Update(commande);
         }
-
+    
         throw new BadHttpRequestException($"Commande n{id} n'est pas expédiée");
     }
 
