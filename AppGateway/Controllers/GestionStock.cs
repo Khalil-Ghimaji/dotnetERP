@@ -103,28 +103,25 @@ namespace AppGateway.Controllers
         }
 
         [HttpPost("reserverCommande")]
-        public async Task<IActionResult> ReserverCommande(ReserverProduitRequestDTO dto)
+        public async Task<IActionResult> ReserverCommande(ReserverCommandeRequestDTO dto)
         {
-            var response = await _gestionStockClient.PostAsync($"{_gestionStockUrl}reserverProduit",
+            var response = await _gestionStockClient.PostAsync($"{_gestionStockUrl}reserverCommande",
                 new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json"));
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
 
-        [HttpDelete("annulerCommande")]
-        public async Task<IActionResult> AnnulerCommande(Guid reservationId)
+        [HttpDelete("annulerCommande/{commandeId}")]
+        public async Task<IActionResult> AnnulerCommande(int commandeId)
         {
-            var response =
-                await _gestionStockClient.DeleteAsync(
-                    $"{_gestionStockUrl}annulerCommande?reservationId={reservationId}");
+            var response = await _gestionStockClient.DeleteAsync($"{_gestionStockUrl}annulerCommande/{commandeId}");
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
 
-        [HttpPost("confirmerCommande")]
-        public async Task<IActionResult> ConfirmerCommande(Guid reservationId)
+        [HttpPost("confirmerCommande/{commandeId}")]
+        public async Task<IActionResult> ConfirmerCommande(int commandeId)
         {
-            var requestDto = new ConfirmerCommandeRequestDTO { ReservationId = reservationId };
-            var response = await _gestionStockClient.PostAsync($"{_gestionStockUrl}confirmerCommande",
-                new StringContent(JsonSerializer.Serialize(requestDto), Encoding.UTF8, "application/json"));
+            var response =
+                await _gestionStockClient.PostAsync($"{_gestionStockUrl}confirmerCommande/{commandeId}", null);
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
 

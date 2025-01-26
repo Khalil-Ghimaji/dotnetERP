@@ -21,9 +21,10 @@ namespace GestionStock.Services
         private readonly IServiceScopeFactory _scopeFactory;
 
         private static readonly
-            ConcurrentDictionary<(Guid reservationId, int produitId), (CancellationTokenSource cts, int quantite)>
+            ConcurrentDictionary<(int commandeId, int produitId), (CancellationTokenSource cts, int
+                quantite)>
             _reservationTasks =
-                new ConcurrentDictionary<(Guid, int), (CancellationTokenSource, int)>();
+                new ConcurrentDictionary<(int, int), (CancellationTokenSource, int)>();
 
         public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo,
             IServiceScopeFactory scopeFactory,
@@ -152,17 +153,15 @@ namespace GestionStock.Services
         }
 
 
-        public async Task<Guid> ReserverProduit(ReserverProduitRequestDTO dto)
+        public async Task ReserverProduit(ReserverProduitRequestDTO dto)
         {
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null && articleStock.Quantite >= dto.Quantite)
             {
                 articleStock.Quantite -= dto.Quantite;
                 await _stockRepo.Update(articleStock);
-
-                var reservationId = Guid.NewGuid();
                 var cts = new CancellationTokenSource();
-                _reservationTasks[(reservationId, dto.ProduitId)] = (cts, dto.Quantite);
+                _reservationTasks[(dto.CommandeId, dto.ProduitId)] = (cts, dto.Quantite);
 
                 if (TimeSpan.TryParse(dto.ReservationDuration, out var reservationDuration))
                 {
@@ -184,7 +183,7 @@ namespace GestionStock.Services
                         }
                         finally
                         {
-                            _reservationTasks.TryRemove((reservationId, dto.ProduitId), out _);
+                            _reservationTasks.TryRemove((dto.CommandeId, dto.ProduitId), out _);
                         }
                     });
                 }
@@ -192,8 +191,6 @@ namespace GestionStock.Services
                 {
                     throw new InvalidOperationException("Timespan invalide.");
                 }
-
-                return reservationId;
             }
             else
             {
@@ -223,9 +220,11 @@ namespace GestionStock.Services
                     {
                         ReservationDuration = reserverCommande.ReservationDuration,
                         ProduitId = article.produit.Id,
-                        Quantite = article.quantite
+                        Quantite = article.quantite,
+                        CommandeId = reserverCommande.idCommande
                     });
                 }
+
                 await transaction.CommitAsync();
             }
             catch (Exception e)
@@ -235,48 +234,80 @@ namespace GestionStock.Services
             }
         }
 
-        public async Task AnnulerCommande(Guid id)
+        public async Task AnnulerCommande(int CommandeId)
         {
-            var reservation = _reservationTasks.FirstOrDefault(r => r.Key.reservationId == id);
-            if (reservation.Key != default)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                var (reservationId, produitId) = reservation.Key;
-                var (cts, quantite) = reservation.Value;
-
-                cts.Cancel();
-                _reservationTasks.TryRemove((reservationId, produitId), out _);
-
-                using (var scope = _scopeFactory.CreateScope())
+                var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
+                foreach (var reservation in reservations)
                 {
-                    var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
-                    var articleStock = await scopedStockRepo.GetArticleStockByProduitId(produitId);
-                    if (articleStock != null)
+                    if (reservation.Key != default)
                     {
-                        articleStock.Quantite += quantite;
-                        await scopedStockRepo.Update(articleStock);
+                        var (commandeId, produitId) = reservation.Key;
+                        var (cts, quantite) = reservation.Value;
+
+                        cts.Cancel();
+                        _reservationTasks.TryRemove((commandeId, produitId), out _);
+
+                        using (var scope = _scopeFactory.CreateScope())
+                        {
+                            var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
+                            var articleStock = await scopedStockRepo.GetArticleStockByProduitId(produitId);
+                            if (articleStock != null)
+                            {
+                                articleStock.Quantite += quantite;
+                                await scopedStockRepo.Update(articleStock);
+                            }
+                            else
+                            {
+                                throw new KeyNotFoundException("Article non trouvé.");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        throw new KeyNotFoundException("Reservation non trouvée.");
                     }
                 }
+
+                await transaction.CommitAsync();
             }
-            else
+            catch (Exception e)
             {
-                throw new KeyNotFoundException("Reservation non trouvée.");
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
-        public void ConfirmerCommande(Guid id)
+        public async Task ConfirmerCommande(int CommandeId)
         {
-            var reservation = _reservationTasks.FirstOrDefault(r => r.Key.reservationId == id);
-            if (reservation.Key != default)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                var (reservationId, produitId) = reservation.Key;
-                var (cts, _) = reservation.Value;
+                var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
+                foreach (var reservation in reservations)
+                {
+                    if (reservation.Key != default)
+                    {
+                        var (commandeId, produitId) = reservation.Key;
+                        var (cts, _) = reservation.Value;
 
-                cts.Cancel();
-                _reservationTasks.TryRemove((reservationId, produitId), out _);
+                        cts.Cancel();
+                        _reservationTasks.TryRemove((commandeId, produitId), out _);
+                    }
+                    else
+                    {
+                        throw new KeyNotFoundException("Reservation non trouvée.");
+                    }
+                }
+
+                await transaction.CommitAsync();
             }
-            else
+            catch (Exception e)
             {
-                throw new KeyNotFoundException("Reservation non trouvée.");
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 

@@ -115,13 +115,13 @@ namespace GestionStock.Controllers
             }
         }
 
-        [HttpPost("reserverProduit")]
-        public async Task<ActionResult<ReserverProduitResponseDTO>> ReserverProduit(ReserverProduitRequestDTO dto)
+        [HttpPost("reserverCommande")]
+        public async Task<ActionResult> ReserverCommande(ReserverCommandeRequestDTO dto)
         {
             try
             {
-                var reservationId = await _stockService.ReserverProduit(dto);
-                return Ok(new { ReservationId = reservationId });
+                await _stockService.ReserverCommande(dto);
+                return Ok();
             }
             catch (KeyNotFoundException e)
             {
@@ -133,12 +133,12 @@ namespace GestionStock.Controllers
             }
         }
 
-        [HttpDelete("annulerCommande")]
-        public async Task<IActionResult> AnnulerCommande(Guid reservationId)
+        [HttpDelete("annulerCommande/{commandeId}")]
+        public async Task<IActionResult> AnnulerCommande(int commandeId)
         {
             try
             {
-                await _stockService.AnnulerCommande(reservationId);
+                await _stockService.AnnulerCommande(commandeId);
                 return NoContent();
             }
             catch (KeyNotFoundException e)
@@ -151,12 +151,12 @@ namespace GestionStock.Controllers
             }
         }
 
-        [HttpPost("confirmerCommande")]
-        public IActionResult ConfirmerCommande(ConfirmerCommandeRequestDTO dto)
+        [HttpPost("confirmerCommande/{commandeId}")]
+        public IActionResult ConfirmerCommande(int commandeId)
         {
             try
             {
-                _stockService.ConfirmerCommande(dto.ReservationId);
+                _stockService.ConfirmerCommande(commandeId);
                 return NoContent();
             }
             catch (KeyNotFoundException e)
