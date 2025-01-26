@@ -14,10 +14,10 @@ namespace AppGateway.Controllers
     public class OrderingController : ControllerBase
     {
         private readonly HttpClient _httpClient;
-        private readonly string _gestionCommandesUrl = "https://localhost:5012/api/Commandes/";
-        private readonly string _gestionStockUrl = "https://localhost:5071/api/Stock/";
-        private readonly string _gestionClientUrl = "https://localhost:5154/api/Client/";
-        private readonly string _gestionFacturationUrl = "https://localhost:5105/api/Facturation/";
+        private readonly string _gestionCommandesUrl = "http://localhost:5012/api/Commandes/";
+        private readonly string _gestionStockUrl = "http://localhost:5071/api/Stock/";
+        private readonly string _gestionClientUrl = "http://localhost:5154/api/Client/";
+        private readonly string _gestionFacturationUrl = "http://localhost:5105/api/Facturation/";
         
         public OrderingController(IHttpClientFactory httpClientFactory)
         {
@@ -26,16 +26,18 @@ namespace AppGateway.Controllers
         
         // GET: api/<OrderingController>
         [HttpGet("Commandes")]
-        public async Task<ActionResult<IEnumerable<CommandeResponseDTO>>> ListerCommandes()
+        public async Task<IResult> ListerCommandes()
         {
             var response = await _httpClient.GetAsync(_gestionCommandesUrl);
             var content = await response.Content.ReadAsStringAsync();
-            return StatusCode((int)response.StatusCode, content);
+            var contentType = response.Content.Headers.ContentType?.ToString()??"application/json";
+            return Results.Content(content, contentType,Encoding.UTF8, (int)response.StatusCode);
+            // return StatusCode((int)response.StatusCode, content);
         }
 
         // GET api/<OrderingController>/5
         [HttpGet("Commandes/{id}")]
-        public async Task<ActionResult<CommandeResponseDTO>> Get(int id)
+        public async Task<ActionResult<CommandeResponseDTO>> GetCommande(int id)
         {
             var response = await _httpClient.GetAsync(_gestionCommandesUrl+id);
             var content = await response.Content.ReadAsStringAsync();
@@ -43,7 +45,7 @@ namespace AppGateway.Controllers
         }
         
         // [HttpPost("Clients/creerClient")]
-        // public async Task<ActionResult<ClientResponseDTO>> CreerClient(ClientRequestDTO clientDto)
+        // public async Task<ActionResult<ClientResponseDTO>> CreerClientIfNotExists(ClientRequestDTO clientDto)
         // {
         //     var json = JsonSerializer.Serialize(clientDto);
         //     var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -58,7 +60,7 @@ namespace AppGateway.Controllers
             var json = JsonSerializer.Serialize(commandeDto);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(_gestionCommandesUrl, content);
-            return StatusCode((int)response.StatusCode, content);
+            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
 
         [HttpPost("Commandes/ajouterProduit/{idCommande}")]
@@ -68,7 +70,7 @@ namespace AppGateway.Controllers
             var json = JsonSerializer.Serialize(articleCommandeRequestDto);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(_gestionCommandesUrl + "ajouterArticle/" + idCommande , content);
-            return StatusCode((int)response.StatusCode, content);
+            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
         
         [HttpPost("Commandes/{idCommande}/RetirerArticle")]
@@ -78,7 +80,7 @@ namespace AppGateway.Controllers
             var json = JsonSerializer.Serialize(articleCommandeRequestDto);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(_gestionCommandesUrl + "retirerArticle/" + idCommande, content);
-            return StatusCode((int)response.StatusCode, content);
+            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
         
         [HttpPost("Commandes/{idCommande}/ValiderCommande")]

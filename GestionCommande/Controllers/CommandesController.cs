@@ -139,7 +139,7 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(idCommande))
             {
-                return NotFound();
+                return NotFound($"Commande n{idCommande} n'existe pas");
             }
 
             try{
@@ -162,7 +162,7 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
 
             try{
@@ -185,7 +185,7 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
 
             try{
@@ -207,7 +207,7 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
 
             try{
@@ -229,7 +229,7 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
 
             try{
@@ -251,7 +251,7 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
 
             try{
