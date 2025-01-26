@@ -102,8 +102,8 @@ namespace AppGateway.Controllers
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
 
-        [HttpPost("reserverProduit")]
-        public async Task<IActionResult> ReserverProduit(ReserverProduitRequestDTO dto)
+        [HttpPost("reserverCommande")]
+        public async Task<IActionResult> ReserverCommande(ReserverProduitRequestDTO dto)
         {
             var response = await _gestionStockClient.PostAsync($"{_gestionStockUrl}reserverProduit",
                 new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json"));
