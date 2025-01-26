@@ -8,13 +8,13 @@ using Persistence.Repository;
 
 namespace Persistence.Repository.FacturationRepositories;
 
-public class PaiementRepo : GenericRepository<Paiement>,IPaiementRepo
+public class EcheanceRepo : GenericRepository<Echeance>,IEcheanceRepo
 {
-    public PaiementRepo(AppDbContext context) : base(context)
+    public EcheanceRepo(AppDbContext context) : base(context)
     {}
 
 
-    public async Task<IEnumerable<Paiement>> GetPaiementsByFactureId(int factureId)
+    public async Task<IEnumerable<Echeance>> GetPaiementsByFactureId(int factureId)
     {
         return await _context.Paiements
             .Where(p => p.FactureId == factureId)
