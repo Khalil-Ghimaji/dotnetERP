@@ -106,33 +106,21 @@ namespace GestionStock.Services
         //reste à remplacer Commande par un DTO
         public async Task ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            foreach (var item in commande.Articles)
             {
-                foreach (var item in commande.Articles)
+                var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
+                if (articleStock == null)
                 {
-                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
-                    if (articleStock == null)
-                    {
-                        throw new KeyNotFoundException("Article non trouvé.");
-                    }
-
-                    if (articleStock.Quantite < item.Quantite)
-                    {
-                        throw new InvalidOperationException("Quantité insuffisante.");
-                    }
-
-                    articleStock.Quantite -= item.Quantite;
-                    await _stockRepo.Update(articleStock);
+                    throw new KeyNotFoundException("Article non trouvé.");
                 }
 
-                await transaction.CommitAsync();
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                //propager la même exception
-                throw;
+                if (articleStock.Quantite < item.Quantite)
+                {
+                    throw new InvalidOperationException("Quantité insuffisante.");
+                }
+
+                articleStock.Quantite -= item.Quantite;
+                await _stockRepo.Update(articleStock);
             }
         }
 

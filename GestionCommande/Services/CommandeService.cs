@@ -8,15 +8,17 @@ namespace GestionCommande.Services;
 public class CommandeService : ICommandeService
 {
     private readonly ICommandeRepo _commandeRepo;
+    private readonly IArticleCommandeRepo _articleCommandeRepo;
     private readonly IProduitRepo _produitRepo;
     private readonly IArticleStockRepo _articleStockRepo;
     private readonly IClientRepo _clientRepo;
-    public CommandeService(ICommandeRepo commandeRepo, IProduitRepo produitRepo, IArticleStockRepo articleStockRepo, IClientRepo clientRepo)
+    public CommandeService(ICommandeRepo commandeRepo, IProduitRepo produitRepo,IArticleCommandeRepo articleCommandeRepo, IArticleStockRepo articleStockRepo, IClientRepo clientRepo)
     {
         _commandeRepo = commandeRepo;
         _produitRepo = produitRepo;
         _articleStockRepo = articleStockRepo;
         _clientRepo = clientRepo;
+        _articleCommandeRepo = articleCommandeRepo;
     }
     
     public async Task<IEnumerable<Commande>> getAllCommandes()
@@ -31,35 +33,44 @@ public class CommandeService : ICommandeService
     
     public async Task<Commande?> getCommandeById(int id)
     {
-        return await _commandeRepo.getEagerById(id);
+        return await _commandeRepo.GetById(id);
     }
 
-    public async Task<Commande?> preparerCommande(Commande commande)
+    public async Task<Commande> preparerCommande(Commande commande)
     {
         var client = await _clientRepo.GetById(commande.client.Id);
         if (client == null)
         {
-            return null;
+            throw new HttpRequestException("Client inexistant");
         }
         commande.client = client;
         return await _commandeRepo.Add(commande);
     }
     
-    public async Task<Commande?> modifierCommande(Commande commande)
+    public async Task<Commande> modifierCommande(Commande commande)
     {
         var command = await getCommandeById(commande.Id);
-        if (command != null && command.status == StatusCommande.PREPARATION && commande.status==StatusCommande.PREPARATION)
+        if (command == null)
+        {
+            throw new HttpRequestException($"Commande n{commande.Id} n'existe pas");
+        }
+        if (command.status == StatusCommande.PREPARATION && commande.status==StatusCommande.PREPARATION)
         {
             _commandeRepo.Detach(command); // Detach the existing entity
             return await _commandeRepo.Update(commande);
         }
-        return null;
+        throw new BadHttpRequestException("Commande n'est pas en préparation");
     }
     
-    public async Task<Commande?> ajouterArticle(int idCommande, int idProduit, int quantite)
+    public async Task<Commande> ajouterArticle(int idCommande, int idProduit, int quantite)
     {
         var commande = await getCommandeById(idCommande);
-        if (commande != null && commande.status == StatusCommande.PREPARATION)
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{idCommande} n'existe pas");
+        }
+
+        if (commande.status == StatusCommande.PREPARATION)
         {
             var produit = await _produitRepo.GetById(idProduit);
             if (produit != null)
@@ -67,7 +78,7 @@ public class CommandeService : ICommandeService
                 var articleStock = await _articleStockRepo.GetArticleStockByProduitId(idProduit);
                 if (articleStock == null)
                 {
-                    return null;
+                    throw new HttpRequestException($"Article {produit.Nom} n'est pas en stock");
                 }
                 var prix = articleStock.Prix;
                 var articleCommande = _commandeRepo.getArticleCommandeByProduit(idCommande, idProduit);
@@ -88,23 +99,28 @@ public class CommandeService : ICommandeService
                 return await _commandeRepo.Update(commande);
             }
         }
-        return null;
+        throw new BadHttpRequestException("Commande n'est pas en préparation");
     }
-    public async Task<Commande?> retirerArticle(int idCommande, int idProduit, int quantite)
+    public async Task<Commande> retirerArticle(int idCommande, int idProduit, int quantite)
     {
         var commande = await getCommandeById(idCommande);
-        if (commande != null && commande.status == StatusCommande.PREPARATION)
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{idCommande} n'existe pas");
+        }
+        if(commande.status == StatusCommande.PREPARATION)
         {
             var articleCommande = _commandeRepo.getArticleCommandeByProduit(idCommande, idProduit);
             if (articleCommande != null)
             {
                 if (articleCommande.quantite < quantite)
                 {
-                    return null;
+                    throw new BadHttpRequestException("Quantité à retirer supérieure à la quantité commandée");
                 }
                 if(articleCommande.quantite == quantite)
                 {
                     commande.articles.Remove(articleCommande);
+                    _articleCommandeRepo.Delete(articleCommande.Id);
                 }
                 else
                 {
@@ -113,62 +129,82 @@ public class CommandeService : ICommandeService
                 return await _commandeRepo.Update(commande);
             }
         }
-        return null;
+        throw new BadHttpRequestException("Commande n'est pas en préparation");
     }
     
-    public async Task<Commande?> validerCommande(int id)
+    public async Task<Commande> validerCommande(int id)
     {
         var commande = await getCommandeById(id);
-        if (commande !=null && commande.status == StatusCommande.PREPARATION)
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
+        if(commande.status == StatusCommande.PREPARATION)
         {
             commande.status = StatusCommande.VALIDEE;
             return await _commandeRepo.Update(commande);
         }
-        return null;
+        throw new BadHttpRequestException("Commande n'est pas en préparation");
     }
 
-    public async Task<Commande?> annulerCommande(int id)
+    public async Task<Commande> annulerCommande(int id)
     {
         var commande = await getCommandeById(id);
-        if (commande != null && (commande.status == StatusCommande.VALIDEE || commande.status == StatusCommande.PREPARATION))
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
+        if((commande.status == StatusCommande.VALIDEE || commande.status == StatusCommande.PREPARATION))
         {
             commande.status = StatusCommande.ANNULEE;
             return await _commandeRepo.Update(commande);
         }
-        return null;
+        throw new BadHttpRequestException("Commande n'est pas en préparation ou validée");
     }
     
-    public async Task<Commande?> facturerCommande(int id)
+    public async Task<Commande> facturerCommande(int id)
     {
         var commande = await getCommandeById(id);
-        if (commande != null && commande.status == StatusCommande.VALIDEE)
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
+        if(commande.status == StatusCommande.VALIDEE)
         {
             commande.status = StatusCommande.FACTUREE;
             return await _commandeRepo.Update(commande);
         }
-        return null;
+        throw new BadHttpRequestException($"Commande n{id} n'est pas validée");
     }
 
-    public async Task<Commande?> expedierCommande(int id)
+    public async Task<Commande> expedierCommande(int id)
     {
         var commande = await getCommandeById(id);
-        if (commande != null && commande.status == StatusCommande.FACTUREE)
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
+        if(commande.status == StatusCommande.FACTUREE)
         {
             commande.status = StatusCommande.EXPEDIEE;
             return await _commandeRepo.Update(commande);
         }
-        return null;
+        throw new BadHttpRequestException($"Commande n{id} n'est pas facturée");
     }
 
-    public async Task<Commande?> livrerCommande(int id)
+    public async Task<Commande> livrerCommande(int id)
     {
         var commande = await getCommandeById(id);
-        if (commande != null && commande.status == StatusCommande.EXPEDIEE)
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
+        if(commande.status == StatusCommande.EXPEDIEE)
         {
             commande.status = StatusCommande.LIVREE;
             return await _commandeRepo.Update(commande);
         }
-        return null;
+        throw new BadHttpRequestException($"Commande n{id} n'est pas expédiée");
     }
     
     public async Task<Commande?> supprimerCommande(int id)
