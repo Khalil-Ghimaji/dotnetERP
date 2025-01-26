@@ -51,6 +51,10 @@ namespace GestionClients.Services
         public async Task<IEnumerable<ClientOut>> listerClients()
         {
             var clients = await _ClientRepo.GetAll();
+            if( clients == null)
+            {
+                return null;
+            }
             var clientsOut = clients.Select(client => new ClientOut
             {
                 Id = client.Id,

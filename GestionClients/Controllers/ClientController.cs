@@ -1,6 +1,7 @@
 ﻿using GestionClients.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Persistence.DTO.GestionClients;
 using Persistence.entities.Client;
 
 namespace GestionClients.Controllers
@@ -16,7 +17,7 @@ namespace GestionClients.Controllers
             _clientService = stockService;
         }
         [HttpPost("ajouterClient")]
-        public IActionResult AjouterClient(Client client )
+        public IActionResult AjouterClient(ClientIn client )
         {
             _clientService.ajouterClient(client);
             return CreatedAtAction("ConsulterClient", new {id = client.Id});
@@ -28,13 +29,31 @@ namespace GestionClients.Controllers
             var client = _clientService.consulterClient(id);
             return Ok(client);
         }
-
-        [HttpPut("modifierClient")]
-        public async Task<IActionResult> ModifierClient([FromBody] Client client)
+        [HttpGet("listerClients")]
+        public async Task<IActionResult> ListerClients()
         {
             try
             {
-                await _clientService.modifierClientAsync(client);
+                var clients = await _clientService.listerClients();
+                if (clients == null || !clients.Any())
+                {
+                    return NotFound("Aucun client trouvé.");
+                }
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Une erreur s'est produite : {ex.Message}");
+            }
+        }
+
+        [HttpPut("modifierClient")]
+        public async Task<IActionResult> ModifierClient([FromBody] ClientIn client, int id)
+        {
+            try
+            {
+                await _clientService.modifierClient(client,id);
                 return Ok(new { message = "Client modifié avec succès." });
             }
             catch (KeyNotFoundException ex)
@@ -70,7 +89,7 @@ namespace GestionClients.Controllers
 
                     return match;
                 };
-                var filteredClients = await _clientService.FiltrerClients(condition);
+                var filteredClients = await _clientService.filtrerClients(condition);
                 if (filteredClients == null || !filteredClients.Any())
                 {
                     return NotFound(new { message = "Aucun client ne correspond aux critères fournis." });
@@ -89,7 +108,7 @@ namespace GestionClients.Controllers
         {
             try
             {
-                await _clientService.evaluerClientAsync(id, note);
+                await _clientService.evaluerClient(id, note);
                 return Ok(new { message = "Client évalué avec succès." });
             }
             catch (KeyNotFoundException ex)
