@@ -23,7 +23,7 @@ namespace Persistence
         public DbSet<Commande> Commandes { get; set; }
         public DbSet<ArticleCommande> ArticleCommandes { get; set; }
         public DbSet<Facture> Factures { get; set; }
-        public DbSet<Paiement> Paiements { get; set; }
+        public DbSet<Echeance> Echeances { get; set; }
         public DbSet<ArticleStock> AricleStocks { get; set; }
         public DbSet<Categorie> Categories { get; set; }
         public DbSet<Produit> Produits { get; set; }

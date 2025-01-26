@@ -1,5 +1,5 @@
 using AutoMapper;
-using Facturation.DTO;
+using Persistence.DTO.Facturation;
 using Persistence.entities.Facturation;
 
 namespace Facturation.Mapping
@@ -10,8 +10,10 @@ namespace Facturation.Mapping
         {
             CreateMap<CreerFactureDTO, Facture>();
             CreateMap<UpdateFactureDTO, Facture>().ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-            CreateMap<CreerPaiementDTO, Paiement>();
-            CreateMap<UpdatePaiementDTO, Paiement>().ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<CreerEcheanceDTO, Echeance>();
+            CreateMap<UpdateEcheanceDTO, Echeance>().ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<Facture, FactureResponseDTO>();
+            CreateMap<Echeance, EcheanceResponseDTO>();
         }
     }
 }

@@ -1,8 +1,9 @@
 using System.Net;
 using System.Net.Mail;
+using Facturation.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
-public class MailService : IEmailSender
+public class MailService : IMailService, IEmailSender
 {
     private readonly IConfiguration _configuration;
 
@@ -11,7 +12,7 @@ public class MailService : IEmailSender
         _configuration = configuration;
     }
 
-    public async Task SendEmailAsync(string email, string subject, string message)
+    public async Task SendEmailAsync(string email, string subject, string message, byte[] attachment = null)
     {
         var smtpClient = new SmtpClient(_configuration["Smtp:Host"])
         {
@@ -29,6 +30,21 @@ public class MailService : IEmailSender
         };
         mailMessage.To.Add(email);
 
+        // Ajouter la pièce jointe si elle est fournie
+        if (attachment != null)
+        {
+            using (var memoryStream = new MemoryStream(attachment))
+            {
+                var attachmentFile = new Attachment(memoryStream, "Facture.pdf", "application/pdf");
+                mailMessage.Attachments.Add(attachmentFile);
+            }
+        }
+
         await smtpClient.SendMailAsync(mailMessage);
+    }
+
+    public Task SendEmailAsync(string email, string subject, string htmlMessage)
+    {
+        return SendEmailAsync(email, subject, htmlMessage, null); // Appelle la méthode IMailService sans pièce jointe
     }
 }

@@ -1,8 +1,6 @@
-using System.Text.Json;
-using Facturation.DTO;
-using Facturation.Services;
 using Microsoft.AspNetCore.Mvc;
-using Persistence.entities.Facturation;
+using Persistence.DTO.Facturation;
+using Facturation.Services;
 
 namespace Facturation.Controllers
 {
@@ -10,13 +8,6 @@ namespace Facturation.Controllers
     [ApiController]
     public class FacturationController : ControllerBase
     {
-        /*
-        private readonly AppDbContext _context; // Remplacez AppDbContext par le nom de votre contexte
-
-        public FacturationController(AppDbContext context)
-        {
-            _context = context;
-        }*/
         private readonly IFactureService _factureService;
 
         public FacturationController(IFactureService factureService)
@@ -24,118 +15,81 @@ namespace Facturation.Controllers
             _factureService = factureService;
         }
 
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<Facture>> ConsulterFacture(int id)
+        public async Task<ActionResult<FactureResponseDTO>> ConsulterFacture(int id)
         {
             var facture = await _factureService.ConsulterFacture(id);
-            if (facture == null)
-                return NotFound("Facture non trouvée.");
-            return Ok(JsonSerializer.Serialize(facture));
+            if (facture == null) return NotFound("Facture non trouvée.");
+            return Ok(facture);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Facture>>> ConsulterFactures()
+        public async Task<ActionResult<IEnumerable<FactureResponseDTO>>> ConsulterFactures()
         {
             var factures = await _factureService.ConsulterFactures();
             return Ok(factures);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Facture>> CreerFacture([FromBody] CreerFactureDTO creerFactureDTO)
+        public async Task<ActionResult<FactureResponseDTO>> CreerFacture([FromBody] CreerFactureDTO creerFactureDTO)
         {
-            if (creerFactureDTO == null)
-                return BadRequest("Données de facture invalides.");
+            if (creerFactureDTO == null) return BadRequest("Données de facture invalides.");
 
             var facture = await _factureService.CreerFacture(creerFactureDTO);
             return CreatedAtAction(nameof(ConsulterFacture), new { id = facture.FactureId }, facture);
         }
-        /*
-        public async Task<ActionResult<Facture>> CreerFacture([FromBody] CreerFactureDTO creerFactureDTO)
-        {
-
-            var facture = new Facture
-            {
-                CommandeId = creerFactureDTO.CommandeId,
-                DateGeneration = DateTime.UtcNow,
-                MontantTotal = creerFactureDTO.MontantTotal,
-                StatusFacture = StatusFacture.Créée // ou une valeur par défaut si applicable
-            };
-
-            // Ajouter au contexte
-            _context.Factures.Add(facture);
-
-            // Enregistrer les changements
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(ConsulterFacture), new { id = facture.FactureId }, facture);
-        }*/
 
         [HttpDelete("{factureId}")]
         public async Task<ActionResult> SupprimerFacture(int factureId)
         {
-            var facture = await _factureService.SupprimerFacture(factureId);
-            if (facture == null)
-                return NotFound("Facture non trouvée.");
-
+            await _factureService.SupprimerFacture(factureId);
             return NoContent();
         }
 
         [HttpPut("{factureId}")]
-        public async Task<ActionResult<Facture>> UpdateFacture(int factureId,
-            [FromBody] UpdateFactureDTO updateFactureDTO)
+        public async Task<ActionResult<FactureResponseDTO>> UpdateFacture(int factureId, [FromBody] UpdateFactureDTO updateFactureDTO)
         {
-            if (updateFactureDTO == null)
-                return BadRequest("Données de mise à jour invalides.");
+            if (updateFactureDTO == null) return BadRequest("Données de mise à jour invalides.");
 
             var facture = await _factureService.UpdateFacture(factureId, updateFactureDTO);
             return Ok(facture);
         }
 
-
-        [HttpPost("{factureId}/paiement")]
-        public async Task<ActionResult<Paiement>> AjouterPaiement(int factureId,
-            [FromBody] CreerPaiementDTO creerPaiementDTO)
+        [HttpPost("{factureId}/echeance")]
+        public async Task<ActionResult<EcheanceResponseDTO>> AjouterEcheance(int factureId, [FromBody] CreerEcheanceDTO creerEcheanceDto)
         {
-            var paiement = await _factureService.AjouterPaiement(factureId, creerPaiementDTO);
-            return CreatedAtAction(nameof(ConsulterPaiement), new { factureId = factureId }, paiement);
+            var echeance = await _factureService.AjouterEcheance(factureId, creerEcheanceDto);
+            return CreatedAtAction(nameof(ConsulterEcheance), new { echeanceId = echeance.EcheanceId }, echeance);
         }
 
-        [HttpGet("{factureId}/paiements")]
-        public async Task<ActionResult<IEnumerable<Paiement>>> ConsulterPaiements(int factureId)
+        [HttpGet("{factureId}/echeances")]
+        public async Task<ActionResult<IEnumerable<EcheanceResponseDTO>>> ConsulterEcheances(int factureId)
         {
-            var paiements = await _factureService.ConsulterPaiements(factureId);
-            return Ok(paiements);
+            var echeances = await _factureService.ConsulterEcheances(factureId);
+            return Ok(echeances);
         }
 
-        [HttpGet("paiement/{paiementId}")]
-        public async Task<ActionResult<Paiement>> ConsulterPaiement(int paiementId)
+        [HttpGet("echeance/{echeanceId}")]
+        public async Task<ActionResult<EcheanceResponseDTO>> ConsulterEcheance(int echeanceId)
         {
-            var paiement = await _factureService.ConsulterPaiement(paiementId);
-            if (paiement == null)
-                return NotFound("Aucun paiement trouvé.");
-
-            return Ok(paiement);
+            var echeance = await _factureService.ConsulterEcheance(echeanceId);
+            if (echeance == null) return NotFound("Aucun échéance trouvé.");
+            return Ok(echeance);
         }
 
-        [HttpDelete("paiement/{paiementId}")]
-        public async Task<ActionResult> SupprimerPaiement(int paiementId)
+        [HttpDelete("echeance/{echeanceId}")]
+        public async Task<ActionResult> SupprimerEcheance(int echeanceId)
         {
-            var paiement = await _factureService.SupprimerPaiement(paiementId);
-            if (paiement == null)
-                return NotFound("Paiement non trouvé.");
-
+            await _factureService.SupprimerEcheance(echeanceId);
             return NoContent();
         }
 
-        [HttpPut("paiement/{paiementId}")]
-        public async Task<ActionResult<Paiement>> UpdatePaiement(int paiementId,
-            [FromBody] UpdatePaiementDTO updatePaiementDTO)
+        [HttpPut("echeance/{echeanceId}")]
+        public async Task<ActionResult<EcheanceResponseDTO>> UpdateEcheance(int echeanceId, [FromBody] UpdateEcheanceDTO updateEcheanceDto)
         {
-            var paiement = await _factureService.UpdatePaiement(paiementId, updatePaiementDTO);
-            if (paiement == null)
-                return NotFound("Paiement non trouvé.");
-
-            return Ok(paiement);
+            var echeance = await _factureService.UpdateEcheance(echeanceId, updateEcheanceDto);
+            if (echeance == null) return NotFound("Échéance non trouvée.");
+            return Ok(echeance);
         }
 
         [HttpGet("{factureId}/pdf")]
@@ -144,15 +98,25 @@ namespace Facturation.Controllers
             try
             {
                 var facturePdf = await _factureService.GenererFacturePdf(factureId);
-
-                if (facturePdf == null)
-                    return NotFound("Facture non trouvée ou problème lors de la génération du PDF.");
-
                 return File(facturePdf, "application/pdf", $"Facture_{factureId}.pdf");
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erreur lors de la génération du PDF : {ex.Message}");
+            }
+        }
+
+        [HttpPost("{factureId}/envoyer-email")]
+        public async Task<IActionResult> EnvoyerFactureParEmail(int factureId, [FromBody] string email)
+        {
+            try
+            {
+                await _factureService.EnvoyerFactureParEmail(factureId, email);
+                return Ok("Facture envoyée par e-mail avec succès.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de l'envoi de l'e-mail : {ex.Message}");
             }
         }
     }

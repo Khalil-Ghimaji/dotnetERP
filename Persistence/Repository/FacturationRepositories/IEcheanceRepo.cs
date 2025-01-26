@@ -3,8 +3,8 @@ using Persistence.Repository;
 
 namespace Persistence.Repository.FacturationRepositories;
 
-public interface IPaiementRepo:IGenericRepository<Paiement>
+public interface IEcheanceRepo:IGenericRepository<Echeance>
 {
-    Task<IEnumerable<Paiement>> GetPaiementsByFactureId(int factureId);
+    Task<IEnumerable<Echeance>> GetEcheancesByFactureId(int factureId);
 
 }

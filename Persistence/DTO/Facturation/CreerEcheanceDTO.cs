@@ -1,6 +1,6 @@
 using Persistence.entities.Facturation;
 
-namespace Facturation.DTO
+namespace Persistence.DTO.Facturation
 {
     public class CreerEcheanceDTO
     {
@@ -8,6 +8,8 @@ namespace Facturation.DTO
         public DateTime Date { get; set; } = DateTime.Now;
         public float Montant { get; set; }
         public MethodePaiement MethodePaiement { get; set; }
-        
+        public StatutEcheance StatutEcheance { get; set; } = StatutEcheance.Impayée;
+
+
     }
 }

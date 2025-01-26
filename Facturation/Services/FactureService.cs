@@ -1,5 +1,7 @@
-using Facturation.DTO;
+using AutoMapper;
+using Persistence.DTO.Facturation;
 using Persistence.entities.Facturation;
+using Persistence.Repository.CommandeRepositories;
 using Persistence.Repository.FacturationRepositories;
 
 namespace Facturation.Services
@@ -7,124 +9,215 @@ namespace Facturation.Services
     public class FactureService : IFactureService
     {
         private readonly IFactureRepo _factureRepo;
-        private readonly IPaiementRepo _paiementRepo;
+        private readonly IEcheanceRepo _echeanceRepo;
         private readonly IPDFService _pdfService;
+        private readonly ICommandeRepo _commandeRepo;
+        private readonly IMailService _mailService;
+        private readonly IMapper _mapper;
 
-
-
-        public FactureService(IFactureRepo factureRepo, IPaiementRepo paiementRepo,IPDFService pdfService)
+        public FactureService(
+            IFactureRepo factureRepo,
+            IEcheanceRepo echeanceRepo,
+            ICommandeRepo commandeRepo,
+            IPDFService pdfService,
+            IMailService mailService,
+            IMapper mapper)
         {
             _factureRepo = factureRepo;
-            _paiementRepo = paiementRepo;
+            _echeanceRepo = echeanceRepo;
+            _commandeRepo = commandeRepo;
             _pdfService = pdfService;
+            _mailService = mailService;
+            _mapper = mapper;
         }
 
-        public async Task<Facture?> ConsulterFacture(int id)
+        public async Task<FactureResponseDTO?> ConsulterFacture(int id)
         {
-            return await _factureRepo.GetById(id);
+            var facture = await _factureRepo.GetById(id);
+            return _mapper.Map<FactureResponseDTO>(facture);
         }
 
-        public async Task<IEnumerable<Facture>> ConsulterFactures()
+        public async Task<IEnumerable<FactureResponseDTO>> ConsulterFactures()
         {
-            return await _factureRepo.GetAll();
+            var factures = await _factureRepo.GetAll();
+            return _mapper.Map<IEnumerable<FactureResponseDTO>>(factures);
         }
 
-        public async Task<Facture> CreerFacture(CreerFactureDTO creerFactureDTO)
+        public async Task<FactureResponseDTO> CreerFacture(CreerFactureDTO creerFactureDTO)
         {
-            
-            var facture = new Facture
+            var commande = await _commandeRepo.GetById(creerFactureDTO.CommandeId);
+            if (commande == null)
             {
-                CommandeId = creerFactureDTO.CommandeId,
-                DateGeneration = DateTime.Now,
-                MontantTotal = creerFactureDTO.MontantTotal,
-                StatusFacture = StatusFacture.Créée
-            };
+                throw new Exception($"Commande avec ID {creerFactureDTO.CommandeId} introuvable.");
+            }
 
-            return await _factureRepo.Add(facture);
+            var facture = _mapper.Map<Facture>(creerFactureDTO);
+            facture.Commande = commande;
+            facture.MontantPayé = 0;
+
+            var result = await _factureRepo.Add(facture);
+            return _mapper.Map<FactureResponseDTO>(result);
         }
 
-
-
-        public async Task<Facture?> SupprimerFacture(int id)
+        public async Task SupprimerFacture(int id)
         {
-            return await _factureRepo.Delete(id);
+            var facture = await _factureRepo.GetById(id);
+            if (facture == null) return;
+
+            var echeances = await _echeanceRepo.GetEcheancesByFactureId(id);
+            foreach (var echeance in echeances)
+            {
+                await _echeanceRepo.Delete(echeance.EcheanceId);
+            }
+
+            var commande = await _commandeRepo.getEagerById(facture.CommandeId);
+            if (commande != null)
+            {
+                commande.Facture = null;
+                await _commandeRepo.Update(commande);
+            }
+
+            await _factureRepo.Delete(id);
         }
 
-        public async Task<Facture> UpdateFacture(int factureId, UpdateFactureDTO updateFactureDTO)
+        public async Task<FactureResponseDTO> UpdateFacture(int factureId, UpdateFactureDTO updateFactureDTO)
         {
             var facture = await _factureRepo.GetById(factureId);
             if (facture == null) throw new Exception("Facture non trouvée.");
 
-            facture.MontantTotal = updateFactureDTO.MontantTotal ?? facture.MontantTotal;
-            facture.StatusFacture = updateFactureDTO.StatusFacture ?? facture.StatusFacture;
-            return await _factureRepo.Update(facture);
+            _mapper.Map(updateFactureDTO, facture);
+            var result = await _factureRepo.Update(facture);
+            return _mapper.Map<FactureResponseDTO>(result);
         }
 
-        public async Task<Paiement> AjouterPaiement(int factureId, CreerPaiementDTO creerPaiementDTO)
+        public async Task<EcheanceResponseDTO> AjouterEcheance(int factureId, CreerEcheanceDTO creerEcheanceDto)
         {
             var facture = await _factureRepo.GetById(factureId);
             if (facture == null) throw new Exception("Facture non trouvée.");
 
-            var paiement = new Paiement
+            var echeance = _mapper.Map<Echeance>(creerEcheanceDto);
+            echeance.FactureId = factureId;
+
+            var result = await _echeanceRepo.Add(echeance);
+            return _mapper.Map<EcheanceResponseDTO>(result);
+        }
+
+        public async Task<IEnumerable<EcheanceResponseDTO>> ConsulterEcheances(int factureId)
+        {
+            var echeances = await _echeanceRepo.GetEcheancesByFactureId(factureId);
+            return _mapper.Map<IEnumerable<EcheanceResponseDTO>>(echeances);
+        }
+
+        public async Task<EcheanceResponseDTO> ConsulterEcheance(int echeanceId)
+        {
+            var echeance = await _echeanceRepo.GetById(echeanceId);
+            return _mapper.Map<EcheanceResponseDTO>(echeance);
+        }
+
+        public async Task SupprimerEcheance(int echeanceId)
+        {
+            var echeance = await _echeanceRepo.GetById(echeanceId);
+            if (echeance == null)
             {
-                FactureId = factureId,
-                Date = DateTime.Now,
-                Montant = creerPaiementDTO.Montant,
-                MethodePaiement = creerPaiementDTO.MethodePaiement
-            };
+                throw new Exception("Échéance non trouvée.");
+            }
 
-            facture.MontantTotal += paiement.Montant;
-            await _factureRepo.Update(facture);
-
-            return await _paiementRepo.Add(paiement);
-        }
-
-        public async Task<IEnumerable<Paiement>> ConsulterPaiements(int factureId)
-        {
-            return await _paiementRepo.GetPaiementsByFactureId(factureId);
-        }
-        public async Task<Paiement> ConsulterPaiement(int paiementId)
-        {
-            return await _paiementRepo.GetById(paiementId);
-        }
-
-        public async Task<Paiement> CreePaiement(int factureId, double montant)
-        {
-            var paiement = new Paiement
+            var facture = await _factureRepo.GetById(echeance.FactureId);
+            if (facture == null)
             {
-                Date = DateTime.Now,
-                Montant = (float)montant,
-                MethodePaiement = MethodePaiement.Virement
-            };
+                throw new Exception("Facture associée non trouvée.");
+            }
 
-            return await _paiementRepo.Add(paiement);
+            if (echeance.StatutEcheance == StatutEcheance.Payée)
+            {
+                facture.MontantPayé -= echeance.Montant;
+                await _factureRepo.Update(facture);
+            }
+
+            await _echeanceRepo.Delete(echeanceId);
         }
 
-        public async Task<Paiement?> SupprimerPaiement(int paiementId)
+        public async Task<EcheanceResponseDTO> UpdateEcheance(int echeanceId, UpdateEcheanceDTO updateEcheanceDto)
         {
-            return await _paiementRepo.Delete(paiementId);
+            var echeance = await _echeanceRepo.GetById(echeanceId);
+            if (echeance == null) throw new Exception("Echeance non trouvé.");
+
+            var facture = await _factureRepo.GetById(echeance.FactureId);
+            if (facture == null) throw new Exception("Facture non trouvée.");
+
+            var ancienMontant = echeance.Montant;
+            var ancienStatut = echeance.StatutEcheance;
+
+            _mapper.Map(updateEcheanceDto, echeance);
+
+            if (echeance.StatutEcheance == StatutEcheance.Payée && ancienStatut != StatutEcheance.Payée)
+            {
+                facture.MontantPayé += echeance.Montant;
+                await _factureRepo.Update(facture);
+            }
+            else if (ancienStatut == StatutEcheance.Payée && echeance.StatutEcheance != StatutEcheance.Payée)
+            {
+                facture.MontantPayé -= ancienMontant;
+                await _factureRepo.Update(facture);
+            }
+            else if (echeance.StatutEcheance == StatutEcheance.Payée && echeance.Montant != ancienMontant)
+            {
+                facture.MontantPayé += (echeance.Montant - ancienMontant);
+                await _factureRepo.Update(facture);
+            }
+
+            var result = await _echeanceRepo.Update(echeance);
+            return _mapper.Map<EcheanceResponseDTO>(result);
         }
 
-        public async Task<Paiement> UpdatePaiement(int paiementId, UpdatePaiementDTO updatePaiementDTO)
-        {
-            var paiement = await _paiementRepo.GetById(paiementId);
-            if (paiement == null) throw new Exception("Paiement non trouvé.");
-
-            paiement.Montant = updatePaiementDTO.Montant ?? paiement.Montant;
-            paiement.MethodePaiement = updatePaiementDTO.MethodePaiement ?? paiement.MethodePaiement;
-
-            return await _paiementRepo.Update(paiement);
-        }
         public async Task<byte[]> GenererFacturePdf(int factureId)
         {
             var facture = await _factureRepo.GetById(factureId);
-            if (facture == null)
-            {
-                throw new Exception("Facture non trouvée.");
-            }
+            if (facture == null) throw new Exception("Facture non trouvée.");
 
-            return _pdfService.GenererFacturePDF(facture); 
+            return _pdfService.GenererFacturePDF(facture);
         }
-        
+
+        public async Task EnvoyerFactureParEmail(int factureId, string email)
+        {
+            var facturePdf = await GenererFacturePdf(factureId);
+
+            var subject = $"Facture #{factureId}";
+            var body = "Veuillez trouver ci-joint votre facture.";
+
+            await _mailService.SendEmailAsync(email, subject, body, facturePdf);
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
