@@ -2,7 +2,7 @@ using Persistence.entities.Facturation;
 
 namespace Facturation.DTO
 {
-    public class CreerPaiementDTO
+    public class CreerEcheanceDTO
     {
         public int FactureId { get; set; }
         public DateTime Date { get; set; } = DateTime.Now;

@@ -1,6 +1,6 @@
 using Persistence.entities.Facturation;
 
-namespace Facturation.DTO
+namespace Persistence.DTO.Facturation
 {
     public class UpdatePaiementDTO
     {
