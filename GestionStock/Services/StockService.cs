@@ -236,7 +236,6 @@ namespace GestionStock.Services
 
         public async Task AnnulerCommande(int CommandeId)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
@@ -270,12 +269,9 @@ namespace GestionStock.Services
                         throw new KeyNotFoundException("Reservation non trouvée.");
                     }
                 }
-
-                await transaction.CommitAsync();
             }
             catch (Exception e)
             {
-                await transaction.RollbackAsync();
                 throw;
             }
         }
