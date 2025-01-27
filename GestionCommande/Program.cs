@@ -8,6 +8,7 @@ using Persistence.Repository.StockRepositories.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddScoped<IArticleCommandeRepo,ArticleCommandeRepo>();
 builder.Services.AddScoped<ICommandeRepo,CommandeRepo>();
 builder.Services.AddScoped<IProduitRepo,ProduitRepo>();
 builder.Services.AddScoped<IArticleStockRepo,ArticleStockRepo>();
@@ -35,5 +36,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseMiddleware<APIKeyMiddleware>();
 app.Run();

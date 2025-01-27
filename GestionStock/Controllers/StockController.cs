@@ -27,9 +27,13 @@ namespace GestionStock.Controllers
                     Id = id
                 });
             }
-            catch (Exception e)
+            catch (KeyNotFoundException e)
             {
                 return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
             }
         }
 
@@ -41,9 +45,13 @@ namespace GestionStock.Controllers
                 await _stockService.AjouterQuantite(dto);
                 return Created();
             }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
             catch (Exception e)
             {
-                return new NotFoundResult();
+                return Conflict(e.Message);
             }
         }
 
@@ -55,9 +63,13 @@ namespace GestionStock.Controllers
                 var produit = await _stockService.ConsulterProduit(id);
                 return Ok(produit);
             }
-            catch (Exception e)
+            catch (KeyNotFoundException e)
             {
                 return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
             }
         }
 
@@ -75,6 +87,10 @@ namespace GestionStock.Controllers
                 await _stockService.ExpedierMarchandises(commande);
                 return NoContent();
             }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
             catch (Exception e)
             {
                 return Conflict(e.Message);
@@ -89,19 +105,9 @@ namespace GestionStock.Controllers
                 await _stockService.ModifierProduit(dto);
                 return NoContent();
             }
-            catch (Exception e)
+            catch (KeyNotFoundException e)
             {
                 return NotFound(e.Message);
-            }
-        }
-
-        [HttpPost("reserverProduit")]
-        public async Task<ActionResult<ReserverProduitResponseDTO>> ReserverProduit(ReserverProduitRequestDTO dto)
-        {
-            try
-            {
-                var reservationId = await _stockService.ReserverProduit(dto);
-                return Ok(new { ReservationId = reservationId });
             }
             catch (Exception e)
             {
@@ -109,24 +115,75 @@ namespace GestionStock.Controllers
             }
         }
 
-        [HttpPost("confirmerCommande")]
-        public IActionResult ConfirmerCommande(Guid id)
-        {
-            _stockService.ConfirmerCommande(id);
-            return NoContent();
-        }
-
-        [HttpDelete("supprimerProduit")]
-        public async Task<IActionResult> SupprimerProduit(int id)
+        [HttpPost("reserverCommande")]
+        public async Task<ActionResult> ReserverCommande(ReserverCommandeRequestDTO dto)
         {
             try
             {
-                await _stockService.SupprimerProduit(id);
-                return NoContent();
+                await _stockService.ReserverCommande(dto);
+                return Ok();
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
             }
             catch (Exception e)
             {
+                return Conflict(e.Message);
+            }
+        }
+
+        [HttpDelete("annulerCommande/{commandeId}")]
+        public async Task<IActionResult> AnnulerCommande(int commandeId)
+        {
+            try
+            {
+                await _stockService.AnnulerCommande(commandeId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException e)
+            {
                 return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
+        }
+
+        [HttpPost("confirmerCommande/{commandeId}")]
+        public IActionResult ConfirmerCommande(int commandeId)
+        {
+            try
+            {
+                _stockService.ConfirmerCommande(commandeId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
+        }
+
+        [HttpDelete("supprimerProduit")]
+        public async Task<IActionResult> SupprimerProduit(int produitId)
+        {
+            try
+            {
+                await _stockService.SupprimerProduit(produitId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
             }
         }
     }

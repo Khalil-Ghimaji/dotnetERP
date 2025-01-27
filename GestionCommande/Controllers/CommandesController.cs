@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using GestionCommande.DTOs;
 using GestionCommande.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol;
-using Persistence;
 using Persistence.entities.Commande;
 
 namespace GestionCommande.Controllers
@@ -44,7 +36,7 @@ namespace GestionCommande.Controllers
 
             if (commande == null)
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
 
             return _mapper.Map<CommandeResponseDTO>(commande);
@@ -61,14 +53,24 @@ namespace GestionCommande.Controllers
             // }
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
-            var command = await _commandeService.modifierCommande(_mapper.Map<Commande>(commandeDto));
-            if (command == null)
+
+            var command = _mapper.Map<Commande>(commandeDto);
+            command.Id = id;
+            try
             {
-                return BadRequest();
+                command = await _commandeService.modifierCommande(command);
+                return _mapper.Map<CommandeResponseDTO>(command);
             }
-            return _mapper.Map<CommandeResponseDTO>(command);
+            catch (HttpRequestException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         // POST: api/Commandes
@@ -76,13 +78,16 @@ namespace GestionCommande.Controllers
         [HttpPost]
         public async Task<ActionResult<CommandeResponseDTO>> CreerCommande(CommandeRequestDTO commandeDto)
         {
-            var command = await _commandeService.preparerCommande(_mapper.Map<Commande>(commandeDto));
-            if (command == null)
+            try
             {
-                return NotFound();
+                var command = await _commandeService.preparerCommande(_mapper.Map<Commande>(commandeDto));
+                return CreatedAtAction("GetCommande", new { id = command.Id },
+                    _mapper.Map<CommandeResponseDTO>(command));
             }
-
-            return CreatedAtAction("GetCommande", new { id = command.Id });
+            catch (HttpRequestException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         // DELETE: api/Commandes/5
@@ -92,7 +97,7 @@ namespace GestionCommande.Controllers
             var commande = await _commandeService.supprimerCommande(id);
             if (commande == null)
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
             return NoContent();
         }
@@ -102,14 +107,23 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(idCommande))
             {
-                return NotFound();
+                return NotFound($"Commande n{idCommande} n'existe pas");
             }
-            var commande = await _commandeService.ajouterArticle(idCommande, articleCommande.IdProduit, articleCommande.Quantite);
-            if (commande == null)
+
+            try
             {
-                return BadRequest();
+                var commande = await _commandeService.ajouterArticle(idCommande, articleCommande.IdProduit,
+                    articleCommande.Quantite);
+                return _mapper.Map<CommandeResponseDTO>(commande);
             }
-            return _mapper.Map<CommandeResponseDTO>(commande);
+            catch (HttpRequestException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
         
         [HttpPost("retirerArticle/{idCommande}")]
@@ -117,14 +131,22 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(idCommande))
             {
-                return NotFound();
+                return NotFound($"Commande n{idCommande} n'existe pas");
             }
-            var commande = await _commandeService.retirerArticle(idCommande, articleCommande.IdProduit, articleCommande.Quantite);
-            if (commande == null)
+
+            try{
+                var commande = await _commandeService.retirerArticle(idCommande, articleCommande.IdProduit,
+                    articleCommande.Quantite);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
             {
-                return BadRequest();
+                return NotFound(e.Message);
             }
-            return _mapper.Map<CommandeResponseDTO>(commande);
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
         
         [HttpPost("valider/{id}")]
@@ -132,14 +154,22 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
-            var commande = await _commandeService.validerCommande(id);
-            if (commande == null)
+
+            try{
+                var commande = await _commandeService.validerCommande(id);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
             {
-                return BadRequest();
+                return NotFound(e.Message);
             }
-            return _mapper.Map<CommandeResponseDTO>(commande);
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
+            
         }
         
         [HttpPost("annuler/{id}")]
@@ -147,14 +177,43 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
-            var commande = await _commandeService.annulerCommande(id);
-            if(commande == null)
+
+            try{
+                var commande = await _commandeService.annulerCommande(id);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
             {
-                return BadRequest();
+                return NotFound(e.Message);
             }
-            return _mapper.Map<CommandeResponseDTO>(commande);
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+        
+        [HttpPost("reserver/{id}")]
+        public async Task<ActionResult<CommandeResponseDTO>> ReserverCommande(int id)
+        {
+            if (!await _commandeService.commandeExists(id))
+            {
+                return NotFound($"Commande n{id} n'existe pas");
+            }
+
+            try{
+                var commande = await _commandeService.reserverCommande(id);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPost("expedier/{id}")]
@@ -162,14 +221,21 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
-            var commande = await _commandeService.expedierCommande(id);
-            if (commande == null)
+
+            try{
+                var commande = await _commandeService.expedierCommande(id);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
             {
-                return BadRequest();
+                return NotFound(e.Message);
             }
-            return _mapper.Map<CommandeResponseDTO>(commande);
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPost("livrer/{id}")]
@@ -177,15 +243,21 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
-            
-            var commande = await _commandeService.livrerCommande(id);
-            if (commande == null)
+
+            try{
+                var commande = await _commandeService.livrerCommande(id);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
             {
-                return BadRequest();
+                return NotFound(e.Message);
             }
-            return _mapper.Map<CommandeResponseDTO>(commande);
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPost("facturer/{id}")]
@@ -193,14 +265,21 @@ namespace GestionCommande.Controllers
         {
             if (!await _commandeService.commandeExists(id))
             {
-                return NotFound();
+                return NotFound($"Commande n{id} n'existe pas");
             }
-            var commande = await _commandeService.facturerCommande(id);
-            if (commande == null)
+
+            try{
+                var commande = await _commandeService.facturerCommande(id);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
             {
-                return BadRequest();
+                return NotFound(e.Message);
             }
-            return _mapper.Map<CommandeResponseDTO>(commande);
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         // [HttpPost("payer/{id}")]

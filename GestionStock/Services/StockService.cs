@@ -1,9 +1,11 @@
 using System.Collections.Concurrent;
+using System.Data;
 using AutoMapper;
 using GestionStock.DTO;
 using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
 using Persistence;
 using Persistence.entities.Stock;
+using Persistence.Repository.CommandeRepositories;
 using Persistence.Repository.StockRepositories.Contracts;
 
 namespace GestionStock.Services
@@ -14,16 +16,24 @@ namespace GestionStock.Services
         private readonly IMapper _mapper;
         private readonly IProduitRepo _produitRepo;
         private readonly ICategoryRepo _categoryRepo;
+        private readonly ICommandeRepo _commandeRepo;
         private readonly AppDbContext _context;
         private readonly IServiceScopeFactory _scopeFactory;
-        private static readonly ConcurrentDictionary<Guid, CancellationTokenSource> _reservationTasks=new ConcurrentDictionary<Guid, CancellationTokenSource>();
+
+        private static readonly
+            ConcurrentDictionary<(int commandeId, int produitId), (CancellationTokenSource cts, int
+                quantite)>
+            _reservationTasks =
+                new ConcurrentDictionary<(int, int), (CancellationTokenSource, int)>();
 
         public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo,
             IServiceScopeFactory scopeFactory,
             ICategoryRepo categoryRepo,
+            ICommandeRepo commandeRepo,
             AppDbContext context)
         {
             _stockRepo = stockRepo;
+            _commandeRepo = commandeRepo;
             _mapper = mapper;
             _scopeFactory = scopeFactory;
             _produitRepo = produitRepo;
@@ -38,13 +48,13 @@ namespace GestionStock.Services
             //check if the product already exists
             if (await _produitRepo.ProduitExists(dto.Nom))
             {
-                throw new HttpRequestException("Produit déjà existant.");
+                throw new DuplicateNameException("Produit déjà existant.");
             }
 
             //check if the category exists
             if (!await _categoryRepo.CategoryExists(dto.CategoryId))
             {
-                throw new HttpRequestException("Catégorie non trouvée.");
+                throw new KeyNotFoundException("Catégorie non trouvée.");
             }
 
             //créer le produit avec l'ArticleStock
@@ -73,23 +83,20 @@ namespace GestionStock.Services
                 return _mapper.Map<ArticleStockDTO>(articleStock);
             }
 
-            throw new HttpRequestException("Article non trouvé.");
+            throw new KeyNotFoundException("Article non trouvé.");
         }
 
         public async Task AjouterQuantite(AjouterQuantiteRequestDTO dto)
         {
-            Console.WriteLine("Entering AjouterQuantite method.");
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null)
             {
                 articleStock.Quantite += dto.Quantite;
                 await _stockRepo.Update(articleStock);
-                Console.WriteLine("Quantity updated successfully.");
             }
             else
             {
-                Console.WriteLine("Article not found.");
-                throw new HttpRequestException("Article non trouvé.");
+                throw new KeyNotFoundException("Article non trouvé.");
             }
         }
 
@@ -104,28 +111,21 @@ namespace GestionStock.Services
         //reste à remplacer Commande par un DTO
         public async Task ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            foreach (var item in commande.Articles)
             {
-                foreach (var item in commande.Articles)
+                var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
+                if (articleStock == null)
                 {
-                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
-                    if (articleStock == null || articleStock.Quantite < item.Quantite)
-                    {
-                        throw new HttpRequestException("Quantité insuffisante ou article non trouvé.");
-                    }
-
-                    articleStock.Quantite -= item.Quantite;
-                    await _stockRepo.Update(articleStock);
+                    throw new KeyNotFoundException("Article non trouvé.");
                 }
 
-                await transaction.CommitAsync();
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                //propager la même exception
-                throw;
+                if (articleStock.Quantite < item.Quantite)
+                {
+                    throw new InvalidOperationException("Quantité insuffisante.");
+                }
+
+                articleStock.Quantite -= item.Quantite;
+                await _stockRepo.Update(articleStock);
             }
         }
 
@@ -148,22 +148,20 @@ namespace GestionStock.Services
             }
             else
             {
-                throw new HttpRequestException("Article non trouvé.");
+                throw new KeyNotFoundException("Article non trouvé.");
             }
         }
 
 
-        public async Task<Guid> ReserverProduit(ReserverProduitRequestDTO dto)
+        public async Task ReserverProduit(ReserverProduitRequestDTO dto)
         {
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null && articleStock.Quantite >= dto.Quantite)
             {
                 articleStock.Quantite -= dto.Quantite;
                 await _stockRepo.Update(articleStock);
-
-                var reservationId = Guid.NewGuid();
                 var cts = new CancellationTokenSource();
-                _reservationTasks[reservationId] = cts;
+                _reservationTasks[(dto.CommandeId, dto.ProduitId)] = (cts, dto.Quantite);
 
                 if (TimeSpan.TryParse(dto.ReservationDuration, out var reservationDuration))
                 {
@@ -182,36 +180,103 @@ namespace GestionStock.Services
                         }
                         catch (TaskCanceledException)
                         {
-                            Console.WriteLine($"Task canceled for reservationId: {reservationId}");
                         }
                         finally
                         {
-                            _reservationTasks.TryRemove(reservationId, out _);
+                            _reservationTasks.TryRemove((dto.CommandeId, dto.ProduitId), out _);
                         }
                     });
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid TimeSpan format.");
+                    throw new InvalidOperationException("Timespan invalide.");
                 }
-
-                return reservationId;
             }
             else
             {
-                throw new ArgumentException("Quantité insuffisante ou article non trouvé.");
+                if (articleStock == null)
+                {
+                    throw new KeyNotFoundException("Article non trouvé.");
+                }
+
+                throw new InvalidOperationException("Quantité insuffisante");
             }
         }
 
-        public void ConfirmerCommande(Guid id)
+        public async Task ReserverCommande(ReserverCommandeRequestDTO reserverCommande)
         {
-            if (_reservationTasks.TryGetValue(id, out var cts))
+            var commande = await _commandeRepo.GetById(reserverCommande.idCommande);
+            if (commande == null)
             {
-                cts.Cancel();
-                _reservationTasks.TryRemove(id, out _);
+                throw new KeyNotFoundException("Commande non trouvée.");
+            }
+
+            foreach (var article in commande.articles)
+            {
+                await ReserverProduit(new ReserverProduitRequestDTO()
+                {
+                    ReservationDuration = reserverCommande.ReservationDuration,
+                    ProduitId = article.produit.Id,
+                    Quantite = article.quantite,
+                    CommandeId = reserverCommande.idCommande
+                });
             }
         }
 
+        public async Task AnnulerCommande(int CommandeId)
+        {
+            var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
+            foreach (var reservation in reservations)
+            {
+                if (reservation.Key != default)
+                {
+                    var (commandeId, produitId) = reservation.Key;
+                    var (cts, quantite) = reservation.Value;
+
+                    cts.Cancel();
+                    _reservationTasks.TryRemove((commandeId, produitId), out _);
+
+                    using (var scope = _scopeFactory.CreateScope())
+                    {
+                        var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
+                        var articleStock = await scopedStockRepo.GetArticleStockByProduitId(produitId);
+                        if (articleStock != null)
+                        {
+                            articleStock.Quantite += quantite;
+                            await scopedStockRepo.Update(articleStock);
+                        }
+                        else
+                        {
+                            throw new KeyNotFoundException("Article non trouvé.");
+                        }
+                    }
+                }
+                else
+                {
+                    throw new KeyNotFoundException("Reservation non trouvée.");
+                }
+            }
+        }
+
+        public async Task ConfirmerCommande(int CommandeId)
+        {
+            var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
+            foreach (var reservation in reservations)
+            {
+                if (reservation.Key != default)
+                {
+                    var (commandeId, produitId) = reservation.Key;
+                    var (cts, _) = reservation.Value;
+
+                    cts.Cancel();
+                    _reservationTasks.TryRemove((commandeId, produitId), out _);
+                }
+                else
+                {
+                    throw new KeyNotFoundException("Reservation non trouvée.");
+                }
+            }
+        }
 
         public async Task SupprimerProduit(int id)
         {
