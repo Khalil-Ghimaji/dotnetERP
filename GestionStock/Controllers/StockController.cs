@@ -1,3 +1,4 @@
+using System.Text.Json;
 using GestionStock.DTO;
 using GestionStock.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -80,11 +81,12 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("expedierMarchandises")]
-        public async Task<IActionResult> ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
+        public async Task<IActionResult> ExpedierMarchandises([FromBody]dynamic body)
         {
+            int idCommande = JsonSerializer.Deserialize<JsonElement>(body).GetProperty("idCommande").GetInt32();
             try
             {
-                await _stockService.ExpedierMarchandises(commande);
+                await _stockService.ExpedierMarchandises(idCommande);
                 return NoContent();
             }
             catch (KeyNotFoundException e)

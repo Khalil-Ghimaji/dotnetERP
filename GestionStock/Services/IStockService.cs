@@ -7,7 +7,7 @@ public interface IStockService
 {
     Task<int> AjouterProduit(AjouterProduitRequestDTO dto);
     Task<IEnumerable<ArticleStockDTO>> ConsulterStock();
-    Task ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande);
+    Task ExpedierMarchandises(int idCommande);
     Task ModifierProduit(ProduitDTO dto);
     Task ReserverProduit(ReserverProduitRequestDTO dto);
     Task ReserverCommande(ReserverCommandeRequestDTO reserverCommande);

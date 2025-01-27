@@ -109,12 +109,19 @@ namespace GestionStock.Services
 
 
         //reste à remplacer Commande par un DTO
-        public async Task ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
+        public async Task ExpedierMarchandises(int idCommande)
         {
+            var commande = await _commandeRepo.GetById(idCommande);
+            if (commande == null)
+            {
+                throw new KeyNotFoundException("commande non trouvee");
+            }
+
+            var articles = _mapper.Map<IEnumerable<ArticleExpedierMarchandisesDTO>>(commande.articles);
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                foreach (var item in commande.Articles)
+                foreach (var item in articles)
                 {
                     var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
                     if (articleStock == null)
@@ -329,7 +336,6 @@ namespace GestionStock.Services
             catch (Exception e)
             {
                 await transaction.RollbackAsync();
-                //propager la même exception
                 throw;
             }
         }

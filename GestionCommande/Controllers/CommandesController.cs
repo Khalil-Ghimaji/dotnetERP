@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Text.Json;
+using AutoMapper;
 using GestionCommande.DTOs;
 using GestionCommande.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -172,7 +173,7 @@ namespace GestionCommande.Controllers
             
         }
         
-        [HttpPost("annuler/{id}")]
+        [HttpDelete("annuler/{id}")]
         public async Task<ActionResult<CommandeResponseDTO>> AnnulerCommande(int id)
         {
             if (!await _commandeService.commandeExists(id))
@@ -283,7 +284,7 @@ namespace GestionCommande.Controllers
         }
 
         [HttpPost("rollback/{id}")]
-        public async Task<ActionResult<CommandeResponseDTO>> RollbackCommande(int id,string lastStatus)
+        public async Task<ActionResult<CommandeResponseDTO>> RollbackCommande(int id, dynamic body)
         {
             
             if (!await _commandeService.commandeExists(id))
@@ -293,7 +294,7 @@ namespace GestionCommande.Controllers
 
             try
             {
-                var statusCommande = Enum.Parse<StatusCommande>(lastStatus);
+                var statusCommande = Enum.Parse<StatusCommande>(JsonSerializer.Deserialize<JsonElement>(body).GetProperty("lastStatus").GetString());
                 var commande = await _commandeService.rollback(id, statusCommande);
                 return _mapper.Map<CommandeResponseDTO>(commande);
             }
