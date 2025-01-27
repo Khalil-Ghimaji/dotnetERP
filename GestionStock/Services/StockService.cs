@@ -262,20 +262,15 @@ namespace GestionStock.Services
 
                         cts.Cancel();
                         _reservationTasks.TryRemove((commandeId, produitId), out _);
-
-                        using (var scope = _scopeFactory.CreateScope())
+                        var articleStock = await _stockRepo.GetArticleStockByProduitId(produitId);
+                        if (articleStock != null)
                         {
-                            var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
-                            var articleStock = await scopedStockRepo.GetArticleStockByProduitId(produitId);
-                            if (articleStock != null)
-                            {
-                                articleStock.Quantite += quantite;
-                                await scopedStockRepo.Update(articleStock);
-                            }
-                            else
-                            {
-                                throw new KeyNotFoundException("Article non trouvé.");
-                            }
+                            articleStock.Quantite += quantite;
+                            await _stockRepo.Update(articleStock);
+                        }
+                        else
+                        {
+                            throw new KeyNotFoundException("Article non trouvé.");
                         }
                     }
                     else
