@@ -111,21 +111,31 @@ namespace GestionStock.Services
         //reste à remplacer Commande par un DTO
         public async Task ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
         {
-            foreach (var item in commande.Articles)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
-                if (articleStock == null)
+                foreach (var item in commande.Articles)
                 {
-                    throw new KeyNotFoundException("Article non trouvé.");
-                }
+                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
+                    if (articleStock == null)
+                    {
+                        throw new KeyNotFoundException("Article non trouvé.");
+                    }
 
-                if (articleStock.Quantite < item.Quantite)
-                {
-                    throw new InvalidOperationException("Quantité insuffisante.");
-                }
+                    if (articleStock.Quantite < item.Quantite)
+                    {
+                        throw new InvalidOperationException("Quantité insuffisante.");
+                    }
 
-                articleStock.Quantite -= item.Quantite;
-                await _stockRepo.Update(articleStock);
+                    articleStock.Quantite -= item.Quantite;
+                    await _stockRepo.Update(articleStock);
+                }
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
@@ -205,76 +215,102 @@ namespace GestionStock.Services
 
         public async Task ReserverCommande(ReserverCommandeRequestDTO reserverCommande)
         {
-            var commande = await _commandeRepo.GetById(reserverCommande.idCommande);
-            if (commande == null)
-            {
-                throw new KeyNotFoundException("Commande non trouvée.");
-            }
-
-            foreach (var article in commande.articles)
-            {
-                await ReserverProduit(new ReserverProduitRequestDTO()
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try{
+                var commande = await _commandeRepo.GetById(reserverCommande.idCommande);
+                if (commande == null)
                 {
-                    ReservationDuration = reserverCommande.ReservationDuration,
-                    ProduitId = article.produit.Id,
-                    Quantite = article.quantite,
-                    CommandeId = reserverCommande.idCommande
-                });
+                    throw new KeyNotFoundException("Commande non trouvée.");
+                }
+
+                foreach (var article in commande.articles)
+                {
+                    await ReserverProduit(new ReserverProduitRequestDTO()
+                    {
+                        ReservationDuration = reserverCommande.ReservationDuration,
+                        ProduitId = article.produit.Id,
+                        Quantite = article.quantite,
+                        CommandeId = reserverCommande.idCommande
+                    });
+                }
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
         public async Task AnnulerCommande(int CommandeId)
-        {
-            var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
-            foreach (var reservation in reservations)
-            {
-                if (reservation.Key != default)
+        {   await using var transaction = await _context.Database.BeginTransactionAsync();
+            try{
+                var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
+                foreach (var reservation in reservations)
                 {
-                    var (commandeId, produitId) = reservation.Key;
-                    var (cts, quantite) = reservation.Value;
-
-                    cts.Cancel();
-                    _reservationTasks.TryRemove((commandeId, produitId), out _);
-
-                    using (var scope = _scopeFactory.CreateScope())
+                    if (reservation.Key != default)
                     {
-                        var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
-                        var articleStock = await scopedStockRepo.GetArticleStockByProduitId(produitId);
-                        if (articleStock != null)
+                        var (commandeId, produitId) = reservation.Key;
+                        var (cts, quantite) = reservation.Value;
+
+                        cts.Cancel();
+                        _reservationTasks.TryRemove((commandeId, produitId), out _);
+
+                        using (var scope = _scopeFactory.CreateScope())
                         {
-                            articleStock.Quantite += quantite;
-                            await scopedStockRepo.Update(articleStock);
-                        }
-                        else
-                        {
-                            throw new KeyNotFoundException("Article non trouvé.");
+                            var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
+                            var articleStock = await scopedStockRepo.GetArticleStockByProduitId(produitId);
+                            if (articleStock != null)
+                            {
+                                articleStock.Quantite += quantite;
+                                await scopedStockRepo.Update(articleStock);
+                            }
+                            else
+                            {
+                                throw new KeyNotFoundException("Article non trouvé.");
+                            }
                         }
                     }
+                    else
+                    {
+                        throw new KeyNotFoundException("Reservation non trouvée.");
+                    }
                 }
-                else
-                {
-                    throw new KeyNotFoundException("Reservation non trouvée.");
-                }
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
         public async Task ConfirmerCommande(int CommandeId)
         {
-            var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
-            foreach (var reservation in reservations)
-            {
-                if (reservation.Key != default)
+            var transaction = await _context.Database.BeginTransactionAsync();
+            try{
+                var reservations = _reservationTasks.Where(x => x.Key.commandeId == CommandeId).ToList();
+                foreach (var reservation in reservations)
                 {
-                    var (commandeId, produitId) = reservation.Key;
-                    var (cts, _) = reservation.Value;
+                    if (reservation.Key != default)
+                    {
+                        var (commandeId, produitId) = reservation.Key;
+                        var (cts, _) = reservation.Value;
 
-                    cts.Cancel();
-                    _reservationTasks.TryRemove((commandeId, produitId), out _);
+                        cts.Cancel();
+                        _reservationTasks.TryRemove((commandeId, produitId), out _);
+                    }
+                    else
+                    {
+                        throw new KeyNotFoundException("Reservation non trouvée.");
+                    }
                 }
-                else
-                {
-                    throw new KeyNotFoundException("Reservation non trouvée.");
-                }
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
