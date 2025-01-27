@@ -236,22 +236,22 @@ public class CommandeService : ICommandeService
         throw new BadHttpRequestException($"Commande n{id} n'est pas facturée");
     }
 
-    public async Task<Commande> livrerCommande(int id)
-    {
-        var commande = await getCommandeById(id);
-        if (commande == null)
-        {
-            throw new HttpRequestException($"Commande n{id} n'existe pas");
-        }
-    
-        if (commande.status == StatusCommande.EXPEDIEE)
-        {
-            commande.status = StatusCommande.LIVREE;
-            return await _commandeRepo.Update(commande);
-        }
-    
-        throw new BadHttpRequestException($"Commande n{id} n'est pas expédiée");
-    }
+    // public async Task<Commande> livrerCommande(int id)
+    // {
+    //     var commande = await getCommandeById(id);
+    //     if (commande == null)
+    //     {
+    //         throw new HttpRequestException($"Commande n{id} n'existe pas");
+    //     }
+    //
+    //     if (commande.status == StatusCommande.EXPEDIEE)
+    //     {
+    //         commande.status = StatusCommande.LIVREE;
+    //         return await _commandeRepo.Update(commande);
+    //     }
+    //
+    //     throw new BadHttpRequestException($"Commande n{id} n'est pas expédiée");
+    // }
 
     public async Task<Commande?> supprimerCommande(int id)
     {
@@ -263,12 +263,33 @@ public class CommandeService : ICommandeService
         var commande = await _commandeRepo.GetById(id);
         return commande != null;
     }
+    
+    public async Task<Commande> rollback(int id, StatusCommande lastStatus)
+    {
+        var commande = await getCommandeById(id);
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
 
-    // public async void payerCommande(Commande commande)
-    // {
-    //     commande.status = StatusCommande.PAYEE;
-    //     await _repo.Update(commande);
-    // }
+        commande.status = lastStatus;
+        return await _commandeRepo.Update(commande);
+    }
+
+    public async Task<Commande> payerCommande(int id)
+    {
+        var commande = await getCommandeById(id);
+        if (commande == null)
+        {
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
+        if (commande.status != StatusCommande.FACTUREE && commande.status != StatusCommande.RESERVEE && commande.status != StatusCommande.EXPEDIEE)
+        {
+            throw new BadHttpRequestException("Commande n'est pas facturée");
+        }
+        commande.status = StatusCommande.PAYEE;
+        return await _commandeRepo.Update(commande);
+    }
 
 
     // public async void rembourserCommande(Commande commande)

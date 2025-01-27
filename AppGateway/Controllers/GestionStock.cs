@@ -112,7 +112,8 @@ namespace AppGateway.Controllers
                 new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json"));
             if (!responseStock.IsSuccessStatusCode)
             {
-                await _gestionCommandesClient.PostAsync($"{_gestionCommandesUrl}Rollback/{dto.idCommande}", null);
+                await _gestionCommandesClient.PostAsync($"{_gestionCommandesUrl}Rollback/{dto.idCommande}", 
+                    new StringContent(JsonSerializer.Serialize(new { lastStatus = "FACTUREE" }), Encoding.UTF8, "application/json"));
                 return StatusCode((int)responseStock.StatusCode, await responseStock.Content.ReadAsStringAsync());
             }
             return StatusCode((int)HttpStatusCode.OK, $"{await responseStock.Content.ReadAsStringAsync()}\n{await responseCommande.Content.ReadAsStringAsync()}");

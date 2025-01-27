@@ -15,7 +15,9 @@ public interface ICommandeService
     Task<Commande> annulerCommande(int id);
     Task<Commande> reserverCommande(int id);
     Task<Commande> expedierCommande(int id);
-    Task<Commande> livrerCommande(int id);
+    Task<Commande> payerCommande(int id);
     Task<Commande> facturerCommande(int id);
     Task<bool> commandeExists(int id);
+    Task<Commande> rollback(int id, StatusCommande lastStatus);
+    //Task<Commande> livrerCommande(int id);
 }
