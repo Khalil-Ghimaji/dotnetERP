@@ -12,12 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddDbContext<AppDbContext>();
-builder.Services.AddScoped<IArticleStockRepo, ArticleStockRepo>();
-builder.Services.AddScoped<ICommandeRepo, CommandeRepo>();
-builder.Services.AddScoped<IProduitRepo, ProduitRepo>();
-builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
-builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddDbContext<AppDbContext>(ServiceLifetime.Singleton);
+builder.Services.AddSingleton<IArticleStockRepo, ArticleStockRepo>();
+builder.Services.AddSingleton<ICommandeRepo, CommandeRepo>();
+builder.Services.AddSingleton<IProduitRepo, ProduitRepo>();
+builder.Services.AddSingleton<ICategoryRepo, CategoryRepo>();
+builder.Services.AddSingleton<IStockService, StockService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
