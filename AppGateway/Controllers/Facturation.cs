@@ -223,6 +223,40 @@ namespace AppGateway.Controllers
             await VerifierEtMettreAJourStatutCommandeGenerique(verifStatutFactureUrl, changerEtatCommandeUrl,
                 changerEtatCommandeSiFalseUrl);
         }
+        
+        
+        
+        [HttpPost("factures/{factureId}/commandes/{commandeId}/valider")]
+        public async Task<IActionResult> VerifierEtMettreAJourStatutCommandeValidee2(int factureId, int commandeId)
+        {
+            string verifStatutFactureUrl = $"{_facturationUrl}{factureId}/est_validée";
+            string changerEtatCommandeUrl = $"{_gestionCommandesUrl}facturer/{commandeId}";
+            string changerEtatCommandeSiFalseUrl = $"{_gestionCommandesUrl}valider/{commandeId}";
+
+            // Passer les URL pour les cas de succès et de échec
+            await VerifierEtMettreAJourStatutCommandeGenerique(verifStatutFactureUrl, changerEtatCommandeUrl,
+                changerEtatCommandeSiFalseUrl);
+    
+            return Ok("Statut de la commande mis à jour avec succès.");
+        }
+        
+        
+        
+        
+        [HttpPost("factures/{factureId}/commandes/{commandeId}/payer")]
+        public async Task<IActionResult> VerifierEtMettreAJourStatutCommandePayee2(int factureId, int commandeId)
+        {
+            string verifStatutFactureUrl = $"{_facturationUrl}{factureId}/est_payée";
+            string changerEtatCommandeUrl = $"{_gestionCommandesUrl}payer/{commandeId}";
+            string changerEtatCommandeSiFalseUrl = $"{_gestionCommandesUrl}facturer/{commandeId}";
+
+            // Passer les URL pour les cas de succès et de échec
+            await VerifierEtMettreAJourStatutCommandeGenerique(verifStatutFactureUrl, changerEtatCommandeUrl,
+                changerEtatCommandeSiFalseUrl);
+    
+            return Ok("Statut de la commande mis à jour avec succès.");
+        }
+
 
     }
 }
