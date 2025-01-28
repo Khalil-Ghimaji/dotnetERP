@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
+using GestionCommande.DTOs;
 using GestionStock.DTO;
 using Persistence;
 using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
@@ -56,42 +57,41 @@ namespace AppGateway.Controllers
         }
 
         [HttpPost("expedierMarchandises")]
-        public async Task<IActionResult> ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande, int CommandeId)
+        public async Task<IActionResult> ExpedierMarchandises(int CommandeId)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-            var responseTasks = new[]
+            var commandResponse = await _gestionCommandesClient.GetAsync($"{_gestionCommandesUrl}{CommandeId}");
+            if(!commandResponse.IsSuccessStatusCode)
             {
-                _gestionStockClient.PostAsync($"{_gestionStockUrl}expedierMarchandises",
-                    new StringContent(JsonSerializer.Serialize(commande), Encoding.UTF8, "application/json")),
-                _gestionCommandesClient.PostAsync($"{_gestionCommandesUrl}expedier/{CommandeId}", null)
-            };
-            var responses = await Task.WhenAll(responseTasks);
-            var response1 = responses[0];
-            var response2 = responses[1];
-            if (response1.IsSuccessStatusCode && response2.IsSuccessStatusCode)
+                return NotFound("Commande non trouvée");
+            }
+            var commandcontent = await commandResponse.Content.ReadAsStringAsync();
+            var command = JsonSerializer.Deserialize<CommandeResponseDTO>(commandcontent);
+            String statusCommand = command.status;
+            
+            var commandeResponse = await _gestionCommandesClient.PostAsync($"{_gestionCommandesUrl}expedier/{CommandeId}", null);
+            if (!commandeResponse.IsSuccessStatusCode)
             {
-                await transaction.CommitAsync();
-                return StatusCode((int)HttpStatusCode.OK,
-                    await response2.Content.ReadAsStringAsync());
+                return StatusCode((int)commandeResponse.StatusCode, await commandeResponse.Content.ReadAsStringAsync());
+            }
+            HttpResponseMessage stockResponse;
+            if (statusCommand == "FACTUREE")
+            {
+                //var articles = JsonSerializer.Deserialize<CommandeResponseDTO>(commandcontent).articles;
+                stockResponse = await _gestionStockClient.PostAsync($"{_gestionStockUrl}expedierMarchandises",
+                    new StringContent(JsonSerializer.Serialize(new {idCommande=CommandeId}), Encoding.UTF8, "application/json"));
+            }
+            else            
+            {
+                stockResponse = await _gestionStockClient.PostAsync($"{_gestionStockUrl}confirmerCommande/{CommandeId}", null);
             }
 
-            if (response1.IsSuccessStatusCode && !response2.IsSuccessStatusCode)
+            if (!stockResponse.IsSuccessStatusCode)
             {
-                await transaction.RollbackAsync();
-                return StatusCode((int)response2.StatusCode,
-                    await response2.Content.ReadAsStringAsync());
+                await _gestionCommandesClient.PostAsync($"{_gestionCommandesUrl}rollback/{CommandeId}", 
+                    new StringContent(JsonSerializer.Serialize(new { lastStatus = statusCommand }), Encoding.UTF8, "application/json"));
+                return StatusCode((int)stockResponse.StatusCode, await stockResponse.Content.ReadAsStringAsync());
             }
-
-            if (!response1.IsSuccessStatusCode && response2.IsSuccessStatusCode)
-            {
-                await transaction.RollbackAsync();
-                return StatusCode((int)response1.StatusCode,
-                    await response1.Content.ReadAsStringAsync());
-            }
-
-            await transaction.RollbackAsync();
-            return StatusCode((int)HttpStatusCode.BadRequest,
-                await response1.Content.ReadAsStringAsync() + "\n" + await response2.Content.ReadAsStringAsync());
+            return StatusCode((int)HttpStatusCode.OK, $"{await stockResponse.Content.ReadAsStringAsync()}\n{await commandeResponse.Content.ReadAsStringAsync()}");
         }
 
         [HttpPut("modifierProduit")]
@@ -103,30 +103,58 @@ namespace AppGateway.Controllers
         }
 
         [HttpPost("reserverCommande")]
-        public async Task<IActionResult> ReserverCommande(ReserverProduitRequestDTO dto)
+        public async Task<IActionResult> ReserverCommande(ReserverCommandeRequestDTO dto)
         {
-            var response = await _gestionStockClient.PostAsync($"{_gestionStockUrl}reserverProduit",
+            var responseCommande = await _gestionCommandesClient.PostAsync($"{_gestionCommandesUrl}reserver/{dto.idCommande}", null);
+            if (!responseCommande.IsSuccessStatusCode)
+            {
+                return StatusCode((int)responseCommande.StatusCode, await responseCommande.Content.ReadAsStringAsync());
+            }
+            var responseStock = await _gestionStockClient.PostAsync($"{_gestionStockUrl}reserverCommande",
                 new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json"));
-            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+            if (!responseStock.IsSuccessStatusCode)
+            {
+                await _gestionCommandesClient.PostAsync($"{_gestionCommandesUrl}rollback/{dto.idCommande}", 
+                    new StringContent(JsonSerializer.Serialize(new { lastStatus = "FACTUREE" }), Encoding.UTF8, "application/json"));
+                return StatusCode((int)responseStock.StatusCode, await responseStock.Content.ReadAsStringAsync());
+            }
+            return StatusCode((int)HttpStatusCode.OK, $"{await responseStock.Content.ReadAsStringAsync()}\n{await responseCommande.Content.ReadAsStringAsync()}");
         }
 
-        [HttpDelete("annulerCommande")]
-        public async Task<IActionResult> AnnulerCommande(Guid reservationId)
+        [HttpDelete("annulerReservationCommande/{commandeId}")]
+        public async Task<IActionResult> AnnulerReservationCommande(int commandeId)
         {
-            var response =
-                await _gestionStockClient.DeleteAsync(
-                    $"{_gestionStockUrl}annulerCommande?reservationId={reservationId}");
-            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+            var commandResponse = await _gestionCommandesClient.GetAsync($"{_gestionCommandesUrl}{commandeId}");
+            if(!commandResponse.IsSuccessStatusCode)
+            {
+                return NotFound("Commande non trouvée");
+            }
+            var commandcontent = await commandResponse.Content.ReadAsStringAsync();
+            String statusCommand = JsonSerializer.Deserialize<CommandeResponseDTO>(commandcontent).status;
+            
+            var responseCommande = await _gestionCommandesClient.DeleteAsync($"{_gestionCommandesUrl}annuler/{commandeId}");
+            if (!responseCommande.IsSuccessStatusCode)
+            {
+                return StatusCode((int)responseCommande.StatusCode, await responseCommande.Content.ReadAsStringAsync());
+            }
+            
+            var responseStock = await _gestionStockClient.DeleteAsync($"{_gestionStockUrl}annulerCommande/{commandeId}");
+            if (!responseStock.IsSuccessStatusCode)
+            {
+                await _gestionCommandesClient.PostAsync($"{_gestionCommandesUrl}rollback/{commandeId}", 
+                    new StringContent(JsonSerializer.Serialize(new { lastStatus = statusCommand }), Encoding.UTF8, "application/json"));
+                return StatusCode((int)responseStock.StatusCode, await responseStock.Content.ReadAsStringAsync());
+            }
+            return StatusCode((int)HttpStatusCode.OK, $"{await responseStock.Content.ReadAsStringAsync()}\n{await responseCommande.Content.ReadAsStringAsync()}");
         }
 
-        [HttpPost("confirmerCommande")]
-        public async Task<IActionResult> ConfirmerCommande(Guid reservationId)
-        {
-            var requestDto = new ConfirmerCommandeRequestDTO { ReservationId = reservationId };
-            var response = await _gestionStockClient.PostAsync($"{_gestionStockUrl}confirmerCommande",
-                new StringContent(JsonSerializer.Serialize(requestDto), Encoding.UTF8, "application/json"));
-            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
-        }
+        // [HttpPost("confirmerCommande/{commandeId}")]
+        // public async Task<IActionResult> ConfirmerCommande(int commandeId)
+        // {
+        //     var response =
+        //         await _gestionStockClient.PostAsync($"{_gestionStockUrl}confirmerCommande/{commandeId}", null);
+        //     return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+        // }
 
         [HttpDelete("supprimerProduit")]
         public async Task<IActionResult> SupprimerProduit(int produitId)

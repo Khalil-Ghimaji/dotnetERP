@@ -2,7 +2,7 @@ namespace GestionStock.DTO;
 
 public class ExpedierMarchandisesRequestDTO
 {
-    public IEnumerable<ArticleExpedierMarchandisesDTO> Articles { get; init; }
+    public int idCommande;
 }
 public class ArticleExpedierMarchandisesDTO
 {
