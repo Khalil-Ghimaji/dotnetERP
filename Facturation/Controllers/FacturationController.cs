@@ -136,9 +136,21 @@ namespace Facturation.Controllers
                 return StatusCode(500, $"Erreur lors de l'envoi de l'e-mail : {ex.Message}");
             }
         }
-        
         [HttpGet("{factureId}/est_payée")]
-        public async Task<ActionResult<bool>> VerifierStatutFacture(int factureId)
+        public async Task<ActionResult<bool>> VerifierPaiementFacture(int factureId)
+        {
+            // Vérifie si la facture est payée
+            return await VerifierStatutFacture(factureId, StatusFacture.Payée);
+        }
+
+        [HttpGet("{factureId}/est_validée")]
+        public async Task<ActionResult<bool>> VerifierValiditeFacture(int factureId)
+        {
+            // Vérifie si la facture est validée
+            return await VerifierStatutFacture(factureId, StatusFacture.Validée);
+        }
+
+        private async Task<ActionResult<bool>> VerifierStatutFacture(int factureId, StatusFacture statutAttendu)
         {
             try
             {
@@ -148,15 +160,18 @@ namespace Facturation.Controllers
                     return NotFound("Facture non trouvée.");
                 }
 
-                bool isPayee = facture.StatusFacture == StatusFacture.Payée;
-
-                return Ok(isPayee); 
+                bool statutCorrespondant = facture.StatusFacture == statutAttendu;
+                return Ok(statutCorrespondant);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de la vérification du statut de la facture : {ex.Message}");
+                // Erreur lors de la vérification du statut de la facture
+                return StatusCode(500, $"Erreur : {ex.Message}");
             }
         }
+        
+
+    
 
     }
 }
