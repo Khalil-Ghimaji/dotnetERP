@@ -75,6 +75,10 @@ public class CommandeService : ICommandeService
             throw new HttpRequestException($"Commande n{idCommande} n'existe pas");
         }
 
+        if (quantite < 1)
+        {
+            throw new BadHttpRequestException("Quantité doit être supérieure à 0");
+        }
         if (commande.status == StatusCommande.PREPARATION)
         {
             var produit = await _produitRepo.GetById(idProduit);
@@ -85,11 +89,14 @@ public class CommandeService : ICommandeService
                 {
                     throw new HttpRequestException($"Article {produit.Nom} n'est pas en stock");
                 }
-
                 var prix = articleStock.Prix;
                 var articleCommande = _commandeRepo.getArticleCommandeByProduit(idCommande, idProduit);
                 if (articleCommande == null)
                 {
+                    if(articleStock.Quantite<quantite)
+                    {
+                        throw new BadHttpRequestException($"Quantité de {produit.Nom} insuffisante");
+                    }
                     var article = new ArticleCommande
                     {
                         commande = commande,
@@ -102,6 +109,10 @@ public class CommandeService : ICommandeService
                 else
                 {
                     articleCommande.quantite += quantite;
+                    if(articleStock.Quantite<articleCommande.quantite)
+                    {
+                        throw new BadHttpRequestException($"Quantité de {produit.Nom} insuffisante");
+                    }
                 }
 
                 return await _commandeRepo.Update(commande);
