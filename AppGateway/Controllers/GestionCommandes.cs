@@ -108,8 +108,13 @@ namespace AppGateway.Controllers
             }
             var commandcontent = await commandResponse.Content.ReadAsStringAsync();
             String statusCommand = JsonSerializer.Deserialize<CommandeResponseDTO>(commandcontent).status;
-            
-            var responseCommande = await _gestionCommandesClient.DeleteAsync($"{_gestionCommandesUrl}annuler/{idCommande}");
+            HttpResponseMessage? responseCommande;
+            if (statusCommand == "PREPARATION")
+            {
+                responseCommande = await _gestionCommandesClient.DeleteAsync($"{_gestionCommandesUrl}{idCommande}");
+                return StatusCode((int)responseCommande.StatusCode, await responseCommande.Content.ReadAsStringAsync());
+            }
+            responseCommande = await _gestionCommandesClient.DeleteAsync($"{_gestionCommandesUrl}annuler/{idCommande}");
             if (!responseCommande.IsSuccessStatusCode || statusCommand != "RESERVEE")
             {
                 return StatusCode((int)responseCommande.StatusCode, await responseCommande.Content.ReadAsStringAsync());

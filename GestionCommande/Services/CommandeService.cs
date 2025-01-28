@@ -186,8 +186,9 @@ public class CommandeService : ICommandeService
             throw new HttpRequestException($"Commande n{id} n'existe pas");
         }
 
-        if (commande.status == StatusCommande.VALIDEE || commande.status == StatusCommande.PREPARATION ||
-                commande.status == StatusCommande.RESERVEE || commande.status == StatusCommande.FACTUREE)
+        if (commande.status == StatusCommande.VALIDEE || 
+            commande.status == StatusCommande.RESERVEE || 
+            commande.status == StatusCommande.FACTUREE)
         {
             commande.status = StatusCommande.ANNULEE;
             return await _commandeRepo.Update(commande);
