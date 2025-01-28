@@ -8,24 +8,30 @@ namespace GestionClients.Services
     public class ClientService : IClientService
     {
         private readonly IClientRepo _ClientRepo;
+
         public ClientService(IClientRepo clientRepo)
         {
             _ClientRepo = clientRepo;
         }
+
         public async Task ajouterClient(ClientIn dto)
         {
             var existingClients = await _ClientRepo.GetAll();
-            foreach (var existingClient in existingClients) {
-                if (existingClient.nom == dto.nom && existingClient.address == dto.address && existingClient.telephone == dto.telephone)
+            foreach (var existingClient in existingClients)
+            {
+                if (existingClient.nom == dto.nom && existingClient.address == dto.address &&
+                    existingClient.telephone == dto.telephone)
                 {
-                    throw new InvalidOperationException("Un client avec les mêmes informations (nom, adresse, téléphone) existe déjà.");
+                    throw new InvalidOperationException(
+                        "Un client avec les mêmes informations (nom, adresse, téléphone) existe déjà.");
                 }
             }
+
             var client = new Client
             {
                 nom = dto.nom,
                 address = dto.address,
-                telephone = dto.telephone,
+                telephone = dto.telephone.Value,
                 sumNotes = 0,
                 nbNotes = 0,
                 note = 0,
@@ -43,6 +49,7 @@ namespace GestionClients.Services
             {
                 return null;
             }
+
             var clientOut = new ClientOut
             {
                 Id = client.Id,
@@ -59,10 +66,11 @@ namespace GestionClients.Services
         public async Task<IEnumerable<ClientOut>> listerClients()
         {
             var clients = await _ClientRepo.GetAll();
-            if( clients == null)
+            if (clients == null)
             {
                 return null;
             }
+
             var clientsOut = clients.Select(client => new ClientOut
             {
                 Id = client.Id,
@@ -83,32 +91,36 @@ namespace GestionClients.Services
             {
                 throw new KeyNotFoundException($"Client avec l'ID {id} introuvable.");
             }
-            client.sumNotes = client.sumNotes +note  ;
+
+            client.sumNotes = client.sumNotes + note;
             client.nbNotes++;
             client.note = client.sumNotes / client.nbNotes;
             await _ClientRepo.Update(client);
-            
-            
         }
-        public async Task modifierClient(int id,string nom,string adresse, int telephone)
+
+        public async Task modifierClient(int id, string? nom, string? adresse, int? telephone)
         {
             var existingClient = await _ClientRepo.GetById(id);
             if (existingClient == null)
             {
                 throw new KeyNotFoundException($"Client avec l'ID {id} introuvable.");
             }
-            if(nom != null && nom != "")
+
+            if (!String.IsNullOrEmpty(nom))
             {
                 existingClient.nom = nom;
             }
-            if(adresse != null && adresse != "")
+
+            if (!String.IsNullOrEmpty(adresse))
             {
                 existingClient.address = adresse;
             }
-            if (telephone != 0)
+
+            if (telephone != null && telephone != 0)
             {
-                existingClient.telephone = telephone;
+                existingClient.telephone = telephone.Value;
             }
+
             await _ClientRepo.Update(existingClient);
         }
 
@@ -136,6 +148,7 @@ namespace GestionClients.Services
             {
                 throw new KeyNotFoundException($"Client avec l'ID {id} introuvable.");
             }
+
             client.estRestreint = false;
             await _ClientRepo.Update(client);
         }
@@ -147,13 +160,21 @@ namespace GestionClients.Services
             {
                 throw new KeyNotFoundException($"Client avec l'ID {id} introuvable.");
             }
+
             client.estRestreint = true;
             await _ClientRepo.Update(client);
         }
-        public async Task supprimerClient(int id)
-        {
-           await _ClientRepo.Delete(id);
-        }
 
+        /*public async Task supprimerClient(int id)
+        {
+            if (await _ClientRepo.GetById(id) != null)
+            {
+                await _ClientRepo.Delete(id);
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Client avec l'ID {id} introuvable.");
+            }
+        }*/
     }
 }
