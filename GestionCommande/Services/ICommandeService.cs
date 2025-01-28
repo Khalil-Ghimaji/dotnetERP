@@ -7,7 +7,7 @@ public interface ICommandeService
     Task<IEnumerable<Commande>> getAllCommandes();
     Task<Commande?> getCommandeById(int id);
     Task<Commande> preparerCommande(Commande commande);
-    Task<Commande> modifierCommande(Commande commande);
+    Task<Commande> modifierCommande(int id, int idClient, DateTime? dateCommande);
     Task<Commande?> supprimerCommande(int id);
     Task<Commande> ajouterArticle(int idCommande, int idProduit, int quantite);
     Task<Commande> retirerArticle(int idCommande, int idProduit, int quantite);

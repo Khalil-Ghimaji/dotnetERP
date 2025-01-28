@@ -50,17 +50,26 @@ public class CommandeService : ICommandeService
         return await _commandeRepo.Add(commande);
     }
 
-    public async Task<Commande> modifierCommande(Commande commande)
+    public async Task<Commande> modifierCommande(int id,int idClient, DateTime? dateCommande)
     {
-        var command = await getCommandeById(commande.Id);
-        if (command == null)
+        var commande = await getCommandeById(id);
+        if (commande == null)
         {
-            throw new HttpRequestException($"Commande n{commande.Id} n'existe pas");
+            throw new HttpRequestException($"Commande n{id} n'existe pas");
         }
 
-        if (command.status == StatusCommande.PREPARATION && commande.status == StatusCommande.PREPARATION)
+        if (commande.status == StatusCommande.PREPARATION)
         {
-            _commandeRepo.Detach(command); // Detach the existing entity
+            var client = await _clientRepo.GetById(idClient);
+            if (client == null)
+            {
+                throw new HttpRequestException($"Client n{idClient} n'existe pas");
+            }
+            commande.client = client;
+            if (dateCommande != null)
+            {
+                commande.dateCommande = dateCommande.Value;
+            }
             return await _commandeRepo.Update(commande);
         }
 
