@@ -13,6 +13,6 @@ public class Client
     public int nbNotes { get; set; }
     public float note { get; set; }
     [Required]
-    public bool estRestreint { get; set; }
+    public bool estRestreint { get; set; } = false;
 
 }
