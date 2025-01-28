@@ -288,6 +288,13 @@ public class CommandeService : ICommandeService
 
     public async Task<Commande?> supprimerCommande(int id)
     {
+        var commande = await _commandeRepo.GetById(id);
+        if (commande == null)
+        {
+            return commande;
+        }
+        commande.articles = [];
+        await _commandeRepo.Update(commande);
         return await _commandeRepo.Delete(id);
     }
 
