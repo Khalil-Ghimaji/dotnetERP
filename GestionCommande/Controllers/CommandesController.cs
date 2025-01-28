@@ -89,6 +89,10 @@ namespace GestionCommande.Controllers
             {
                 return NotFound(e.Message);
             }
+            catch(BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
             catch (Exception _)
             {
                 return BadRequest("Erreur lors de la création de la commande");

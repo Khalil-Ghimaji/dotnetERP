@@ -43,9 +43,13 @@ public class CommandeService : ICommandeService
         var client = await _clientRepo.GetById(commande.client.Id);
         if (client == null)
         {
-            throw new HttpRequestException("Client inexistant");
+            throw new HttpRequestException("Client Inexistant");
         }
 
+        if (client.estRestreint)
+        {
+            throw new BadHttpRequestException("Client Restreint");
+        }
         commande.client = client;
         return await _commandeRepo.Add(commande);
     }
