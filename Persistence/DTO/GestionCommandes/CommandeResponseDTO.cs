@@ -9,7 +9,7 @@ public class CommandeResponseDTO
     public int Id { get; set; }
     public DateTime dateCommande { get; set; }
     public String status { get; set; }
-    public Client client { get; set; }
+    public ClientResponseDTO client { get; set; }
     public List<ArticleCommandeResponseDTO> articles { get; set; }
     public FactureResponseDTO Facture { get; set; }
 }
