@@ -169,6 +169,10 @@ public class CommandeService : ICommandeService
             throw new HttpRequestException($"Commande n{id} n'existe pas");
         }
 
+        if (commande.articles.Count == 0)
+        {
+            throw new BadHttpRequestException("Commande vide");
+        }
         if (commande.status == StatusCommande.PREPARATION)
         {
             commande.status = StatusCommande.VALIDEE;
