@@ -81,6 +81,15 @@ namespace AppGateway.Controllers
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
         
+        [HttpPut("Commandes/{idCommande}/ModifierClient")]
+        public async Task<ActionResult<CommandeResponseDTO>> ModifierClient(int idCommande, CommandeRequestDTO commandeRequestDto)
+        {
+            var json = JsonSerializer.Serialize(commandeRequestDto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _gestionCommandesClient.PutAsync(_gestionCommandesUrl + idCommande, content);
+            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+        }
+        
         [HttpPost("Commandes/{idCommande}/ValiderCommande")]
         public async Task<ActionResult<CommandeResponseDTO>> ValiderCommande(int idCommande)
         {
