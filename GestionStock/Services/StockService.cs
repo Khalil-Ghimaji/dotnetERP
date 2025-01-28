@@ -4,7 +4,9 @@ using AutoMapper;
 using GestionStock.DTO;
 using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
 using Persistence;
+using Persistence.entities.Commande;
 using Persistence.entities.Stock;
+using Persistence.Repository.CommandeRepositories;
 using Persistence.Repository.StockRepositories.Contracts;
 
 namespace GestionStock.Services
@@ -15,20 +17,21 @@ namespace GestionStock.Services
         private readonly IMapper _mapper;
         private readonly IProduitRepo _produitRepo;
         private readonly ICategoryRepo _categoryRepo;
+        private readonly ICommandeRepo _commandeRepo;
         private readonly AppDbContext _context;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private static readonly
-            ConcurrentDictionary<(Guid reservationId, int produitId), (CancellationTokenSource cts, int quantite)>
-            _reservationTasks =
-                new ConcurrentDictionary<(Guid, int), (CancellationTokenSource, int)>();
+        private static readonly ConcurrentDictionary<int, CancellationTokenSource> _reservationTasks =
+            new ConcurrentDictionary<int, CancellationTokenSource>();
 
         public StockService(IArticleStockRepo stockRepo, IMapper mapper, IProduitRepo produitRepo,
             IServiceScopeFactory scopeFactory,
             ICategoryRepo categoryRepo,
+            ICommandeRepo commandeRepo,
             AppDbContext context)
         {
             _stockRepo = stockRepo;
+            _commandeRepo = commandeRepo;
             _mapper = mapper;
             _scopeFactory = scopeFactory;
             _produitRepo = produitRepo;
@@ -104,23 +107,41 @@ namespace GestionStock.Services
 
 
         //reste à remplacer Commande par un DTO
-        public async Task ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
+        public async Task ExpedierMarchandises(int idCommande)
         {
-            foreach (var item in commande.Articles)
+            var commande = await _commandeRepo.GetById(idCommande);
+            if (commande == null)
             {
-                var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
-                if (articleStock == null)
+                throw new KeyNotFoundException("commande non trouvee");
+            }
+
+            var articles = _mapper.Map<IEnumerable<ArticleExpedierMarchandisesDTO>>(commande.articles);
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                foreach (var item in articles)
                 {
-                    throw new KeyNotFoundException("Article non trouvé.");
+                    var articleStock = await _stockRepo.GetArticleStockByProduitId(item.ProduitId);
+                    if (articleStock == null)
+                    {
+                        throw new KeyNotFoundException("Article non trouvé.");
+                    }
+
+                    if (articleStock.Quantite < item.Quantite)
+                    {
+                        throw new InvalidOperationException("Quantité insuffisante.");
+                    }
+
+                    articleStock.Quantite -= item.Quantite;
+                    await _stockRepo.Update(articleStock);
                 }
 
-                if (articleStock.Quantite < item.Quantite)
-                {
-                    throw new InvalidOperationException("Quantité insuffisante.");
-                }
-
-                articleStock.Quantite -= item.Quantite;
-                await _stockRepo.Update(articleStock);
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
@@ -148,17 +169,15 @@ namespace GestionStock.Services
         }
 
 
-        public async Task<Guid> ReserverProduit(ReserverProduitRequestDTO dto)
+        /*public async Task ReserverProduit(ReserverProduitRequestDTO dto)
         {
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
             if (articleStock != null && articleStock.Quantite >= dto.Quantite)
             {
                 articleStock.Quantite -= dto.Quantite;
                 await _stockRepo.Update(articleStock);
-
-                var reservationId = Guid.NewGuid();
                 var cts = new CancellationTokenSource();
-                _reservationTasks[(reservationId, dto.ProduitId)] = (cts, dto.Quantite);
+                _reservationTasks[(dto.CommandeId, dto.ProduitId)] = (cts, dto.Quantite);
 
                 if (TimeSpan.TryParse(dto.ReservationDuration, out var reservationDuration))
                 {
@@ -180,7 +199,7 @@ namespace GestionStock.Services
                         }
                         finally
                         {
-                            _reservationTasks.TryRemove((reservationId, dto.ProduitId), out _);
+                            _reservationTasks.TryRemove((dto.CommandeId, dto.ProduitId), out _);
                         }
                     });
                 }
@@ -188,8 +207,6 @@ namespace GestionStock.Services
                 {
                     throw new InvalidOperationException("Timespan invalide.");
                 }
-
-                return reservationId;
             }
             else
             {
@@ -200,50 +217,167 @@ namespace GestionStock.Services
 
                 throw new InvalidOperationException("Quantité insuffisante");
             }
-        }
+        }*/
 
-        public async Task AnnulerCommande(Guid id)
+        public async Task ReserverCommande(ReserverCommandeRequestDTO reserverCommande)
         {
-            var reservation = _reservationTasks.FirstOrDefault(r => r.Key.reservationId == id);
-            if (reservation.Key != default)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                var (reservationId, produitId) = reservation.Key;
-                var (cts, quantite) = reservation.Value;
-
-                cts.Cancel();
-                _reservationTasks.TryRemove((reservationId, produitId), out _);
-
-                using (var scope = _scopeFactory.CreateScope())
+                var commande = await _commandeRepo.GetById(reserverCommande.idCommande);
+                if (commande == null)
                 {
-                    var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
-                    var articleStock = await scopedStockRepo.GetArticleStockByProduitId(produitId);
-                    if (articleStock != null)
+                    throw new KeyNotFoundException("Commande non trouvée.");
+                }
+
+                var articles = commande.articles;
+                foreach (var article in articles)
+                {
+                    var articleStock = article.produit.ArticleStock;
+                    if (articleStock.Quantite >= article.quantite)
                     {
-                        articleStock.Quantite += quantite;
-                        await scopedStockRepo.Update(articleStock);
+                        articleStock.Quantite -= article.quantite;
+                        await _stockRepo.Update(articleStock);
+                    }
+                    else
+                    {
+                        if (articleStock == null)
+                        {
+                            throw new KeyNotFoundException("Article non trouvé.");
+                        }
+
+                        throw new InvalidOperationException("Quantité insuffisante");
                     }
                 }
+
+                var cts = new CancellationTokenSource();
+                _reservationTasks[reserverCommande.idCommande] = cts;
+                if (TimeSpan.TryParse(reserverCommande.ReservationDuration, out var reservationDuration))
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        using (var scope = _scopeFactory.CreateScope())
+                        {
+                            var scopedContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                            var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
+                            var scopedCommandeRepo = scope.ServiceProvider.GetRequiredService<ICommandeRepo>();
+
+                            try
+                            {
+                                await Task.Delay(reservationDuration, cts.Token);
+                                cts.Token.ThrowIfCancellationRequested();
+                                commande = await scopedCommandeRepo.GetById(reserverCommande.idCommande);
+                                commande.status = StatusCommande.ANNULEE;
+                                foreach (var article in articles)
+                                {
+                                    var articleStock =
+                                        await scopedStockRepo.GetArticleStockByProduitId(article.produit.Id);
+                                    if (articleStock != null)
+                                    {
+                                        articleStock.Quantite += article.quantite;
+                                        await scopedStockRepo.Update(articleStock);
+                                    }
+                                }
+
+                                await scopedCommandeRepo.Update(commande);
+                            }
+                            catch (TaskCanceledException)
+                            {
+                            }
+                            finally
+                            {
+                                _reservationTasks.TryRemove(reserverCommande.idCommande, out _);
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    throw new InvalidOperationException("Timespan invalide.");
+                }
+
+                await transaction.CommitAsync();
             }
-            else
+            catch (Exception e)
             {
-                throw new KeyNotFoundException("Reservation non trouvée.");
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
-        public void ConfirmerCommande(Guid id)
+        public async Task AnnulerCommande(int CommandeId)
         {
-            var reservation = _reservationTasks.FirstOrDefault(r => r.Key.reservationId == id);
-            if (reservation.Key != default)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                var (reservationId, produitId) = reservation.Key;
-                var (cts, _) = reservation.Value;
+                var reservation
+                    = _reservationTasks.FirstOrDefault(x => x.Key == CommandeId);
 
-                cts.Cancel();
-                _reservationTasks.TryRemove((reservationId, produitId), out _);
+                if (reservation.Key != default)
+                {
+                    var commandeId = reservation.Key;
+                    var cts = reservation.Value;
+
+                    cts.Cancel();
+                    _reservationTasks.TryRemove(commandeId, out _);
+                    var commande = await _commandeRepo.GetById(commandeId);
+                    var articles = commande?.articles;
+                    foreach (var article in articles)
+                    {
+                        var articleStock = await _stockRepo.GetArticleStockByProduitId(article.produit.Id);
+                        if (articleStock != null)
+                        {
+                            articleStock.Quantite += article.quantite;
+                            await _stockRepo.Update(articleStock);
+                        }
+                        else
+                        {
+                            throw new KeyNotFoundException("Article non trouvé.");
+                        }
+                    }
+                }
+                else
+                {
+                    throw new KeyNotFoundException("Reservation non trouvée.");
+                }
+
+                await transaction.CommitAsync();
             }
-            else
+            catch (Exception e)
             {
-                throw new KeyNotFoundException("Reservation non trouvée.");
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task ConfirmerCommande(int CommandeId)
+        {
+            var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var reservations = _reservationTasks.Where(x => x.Key == CommandeId).ToList();
+                foreach (var reservation in reservations)
+                {
+                    if (reservation.Key != default)
+                    {
+                        var commandeId = reservation.Key;
+                        var cts = reservation.Value;
+
+                        cts.Cancel();
+                        _reservationTasks.TryRemove(commandeId, out _);
+                    }
+                    else
+                    {
+                        throw new KeyNotFoundException("Reservation non trouvée.");
+                    }
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
@@ -262,7 +396,6 @@ namespace GestionStock.Services
             catch (Exception e)
             {
                 await transaction.RollbackAsync();
-                //propager la même exception
                 throw;
             }
         }

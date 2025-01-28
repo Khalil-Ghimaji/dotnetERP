@@ -1,3 +1,4 @@
+using System.Text.Json;
 using GestionStock.DTO;
 using GestionStock.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -80,11 +81,12 @@ namespace GestionStock.Controllers
         }
 
         [HttpPost("expedierMarchandises")]
-        public async Task<IActionResult> ExpedierMarchandises(ExpedierMarchandisesRequestDTO commande)
+        public async Task<IActionResult> ExpedierMarchandises([FromBody]dynamic body)
         {
+            int idCommande = JsonSerializer.Deserialize<JsonElement>(body).GetProperty("idCommande").GetInt32();
             try
             {
-                await _stockService.ExpedierMarchandises(commande);
+                await _stockService.ExpedierMarchandises(idCommande);
                 return NoContent();
             }
             catch (KeyNotFoundException e)
@@ -115,13 +117,13 @@ namespace GestionStock.Controllers
             }
         }
 
-        [HttpPost("reserverProduit")]
-        public async Task<ActionResult<ReserverProduitResponseDTO>> ReserverProduit(ReserverProduitRequestDTO dto)
+        [HttpPost("reserverCommande")]
+        public async Task<ActionResult> ReserverCommande(ReserverCommandeRequestDTO dto)
         {
             try
             {
-                var reservationId = await _stockService.ReserverProduit(dto);
-                return Ok(new { ReservationId = reservationId });
+                await _stockService.ReserverCommande(dto);
+                return Ok();
             }
             catch (KeyNotFoundException e)
             {
@@ -133,12 +135,12 @@ namespace GestionStock.Controllers
             }
         }
 
-        [HttpDelete("annulerCommande")]
-        public async Task<IActionResult> AnnulerCommande(Guid reservationId)
+        [HttpDelete("annulerCommande/{commandeId}")]
+        public async Task<IActionResult> AnnulerCommande(int commandeId)
         {
             try
             {
-                await _stockService.AnnulerCommande(reservationId);
+                await _stockService.AnnulerCommande(commandeId);
                 return NoContent();
             }
             catch (KeyNotFoundException e)
@@ -151,12 +153,12 @@ namespace GestionStock.Controllers
             }
         }
 
-        [HttpPost("confirmerCommande")]
-        public IActionResult ConfirmerCommande(ConfirmerCommandeRequestDTO dto)
+        [HttpPost("confirmerCommande/{commandeId}")]
+        public IActionResult ConfirmerCommande(int commandeId)
         {
             try
             {
-                _stockService.ConfirmerCommande(dto.ReservationId);
+                _stockService.ConfirmerCommande(commandeId);
                 return NoContent();
             }
             catch (KeyNotFoundException e)

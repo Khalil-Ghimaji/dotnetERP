@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Text.Json;
+using AutoMapper;
 using GestionCommande.DTOs;
 using GestionCommande.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -172,7 +173,7 @@ namespace GestionCommande.Controllers
             
         }
         
-        [HttpPost("annuler/{id}")]
+        [HttpDelete("annuler/{id}")]
         public async Task<ActionResult<CommandeResponseDTO>> AnnulerCommande(int id)
         {
             if (!await _commandeService.commandeExists(id))
@@ -182,6 +183,28 @@ namespace GestionCommande.Controllers
 
             try{
                 var commande = await _commandeService.annulerCommande(id);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+        
+        [HttpPost("reserver/{id}")]
+        public async Task<ActionResult<CommandeResponseDTO>> ReserverCommande(int id)
+        {
+            if (!await _commandeService.commandeExists(id))
+            {
+                return NotFound($"Commande n{id} n'existe pas");
+            }
+
+            try{
+                var commande = await _commandeService.reserverCommande(id);
                 return _mapper.Map<CommandeResponseDTO>(commande);
             }
             catch (HttpRequestException e)
@@ -216,8 +239,8 @@ namespace GestionCommande.Controllers
             }
         }
 
-        [HttpPost("livrer/{id}")]
-        public async Task<ActionResult<CommandeResponseDTO>> LivrerCommande(int id)
+        [HttpPost("payer/{id}")]
+        public async Task<ActionResult<CommandeResponseDTO>> PayerCommande(int id)
         {
             if (!await _commandeService.commandeExists(id))
             {
@@ -225,7 +248,7 @@ namespace GestionCommande.Controllers
             }
 
             try{
-                var commande = await _commandeService.livrerCommande(id);
+                var commande = await _commandeService.payerCommande(id);
                 return _mapper.Map<CommandeResponseDTO>(commande);
             }
             catch (HttpRequestException e)
@@ -260,17 +283,31 @@ namespace GestionCommande.Controllers
             }
         }
 
-        // [HttpPost("payer/{id}")]
-        // public async Task<ActionResult<Commande>> PayerCommande(int id)
-        // {
-        //     var commande = await _commandeService.getCommandeById(id);
-        //     if (commande == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //     _commandeService.payerCommande(commande);
-        //     return commande;
-        // }
+        [HttpPost("rollback/{id}")]
+        public async Task<ActionResult<CommandeResponseDTO>> RollbackCommande(int id, dynamic body)
+        {
+            
+            if (!await _commandeService.commandeExists(id))
+            {
+                return NotFound($"Commande n{id} n'existe pas");
+            }
+
+            try
+            {
+                var statusCommande = Enum.Parse<StatusCommande>(JsonSerializer.Deserialize<JsonElement>(body).GetProperty("lastStatus").GetString());
+                var commande = await _commandeService.rollback(id, statusCommande);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+        
 
         // [HttpPost("rembourser/{id}")]
         // public async Task<ActionResult<Commande>> RembourserCommande(int id)

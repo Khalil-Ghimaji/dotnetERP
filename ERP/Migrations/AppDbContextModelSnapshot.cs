@@ -15,11 +15,7 @@ namespace ERP.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.1")
-                .HasAnnotation("Proxies:ChangeTracking", false)
-                .HasAnnotation("Proxies:CheckEquality", false)
-                .HasAnnotation("Proxies:LazyLoading", true);
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
 
             modelBuilder.Entity("Persistence.entities.Client.Client", b =>
                 {
@@ -27,32 +23,9 @@ namespace ERP.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("address")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("estRestreint")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("nbNotes")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("nom")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<float>("note")
-                        .HasColumnType("REAL");
-
-                    b.Property<float>("sumNotes")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("telephone")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 
             modelBuilder.Entity("Persistence.entities.Commande.ArticleCommande", b =>
@@ -79,7 +52,7 @@ namespace ERP.Migrations
 
                     b.HasIndex("produitId");
 
-                    b.ToTable("ArticleCommandes");
+                    b.ToTable("ArticleCommandes", (string)null);
                 });
 
             modelBuilder.Entity("Persistence.entities.Commande.Commande", b =>
@@ -101,7 +74,7 @@ namespace ERP.Migrations
 
                     b.HasIndex("clientId");
 
-                    b.ToTable("Commandes");
+                    b.ToTable("Commandes", (string)null);
                 });
 
             modelBuilder.Entity("Persistence.entities.Facturation.Facture", b =>
@@ -127,7 +100,7 @@ namespace ERP.Migrations
                     b.HasIndex("CommandeId")
                         .IsUnique();
 
-                    b.ToTable("Factures");
+                    b.ToTable("Factures", (string)null);
                 });
 
             modelBuilder.Entity("Persistence.entities.Facturation.Paiement", b =>
@@ -150,7 +123,7 @@ namespace ERP.Migrations
 
                     b.HasKey("PaiementId");
 
-                    b.ToTable("Paiements");
+                    b.ToTable("Paiements", (string)null);
                 });
 
             modelBuilder.Entity("Persistence.entities.Stock.ArticleStock", b =>
@@ -166,7 +139,7 @@ namespace ERP.Migrations
 
                     b.HasKey("ProduitId");
 
-                    b.ToTable("AricleStocks");
+                    b.ToTable("AricleStocks", (string)null);
                 });
 
             modelBuilder.Entity("Persistence.entities.Stock.Categorie", b =>
@@ -185,7 +158,7 @@ namespace ERP.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Persistence.entities.Stock.Produit", b =>
@@ -208,7 +181,7 @@ namespace ERP.Migrations
                     b.HasIndex("Nom")
                         .IsUnique();
 
-                    b.ToTable("Produits");
+                    b.ToTable("Produits", (string)null);
                 });
 
             modelBuilder.Entity("Persistence.entities.Commande.ArticleCommande", b =>
