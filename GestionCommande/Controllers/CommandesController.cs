@@ -39,7 +39,10 @@ namespace GestionCommande.Controllers
             {
                 return NotFound($"Commande n{id} n'existe pas");
             }
-
+            if (commande.Facture != null)
+            {
+                return _mapper.Map<CommandeFactureeResponseDTO>(commande);
+            }
             return _mapper.Map<CommandeResponseDTO>(commande);
         }
 
@@ -222,12 +225,12 @@ namespace GestionCommande.Controllers
         }
 
         [HttpPost("expedier/{id}")]
-        public async Task<ActionResult<CommandeResponseDTO>> ExpedierCommande(int id)
+        public async Task<ActionResult<CommandeFactureeResponseDTO>> ExpedierCommande(int id)
         {
             try
             {
                 var commande = await _commandeService.expedierCommande(id);
-                return _mapper.Map<CommandeResponseDTO>(commande);
+                return _mapper.Map<CommandeFactureeResponseDTO>(commande);
             }
             catch (HttpRequestException e)
             {
@@ -244,12 +247,12 @@ namespace GestionCommande.Controllers
         }
 
         [HttpPost("payer/{id}")]
-        public async Task<ActionResult<CommandeResponseDTO>> PayerCommande(int id)
+        public async Task<ActionResult<CommandeFactureeResponseDTO>> PayerCommande(int id)
         {
             try
             {
                 var commande = await _commandeService.payerCommande(id);
-                return _mapper.Map<CommandeResponseDTO>(commande);
+                return _mapper.Map<CommandeFactureeResponseDTO>(commande);
             }
             catch (HttpRequestException e)
             {
@@ -266,12 +269,12 @@ namespace GestionCommande.Controllers
         }
 
         [HttpPost("facturer/{id}")]
-        public async Task<ActionResult<CommandeResponseDTO>> FacturerCommande(int id)
+        public async Task<ActionResult<CommandeFactureeResponseDTO>> FacturerCommande(int id)
         {
             try
             {
                 var commande = await _commandeService.facturerCommande(id);
-                return _mapper.Map<CommandeResponseDTO>(commande);
+                return _mapper.Map<CommandeFactureeResponseDTO>(commande);
             }
             catch (HttpRequestException e)
             {
@@ -295,6 +298,10 @@ namespace GestionCommande.Controllers
                 var statusCommande = Enum.Parse<StatusCommande>(JsonSerializer.Deserialize<JsonElement>(body)
                     .GetProperty("lastStatus").GetString());
                 var commande = await _commandeService.rollback(id, statusCommande);
+                if (commande.facture != null)
+                {
+                    return _mapper.Map<CommandeFactureeResponseDTO>(commande);
+                }
                 return _mapper.Map<CommandeResponseDTO>(commande);
             }
             catch (HttpRequestException e)

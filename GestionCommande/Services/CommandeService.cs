@@ -103,6 +103,10 @@ public class CommandeService : ICommandeService
                     throw new HttpRequestException($"Article {produit.Nom} n'est pas en stock");
                 }
                 var prix = articleStock.Prix;
+                if (prix <= 0)
+                {
+                    throw new HttpRequestException($"Article {produit.Nom} n'a pas de prix");
+                }
                 var articleCommande = _commandeRepo.getArticleCommandeByProduit(idCommande, idProduit);
                 if (articleCommande == null)
                 {

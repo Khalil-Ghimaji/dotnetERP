@@ -12,6 +12,7 @@ public class MappingProfile : Profile
     {
         CreateMap<Commande, CommandeResponseDTO>()
             .ForMember(dto=>dto.status, opt=>opt.MapFrom(c=>c.status.ToString()));
+        CreateMap<Commande, CommandeFactureeResponseDTO>();
         CreateMap<ArticleCommande, ArticleCommandeResponseDTO>()
             .ForMember(dto=>dto.IdProduit, opt=>opt.MapFrom(a=>a.produit.Id))
             .ForMember(dto=>dto.Nom, opt=>opt.MapFrom(a=>a.produit.Nom))

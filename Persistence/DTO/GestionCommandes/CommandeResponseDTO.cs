@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Persistence.entities.Client;
 using Persistence.entities.Commande;
 using Persistence.entities.Facturation;
@@ -11,5 +12,11 @@ public class CommandeResponseDTO
     public String status { get; set; }
     public ClientResponseDTO client { get; set; }
     public List<ArticleCommandeResponseDTO> articles { get; set; }
+    //public FactureResponseDTO Facture { get; set; }
+}
+
+public class CommandeFactureeResponseDTO : CommandeResponseDTO
+{
+    [JsonPropertyOrder(6)]
     public FactureResponseDTO Facture { get; set; }
 }
