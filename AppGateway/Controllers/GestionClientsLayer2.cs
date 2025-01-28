@@ -11,11 +11,16 @@ namespace AppGateway.Controllers
     public class GestionClientsLayer2 : ControllerBase
     {
             private readonly HttpClient _httpClient;
-            private const string Layer3BaseUrl = "http://localhost:44353/api/Client/";
+            private const string Layer3BaseUrl = "http://localhost:5154/api/Client";
             public GestionClientsLayer2(IHttpClientFactory httpClientFactory)
             {
                 _httpClient = httpClientFactory.CreateClient();
             }
+        [HttpGet("tester")]
+        public IActionResult Tester()
+        {
+            return Ok("GestionClientsLayer2 est fonctionnel.");
+        }
 
             [HttpPost("ajouterClient")]
             public async Task<IActionResult> AjouterClient([FromBody] ClientIn client)
