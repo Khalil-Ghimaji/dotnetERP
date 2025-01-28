@@ -258,7 +258,6 @@ namespace GestionStock.Services
                     {
                         using (var scope = _scopeFactory.CreateScope())
                         {
-                            var scopedContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                             var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
                             var scopedCommandeRepo = scope.ServiceProvider.GetRequiredService<ICommandeRepo>();
 
@@ -267,7 +266,7 @@ namespace GestionStock.Services
                                 await Task.Delay(reservationDuration, cts.Token);
                                 cts.Token.ThrowIfCancellationRequested();
                                 commande = await scopedCommandeRepo.GetById(reserverCommande.idCommande);
-                                commande.status = StatusCommande.ANNULEE;
+                                commande.status = StatusCommande.FACTUREE;
                                 foreach (var article in articles)
                                 {
                                     var articleStock =
