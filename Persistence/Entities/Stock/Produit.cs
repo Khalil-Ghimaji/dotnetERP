@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.entities.Stock;
 
-[Index(nameof(Nom), IsUnique = true)]
 public class Produit
 {
     public int Id { get; set; }

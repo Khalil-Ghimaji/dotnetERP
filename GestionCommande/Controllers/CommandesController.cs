@@ -223,6 +223,28 @@ namespace GestionCommande.Controllers
                 return BadRequest("Erreur lors de la réservation");
             }
         }
+        
+        [HttpPost("reserver/{id}")]
+        public async Task<ActionResult<CommandeResponseDTO>> ReserverCommande(int id)
+        {
+            if (!await _commandeService.commandeExists(id))
+            {
+                return NotFound($"Commande n{id} n'existe pas");
+            }
+
+            try{
+                var commande = await _commandeService.reserverCommande(id);
+                return _mapper.Map<CommandeResponseDTO>(commande);
+            }
+            catch (HttpRequestException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (BadHttpRequestException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         [HttpPost("expedier/{id}")]
         public async Task<ActionResult<CommandeFactureeResponseDTO>> ExpedierCommande(int id)

@@ -1,4 +1,5 @@
 using Persistence.entities.Facturation;
+using Persistence.entities.Commande;
 
 namespace Facturation.Services;
 
@@ -6,7 +7,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using QuestPDF.Helpers;
 
-public class PDFService: IPDFService 
+public class PDFService : IPDFService
 {
     public byte[] GenererFacturePDF(Facture facture)
     {
@@ -16,39 +17,130 @@ public class PDFService: IPDFService
             {
                 page.Size(PageSizes.A4);
                 page.Margin(2, Unit.Centimetre);
-                page.DefaultTextStyle(x => x.FontSize(12));
-                page.Content().Column(column =>
+                page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Arial"));
+
+                // En-tête de la facture
+                page.Header().Column(column =>
                 {
-                    column.Item().Text($"Facture #{facture.FactureId}")
-                        .FontSize(20)
+                    column.Item().AlignCenter().Text("Facture")
+                        .FontSize(24)
                         .Bold()
                         .FontColor(Colors.Blue.Darken3);
 
-                    column.Item().Text($"Date de génération : {facture.DateGeneration:dd/MM/yyyy}");
-                    column.Item().Text($"Commande ID : {facture.CommandeId}");
-                    column.Item().Text($"Montant Total : {facture.MontantTotal:C}");
-                    column.Item().Text($"Statut de la facture : {facture.StatusFacture}");
+                    column.Item().AlignCenter().Text($"Numéro de facture : #{facture.FactureId}")
+                        .FontSize(16)
+                        .SemiBold()
+                        .FontColor(Colors.Grey.Darken2);
 
-                    column.Item().Table(table =>
+                    column.Item().AlignCenter().Text($"Date de génération : {facture.DateGeneration:dd/MM/yyyy}")
+                        .FontSize(14)
+                        .FontColor(Colors.Grey.Darken1);
+                });
+
+                // Informations de la commande et du client
+                page.Content().Column(column =>
+                {
+                    column.Spacing(10);
+
+                    // Informations de la commande
+                    column.Item().Text("Informations de la commande")
+                        .FontSize(18)
+                        .Bold()
+                        .FontColor(Colors.Blue.Darken3);
+
+                    column.Item().Text($"Commande ID : {facture.CommandeId}")
+                        .FontSize(14);
+
+                    if (facture.Commande != null)
                     {
-                        table.ColumnsDefinition(columns =>
+                        column.Item().Text($"Date de la commande : {facture.Commande.dateCommande:dd/MM/yyyy}")
+                            .FontSize(14);
+
+                        column.Item().Text($"Statut de la commande : {facture.Commande.status}")
+                            .FontSize(14);
+
+                        // Informations du client
+                        column.Item().Text("Informations du client")
+                            .FontSize(18)
+                            .Bold()
+                            .FontColor(Colors.Blue.Darken3);
+
+                        column.Item().Text($"Nom du client : {facture.Commande.client.nom}")
+                            .FontSize(14);
+
+                        column.Item().Text($"Adresse : {facture.Commande.client.address}")
+                            .FontSize(14);
+
+                        column.Item().Text($"Téléphone : {facture.Commande.client.telephone}")
+                            .FontSize(14);
+
+                        // Tableau des articles de la commande
+                        column.Item().Text("Détails des articles")
+                            .FontSize(18)
+                            .Bold()
+                            .FontColor(Colors.Blue.Darken3);
+
+                        column.Item().Table(table =>
                         {
-                            columns.RelativeColumn(3);
-                            columns.RelativeColumn(1);
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(3); // Produit
+                                columns.RelativeColumn(1); // Quantité
+                                columns.RelativeColumn(1); // Prix unitaire
+                                columns.RelativeColumn(1); // Total
+                            });
+
+                            // En-tête du tableau
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(HeaderCellStyle).Text("Produit");
+                                header.Cell().Element(HeaderCellStyle).Text("Quantité");
+                                header.Cell().Element(HeaderCellStyle).Text("Prix unitaire");
+                                header.Cell().Element(HeaderCellStyle).Text("Total");
+
+                                static IContainer HeaderCellStyle(IContainer container)
+                                {
+                                    return container
+                                        .Background(Colors.Blue.Darken3)
+                                        .Padding(5)
+                                        .AlignCenter()
+                                        .AlignMiddle()
+;
+                                }
+                            });
+
+                            // Corps du tableau
+                            foreach (var article in facture.Commande.articles)
+                            {
+                                table.Cell().Element(CellStyle).Text(article.produit.Nom);
+                                table.Cell().Element(CellStyle).Text(article.quantite.ToString());
+                                table.Cell().Element(CellStyle).Text(article.prix.ToString("C"));
+                                table.Cell().Element(CellStyle).Text((article.quantite * article.prix).ToString("C"));
+                            }
+
+                            // Total de la facture
+                            table.Cell().ColumnSpan(4).Element(TotalCellStyle).Text($"Total de la facture : {facture.MontantTotal:C}")
+                                .FontSize(14)
+                                .Bold();
+
+                            static IContainer TotalCellStyle(IContainer container)
+                            {
+                                return container
+                                    .Background(Colors.Grey.Lighten3)
+                                    .Padding(5)
+                                    .AlignRight()
+                                    .AlignMiddle();
+                            }
                         });
+                    }
+                });
 
-                        table.Cell().Element(CellStyle).Text("Description");
-                        table.Cell().Element(CellStyle).Text("Montant");
-
-                        table.Cell().Element(CellStyle).Text("Produit A");
-                        table.Cell().Element(CellStyle).Text("100 €");
-
-                        table.Cell().Element(CellStyle).Text("Produit B");
-                        table.Cell().Element(CellStyle).Text("50 €");
-
-                        table.Cell().Element(CellStyle).Text("Total");
-                        table.Cell().Element(CellStyle).Text(facture.MontantTotal.ToString("C"));
-                    });
+                // Pied de page
+                page.Footer().AlignCenter().Text(text =>
+                {
+                    text.Span("Merci pour votre confiance !").Bold().FontColor(Colors.Blue.Darken3);
+                    text.Span(" - ").FontColor(Colors.Grey.Darken1);
+                    text.Span("Contactez-nous pour toute question.").Italic().FontColor(Colors.Grey.Darken1);
                 });
             });
         }).GeneratePdf();
@@ -56,6 +148,11 @@ public class PDFService: IPDFService
 
     private static IContainer CellStyle(IContainer container)
     {
-        return container.Border(1).Padding(5).AlignCenter().AlignMiddle();
+        return container
+            .Border(1)
+            .BorderColor(Colors.Grey.Lighten2)
+            .Padding(5)
+            .AlignCenter()
+            .AlignMiddle();
     }
 }
