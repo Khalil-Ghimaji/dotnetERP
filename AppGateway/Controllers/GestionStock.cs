@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using GestionCommande.DTOs;
 using GestionStock.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Persistence;
 using AjouterQuantiteRequestDTO = GestionStock.DTO.ArticleExpedierMarchandisesDTO;
 
@@ -11,6 +12,7 @@ namespace AppGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize("Admin,GestionnaireStock")]
     public class GestionStock : ControllerBase
     {
         private readonly HttpClient _gestionStockClient;

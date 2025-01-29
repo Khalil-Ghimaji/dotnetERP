@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Persistence.Entities;
 using Persistence.entities.Client;
 using Persistence.entities.Commande;
 using Persistence.entities.Facturation;
@@ -6,7 +8,7 @@ using Persistence.entities.Stock;
 
 namespace Persistence
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<User>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {

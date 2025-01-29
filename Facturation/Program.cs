@@ -12,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<IFactureRepo, FactureRepo>();
 builder.Services.AddScoped<IPaiementRepo, PaiementRepo>();
-builder.Services.AddScoped<IFactureService, FactureService>();
+/*builder.Services.AddScoped<IFactureService, FactureService>();*/
 builder.Services.AddScoped<IPDFService, PDFService>();
 builder.Services.AddScoped<IEmailSender, MailService>();
 builder.Services.AddControllers();

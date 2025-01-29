@@ -1,4 +1,4 @@
-using Facturation.DTO;
+/*using Facturation.DTO;
 using Persistence.entities.Facturation;
 
 namespace Facturation.Services
@@ -19,4 +19,4 @@ namespace Facturation.Services
         Task<Paiement> UpdatePaiement(int paiementId, UpdatePaiementDTO updatePaiementDTO);
         Task<byte[]> GenererFacturePdf(int factureId);
     }
-}
+}*/

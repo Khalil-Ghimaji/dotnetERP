@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Persistence.DTO.GestionClients;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace AppGateway.Controllers
 {
+    [Authorize(Roles = "Admin,GestionnaireClients")]
     [Route("api/[controller]")]
     [ApiController]
     public class GestionClientsLayer2 : ControllerBase

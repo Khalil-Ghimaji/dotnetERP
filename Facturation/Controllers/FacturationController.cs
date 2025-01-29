@@ -1,4 +1,4 @@
-using System.Text.Json;
+/*using System.Text.Json;
 using Facturation.DTO;
 using Facturation.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +16,7 @@ namespace Facturation.Controllers
         public FacturationController(AppDbContext context)
         {
             _context = context;
-        }*/
+        }#1#
         private readonly IFactureService _factureService;
 
         public FacturationController(IFactureService factureService)
@@ -68,7 +68,7 @@ namespace Facturation.Controllers
             // Enregistrer les changements
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(ConsulterFacture), new { id = facture.FactureId }, facture);
-        }*/
+        }#1#
 
         [HttpDelete("{factureId}")]
         public async Task<ActionResult> SupprimerFacture(int factureId)
@@ -156,4 +156,4 @@ namespace Facturation.Controllers
             }
         }
     }
-}
+}*/

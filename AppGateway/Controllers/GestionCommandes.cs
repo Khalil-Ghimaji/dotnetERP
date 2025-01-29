@@ -2,12 +2,14 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using GestionCommande.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppGateway.Controllers
 {
     [Route("api")]
     [ApiController]
+    [Authorize("Admin,GestionnaireCommandes")]
     public class GestionCommandes : ControllerBase
     {
         private readonly HttpClient _gestionCommandesClient;
