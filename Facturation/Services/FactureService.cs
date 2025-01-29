@@ -223,10 +223,24 @@ namespace Facturation.Services
 
         public async Task EnvoyerFactureParEmail(int factureId, string email)
         {
-            var facturePdf = await GenererFacturePdf(factureId);
+            var facture = await _factureRepo.GetById(factureId);
+            if (facture == null) throw new Exception("Facture non trouvée.");
 
-            var subject = $"Facture #{factureId}";
-            var body = "Veuillez trouver ci-joint votre facture.";
+            var facturePdf = _pdfService.GenererFacturePDF(facture);
+
+            var subject = $"Facture #{factureId} - Mini-ERP";
+            var body = $@"
+        <html>
+        <body>
+            <h2>Facture #{factureId}</h2>
+            <p>Bonjour,</p>
+            <p>Veuillez trouver ci-joint votre facture #{factureId}.</p>
+            <p>Montant total : {facture.MontantTotal:C}</p>
+            <p>Date de génération : {facture.DateGeneration:dd/MM/yyyy}</p>
+            <br/>
+            <p>Cordialement,<br/>Mini-ERP</p>
+        </body>
+        </html>";
 
             await _mailService.SendEmailAsync(email, subject, body, facturePdf);
         }

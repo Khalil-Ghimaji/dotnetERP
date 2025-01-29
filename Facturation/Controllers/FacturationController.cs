@@ -124,12 +124,15 @@ namespace Facturation.Controllers
         }
 
         [HttpPost("{factureId}/envoyer-email")]
-        public async Task<IActionResult> EnvoyerFactureParEmail(int factureId, [FromBody] string email)
+        public async Task<IActionResult> EnvoyerFactureParEmail(int factureId)
         {
             try
             {
-                await _factureService.EnvoyerFactureParEmail(factureId, email);
-                return Ok("Facture envoyée par e-mail avec succès.");
+                string emailDestination = "44rayen44@gmail.com";
+
+                // Pas besoin de passer l'email en paramètre car il est défini dans le MailService
+                await _factureService.EnvoyerFactureParEmail(factureId, emailDestination);
+                return Ok("Facture envoyée par e-mail avec succès à 44rayen44@gmail.com");
             }
             catch (Exception ex)
             {

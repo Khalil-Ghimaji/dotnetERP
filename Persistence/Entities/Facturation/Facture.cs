@@ -15,6 +15,7 @@ namespace Persistence.entities.Facturation
         public float MontantTotal { get; set; }
 
         public StatusFacture StatusFacture { get; set; }
+        [JsonPropertyName("montantPayé")]
         public float MontantPayé { get; set; }
 
     }
