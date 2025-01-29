@@ -18,14 +18,11 @@ namespace WebApplication2.Controllers
         private readonly UrlEncoder _urlEncoder;
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly QRCodeGenerator _qrGenerator = new();
 
-        public TwoFactorAuthController(UserManager<User> userManager, SignInManager<User> signInManager,UrlEncoder urlEncoder)
+        public TwoFactorAuthController(UserManager<User> userManager, UrlEncoder urlEncoder)
         {
             _urlEncoder = urlEncoder;
             _userManager = userManager;
-            _signInManager = signInManager;
         }
 
         [HttpPost("enable")]
@@ -37,6 +34,7 @@ namespace WebApplication2.Controllers
             {
                 return NotFound("User not found.");
             }
+
             var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             if (string.IsNullOrEmpty(unformattedKey))
             {
@@ -61,7 +59,7 @@ namespace WebApplication2.Controllers
             var qrCodeImage = qrCode.GetGraphic(20);
             return $"data:image/png;base64,{Convert.ToBase64String(qrCodeImage)}";
         }
-        
+
         private string FormatKey(string unformattedKey)
         {
             var result = new StringBuilder();
@@ -71,6 +69,7 @@ namespace WebApplication2.Controllers
                 result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
                 currentPosition += 4;
             }
+
             if (currentPosition < unformattedKey.Length)
             {
                 result.Append(unformattedKey.AsSpan(currentPosition));
@@ -84,7 +83,7 @@ namespace WebApplication2.Controllers
             return string.Format(
                 CultureInfo.InvariantCulture,
                 AuthenticatorUriFormat,
-                _urlEncoder.Encode("MAD"),
+                _urlEncoder.Encode("Mini-ERP"),
                 _urlEncoder.Encode(email),
                 unformattedKey);
         }

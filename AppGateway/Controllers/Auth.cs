@@ -51,14 +51,12 @@ namespace WebApplication2.Controllers
                 {
                     user = new User
                     {
-                        Email = payload.Email, 
-                        UserName = payload.Email, 
+                        Email = payload.Email,
+                        UserName = payload.Email,
                         EmailConfirmed = true,
                         firstName = payload.GivenName
                     };
                     await _userManager.CreateAsync(user);
-                    //prepare and send an email for the email confirmation
-                    await _userManager.AddToRoleAsync(user, "User");
                 }
 
                 await _userManager.AddLoginAsync(user, info);

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Persistence.DTO.GestionClients;
 using System.Text;
 using System.Text.Json;
@@ -11,12 +10,12 @@ namespace AppGateway.Controllers
     [Authorize(Roles = "Admin,GestionnaireClients")]
     [Route("api/[controller]")]
     [ApiController]
-    public class GestionClientsLayer2 : ControllerBase
+    public class GestionClients : ControllerBase
     {
         private readonly HttpClient _httpClient;
         private const string Layer3BaseUrl = "http://localhost:5154/api/Client";
 
-        public GestionClientsLayer2(IHttpClientFactory httpClientFactory)
+        public GestionClients(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
         }
