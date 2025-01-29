@@ -1,8 +1,8 @@
 using Persistence.entities.Facturation;
 
-namespace Facturation.DTO
+namespace Persistence.DTO.Facturation
 {
-    public class UpdateFactureDTO
+    public class UpdateEcheanceDTO
     {
         public float? MontantTotal { get; set; }
         public StatusFacture? StatusFacture { get; set; }

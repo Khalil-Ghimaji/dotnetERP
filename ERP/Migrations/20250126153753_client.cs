@@ -5,7 +5,7 @@
 namespace ERP.Migrations
 {
     /// <inheritdoc />
-    public partial class secondmig : Migration
+    public partial class client : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

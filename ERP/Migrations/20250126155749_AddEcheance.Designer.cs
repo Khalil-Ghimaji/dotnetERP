@@ -11,19 +11,46 @@ using Persistence;
 namespace ERP.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250123140715_first-mig")]
-    partial class firstmig
+    [Migration("20250126155749_AddEcheance")]
+    partial class AddEcheance
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true);
 
             modelBuilder.Entity("Persistence.entities.Client.Client", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("address")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("estRestreint")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("nbNotes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("nom")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("note")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("sumNotes")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("telephone")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -80,35 +107,9 @@ namespace ERP.Migrations
                     b.ToTable("Commandes");
                 });
 
-            modelBuilder.Entity("Persistence.entities.Facturation.Facture", b =>
+            modelBuilder.Entity("Persistence.entities.Facturation.Echeance", b =>
                 {
-                    b.Property<int>("FactureId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CommandeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("DateGeneration")
-                        .HasColumnType("TEXT");
-
-                    b.Property<float>("MontantTotal")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("StatusFacture")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("FactureId");
-
-                    b.HasIndex("CommandeId")
-                        .IsUnique();
-
-                    b.ToTable("Factures");
-                });
-
-            modelBuilder.Entity("Persistence.entities.Facturation.Paiement", b =>
-                {
-                    b.Property<int>("PaiementId")
+                    b.Property<int>("EcheanceId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -124,9 +125,41 @@ namespace ERP.Migrations
                     b.Property<float>("Montant")
                         .HasColumnType("REAL");
 
-                    b.HasKey("PaiementId");
+                    b.Property<int>("StatutEcheance")
+                        .HasColumnType("INTEGER");
 
-                    b.ToTable("Paiements");
+                    b.HasKey("EcheanceId");
+
+                    b.ToTable("Echeances");
+                });
+
+            modelBuilder.Entity("Persistence.entities.Facturation.Facture", b =>
+                {
+                    b.Property<int>("FactureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CommandeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateGeneration")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("MontantPayé")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("MontantTotal")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("StatusFacture")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("FactureId");
+
+                    b.HasIndex("CommandeId")
+                        .IsUnique();
+
+                    b.ToTable("Factures");
                 });
 
             modelBuilder.Entity("Persistence.entities.Stock.ArticleStock", b =>
@@ -180,9 +213,6 @@ namespace ERP.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategorieId");
-
-                    b.HasIndex("Nom")
-                        .IsUnique();
 
                     b.ToTable("Produits");
                 });
