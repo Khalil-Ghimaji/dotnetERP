@@ -3,6 +3,7 @@ using Persistence.DTO.Facturation;
 using Persistence.entities.Facturation;
 using Persistence.Repository.CommandeRepositories;
 using Persistence.Repository.FacturationRepositories;
+using Persistence.entities.Commande;
 
 namespace Facturation.Services
 {
@@ -51,12 +52,30 @@ namespace Facturation.Services
                 throw new Exception($"Commande avec ID {creerFactureDTO.CommandeId} introuvable.");
             }
 
+            // Vérifier si l'état de la commande est bien "VALIDEE"
+            if (commande.status != StatusCommande.VALIDEE)
+            {
+                throw new Exception($"Impossible de créer une facture pour une commande dont l'état est {commande.status}. La commande doit être VALIDEE.");
+            }
+
             var facture = _mapper.Map<Facture>(creerFactureDTO);
             facture.Commande = commande;
+
+            // Vérifier si MontantTotal est défini dans le DTO, sinon le calculer
+            if (!creerFactureDTO.MontantTotal.HasValue) 
+            {
+                facture.MontantTotal = (float)commande.articles.Sum(article => article.prix * article.quantite);
+            }
+            else
+            {
+                facture.MontantTotal = creerFactureDTO.MontantTotal.Value;
+            }
 
             var result = await _factureRepo.Add(facture);
             return _mapper.Map<FactureResponseDTO>(result);
         }
+
+
 
         public async Task SupprimerFacture(int id)
         {
@@ -221,7 +240,7 @@ namespace Facturation.Services
             return _pdfService.GenererFacturePDF(facture);
         }
 
-        public async Task EnvoyerFactureParEmail(int factureId, string email)
+        public async Task EnvoyerFactureParEmail(int factureId)
         {
             var facture = await _factureRepo.GetById(factureId);
             if (facture == null) throw new Exception("Facture non trouvée.");
@@ -242,7 +261,7 @@ namespace Facturation.Services
         </body>
         </html>";
 
-            await _mailService.SendEmailAsync(email, subject, body, facturePdf);
+            await _mailService.SendEmailAsync(facture.Commande.client.email, subject, body, facturePdf);
         }
 
         private async Task VerifEtatFacture(int factureId)
@@ -253,6 +272,11 @@ namespace Facturation.Services
             var echeancesExistantes = await _echeanceRepo.GetEcheancesByFactureId(factureId);
 
             var total = echeancesExistantes.Sum(e => e.Montant);
+
+            Console.WriteLine("hhhhhhhhhhhhhhhhhhhhhhhh\nkkkkk");
+            Console.WriteLine(total);
+            Console.WriteLine("hhhhhhhhhhhhhhhhhhhhhhhh\nkkkkk");
+            Console.WriteLine(facture.MontantTotal);
 
             if (total == facture.MontantTotal)
             {

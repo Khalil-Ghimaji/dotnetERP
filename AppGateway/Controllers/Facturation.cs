@@ -35,6 +35,7 @@ namespace AppGateway.Controllers
             var content = await response.Content.ReadAsStringAsync();
             return StatusCode((int)response.StatusCode, content);
         }
+
         [HttpPost("factures/{factureId}/annuler")]
         public async Task<IActionResult> AnnulerFacture(int factureId)
         {
@@ -69,6 +70,7 @@ namespace AppGateway.Controllers
                 return StatusCode(500, $"Erreur lors de l'annulation de la facture : {ex.Message}");
             }
         }
+
         [HttpPost("factures")]
         public async Task<IActionResult> CreerFacture([FromBody] CreerFactureDTO creerFactureDTO)
         {
@@ -80,6 +82,19 @@ namespace AppGateway.Controllers
             var json = JsonSerializer.Serialize(creerFactureDTO);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync($"{_facturationUrl}", content);
+
+            // Vérification de la réponse de la création de la facture
+            if (response.IsSuccessStatusCode)
+            {
+                // Extraire l'ID de la facture à partir de la réponse
+                var factureContent = await response.Content.ReadAsStringAsync();
+                using var document = JsonDocument.Parse(factureContent);
+                var root = document.RootElement;
+                int factureId = root.GetProperty("FactureId").GetInt32();
+
+                // Appel de la méthode pour vérifier et mettre à jour le statut de la commande
+                await VerifierEtMettreAJourStatutCommande(factureId);
+            }
 
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
@@ -95,8 +110,17 @@ namespace AppGateway.Controllers
             var json = JsonSerializer.Serialize(updateFactureDTO);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _httpClient.PutAsync($"{_facturationUrl}{id}", content);
+
+            // Vérification de la réponse de la mise à jour de la facture
+            if (response.IsSuccessStatusCode)
+            {
+                // Appel de la méthode pour vérifier et mettre à jour le statut de la commande
+                await VerifierEtMettreAJourStatutCommande(id);
+            }
+
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
+
 
         [HttpDelete("factures/{id}")]
         public async Task<IActionResult> SupprimerFacture(int id)
@@ -148,7 +172,6 @@ namespace AppGateway.Controllers
         }
 
 
-
         [HttpGet("factures/{factureId}/echeances")]
         public async Task<IActionResult> ConsulterEcheances(int factureId)
         {
@@ -166,12 +189,22 @@ namespace AppGateway.Controllers
         }
 
         [HttpPut("echeances/{echeanceId}")]
-        public async Task<IActionResult> ModifierEcheance(int echeanceId, [FromBody] UpdateEcheanceDTO updateEcheanceDTO)
+        public async Task<IActionResult> ModifierEcheance(int echeanceId,
+            [FromBody] UpdateEcheanceDTO updateEcheanceDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
+            var response1 = await _httpClient.GetAsync($"{_facturationUrl}echeance/{echeanceId}");
+            var content1 = await response1.Content.ReadAsStringAsync();
+            using var jsonDoc = JsonDocument.Parse(content1);
+            var root = jsonDoc.RootElement;
+            int factureId = root.GetProperty("factureId").GetInt32();
+            Console.WriteLine("heeeeeeeeeeeey");
+            Console.WriteLine(factureId);
+            Console.WriteLine("haaaaaaaaaaaaw");
 
             var json = JsonSerializer.Serialize(updateEcheanceDTO);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -186,7 +219,7 @@ namespace AppGateway.Controllers
             // Appeler la méthode pour vérifier et mettre à jour le statut de la commande après la mise à jour de l'échéance
             try
             {
-                await VerifierEtMettreAJourStatutCommande(echeanceId); // Appel de la méthode
+                await VerifierEtMettreAJourStatutCommande(factureId); // Appel de la méthode
             }
             catch (Exception ex)
             {
@@ -199,6 +232,11 @@ namespace AppGateway.Controllers
         [HttpDelete("echeances/{echeanceId}")]
         public async Task<IActionResult> SupprimerEcheance(int echeanceId)
         {
+            var response1 = await _httpClient.GetAsync($"{_facturationUrl}echeance/{echeanceId}");
+            var content1 = await response1.Content.ReadAsStringAsync();
+            using var jsonDoc = JsonDocument.Parse(content1);
+            var root = jsonDoc.RootElement;
+            int factureId = root.GetProperty("factureId").GetInt32();
             var response = await _httpClient.DeleteAsync($"{_facturationUrl}echeance/{echeanceId}");
 
             if (!response.IsSuccessStatusCode)
@@ -210,7 +248,7 @@ namespace AppGateway.Controllers
             // Appeler la méthode pour vérifier et mettre à jour le statut de la commande après la suppression de l'échéance
             try
             {
-                await VerifierEtMettreAJourStatutCommande(echeanceId); // Appel de la méthode
+                await VerifierEtMettreAJourStatutCommande(factureId); // Appel de la méthode
             }
             catch (Exception ex)
             {
@@ -229,31 +267,43 @@ namespace AppGateway.Controllers
         }
 
         [HttpPost("factures/{factureId}/envoyer-email")]
-        public async Task<IActionResult> EnvoyerFactureParEmail(int factureId, [FromBody] string email)
+        public async Task<IActionResult> EnvoyerFactureParEmail(int factureId)
         {
-            if (string.IsNullOrEmpty(email))
+            string verifStatutFactureUrlValidee = $"{_facturationUrl}{factureId}/est_validée";
+            var checkValideeResponse = await _httpClient.GetAsync(verifStatutFactureUrlValidee);
+
+            if (!checkValideeResponse.IsSuccessStatusCode)
             {
-                return BadRequest("L'adresse e-mail est requise.");
+                throw new Exception(
+                    $"Échec lors de la vérification du statut de la facture (validée) : {checkValideeResponse.ReasonPhrase}");
             }
 
-            var json = JsonSerializer.Serialize(new { Email = email });
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_facturationUrl}{factureId}/envoyer-email", content);
+            var checkValideeContent = await checkValideeResponse.Content.ReadAsStringAsync();
+            bool isValidee = bool.Parse(checkValideeContent);
 
-            if (response.IsSuccessStatusCode)
+            if (isValidee)
             {
-                return Ok("Facture envoyée par e-mail avec succès.");
+                var response = await _httpClient.PostAsync($"{_facturationUrl}{factureId}/envoyer-email", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok("Facture envoyée par e-mail avec succès.");
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return StatusCode((int)response.StatusCode, errorContent);
+                }
             }
             else
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                return StatusCode((int)response.StatusCode, errorContent);
+                return BadRequest("La facture doit être validée avant d'être envoyée par e-mail.");
             }
         }
 
 
         //lezm netfaker nhotha fi blasetha baad ki nthabet mel endpoint
-
+/*
         private async Task VerifierEtMettreAJourStatutCommande(int factureId)
         {
             try
@@ -342,7 +392,191 @@ namespace AppGateway.Controllers
             {
                 throw new Exception($"Erreur dans la mise à jour du statut de la commande : {ex.Message}");
             }
+        }*/
+
+/*
+private async Task VerifierEtMettreAJourStatutCommande(int factureId)
+{
+    try
+    {
+        // Récupérer la facture
+        var response = await _httpClient.GetAsync($"{_facturationUrl}{factureId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"Erreur lors de la récupération de la facture : {response.ReasonPhrase}");
         }
+
+        var factureContent = await response.Content.ReadAsStringAsync();
+        using var document = JsonDocument.Parse(factureContent);
+        var root = document.RootElement;
+        var commandeId = root.GetProperty("commandeId").GetInt32();
+
+        // Définir les URLs
+        string verifStatutFactureUrlPayee = $"{_facturationUrl}{factureId}/est_payée";
+        string verifStatutFactureUrlValidee = $"{_facturationUrl}{factureId}/est_validée";
+        string rollbackUrl = $"{_gestionCommandesUrl}rollback/{commandeId}";
+
+        // Vérification du statut de la facture (payée)
+        var checkPaymentResponse = await _httpClient.GetAsync(verifStatutFactureUrlPayee);
+        if (!checkPaymentResponse.IsSuccessStatusCode)
+        {
+            throw new Exception($"Échec lors de la vérification du statut de la facture (payée) : {checkPaymentResponse.ReasonPhrase}");
+        }
+
+        var checkPaymentContent = await checkPaymentResponse.Content.ReadAsStringAsync();
+        bool isPayee = bool.Parse(checkPaymentContent);
+
+        // Vérification du statut de la facture (validée)
+        var checkValideeResponse = await _httpClient.GetAsync(verifStatutFactureUrlValidee);
+        if (!checkValideeResponse.IsSuccessStatusCode)
+        {
+            throw new Exception($"Échec lors de la vérification du statut de la facture (validée) : {checkValideeResponse.ReasonPhrase}");
+        }
+
+        var checkValideeContent = await checkValideeResponse.Content.ReadAsStringAsync();
+        bool isValidee = bool.Parse(checkValideeContent);
+
+        // Déterminer le dernier statut pour le rollback
+        string lastStatus = isPayee ? "PAYEE" :
+                           isValidee ? "FACTUREE" :
+                           "VALIDEE";
+
+        // Effectuer le rollback avec l'état correspondant
+        var rollbackContent = new StringContent(
+            JsonSerializer.Serialize(new { lastStatus }),
+            Encoding.UTF8, "application/json"
+        );
+
+        var rollbackResponse = await _httpClient.PostAsync(rollbackUrl, rollbackContent);
+        if (!rollbackResponse.IsSuccessStatusCode)
+        {
+            var errorContent = await rollbackResponse.Content.ReadAsStringAsync();
+            throw new Exception($"Échec lors du rollback du statut de la commande : {errorContent}");
+        }
+    }
+    catch (Exception ex)
+    {
+        throw new Exception($"Erreur dans la mise à jour du statut de la commande : {ex.Message}");
+    }
+}*/
+
+
+        private async Task VerifierEtMettreAJourStatutCommande(int factureId)
+        {
+            try
+            {
+                // Récupérer la facture
+                var response = await _httpClient.GetAsync($"{_facturationUrl}{factureId}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Erreur lors de la récupération de la facture : {response.ReasonPhrase}");
+                }
+
+                var factureContent = await response.Content.ReadAsStringAsync();
+                using var document = JsonDocument.Parse(factureContent);
+                var root = document.RootElement;
+                var commandeId = root.GetProperty("commandeId").GetInt32();
+                string getCommandeUrl = $"{_gestionCommandesUrl}{commandeId}";
+                var commandeResponse = await _httpClient.GetAsync(getCommandeUrl);
+                if (!commandeResponse.IsSuccessStatusCode)
+                {
+                    throw new Exception(
+                        $"Erreur lors de la récupération de la commande : {commandeResponse.ReasonPhrase}");
+                }
+
+                var commandeContent = await commandeResponse.Content.ReadAsStringAsync();
+                using var commandeDocument = JsonDocument.Parse(commandeContent);
+                var commandeRoot = commandeDocument.RootElement;
+                string statutCommande = commandeRoot.GetProperty("status").GetString();
+                Console.WriteLine("heeeeeeeeeeeey");
+                Console.WriteLine(statutCommande);
+
+                // Définir les URLs
+                string verifStatutFactureUrlPayee = $"{_facturationUrl}{factureId}/est_payée";
+                string verifStatutFactureUrlValidee = $"{_facturationUrl}{factureId}/est_validée";
+                string rollbackUrl = $"{_gestionCommandesUrl}rollback/{commandeId}";
+
+                // Vérification du statut de la facture (payée)
+                var checkPaymentResponse = await _httpClient.GetAsync(verifStatutFactureUrlPayee);
+                if (!checkPaymentResponse.IsSuccessStatusCode)
+                {
+                    throw new Exception(
+                        $"Échec lors de la vérification du statut de la facture (payée) : {checkPaymentResponse.ReasonPhrase}");
+                }
+
+                var checkPaymentContent = await checkPaymentResponse.Content.ReadAsStringAsync();
+                bool isPayee = bool.Parse(checkPaymentContent);
+
+                // Vérification du statut de la facture (validée)
+                var checkValideeResponse = await _httpClient.GetAsync(verifStatutFactureUrlValidee);
+                if (!checkValideeResponse.IsSuccessStatusCode)
+                {
+                    throw new Exception(
+                        $"Échec lors de la vérification du statut de la facture (validée) : {checkValideeResponse.ReasonPhrase}");
+                }
+
+                var checkValideeContent = await checkValideeResponse.Content.ReadAsStringAsync();
+                bool isValidee = bool.Parse(checkValideeContent);
+
+                string lastStatus;
+
+                if (isPayee)
+                {
+                    lastStatus = "PAYEE";
+                }
+                else if (isValidee)
+                {
+                    if (statutCommande == "FACTUREE" || statutCommande == "EXPEDIEE" || statutCommande == "RESERVEE")
+                    {
+                        lastStatus = statutCommande;
+                    }
+                    else if (statutCommande == "PAYEE")
+                    {
+                        lastStatus = "EXPEDIEE";
+                    }
+                    else
+                    {
+                        lastStatus = "FACTUREE";
+                    }
+                }
+                else
+                {
+                    if (statutCommande == "PAYEE" || statutCommande == "EXPEDIEE")
+                    {
+                        lastStatus = "EXPEDIEE";
+                    }
+                    else if (statutCommande == "VALIDEE" || statutCommande == "FACTUREE" ||
+                             statutCommande == "RESERVEE")
+                    {
+                        lastStatus = "VALIDEE";
+                    }
+                    else
+                    {
+                        lastStatus = statutCommande;
+                    }
+                }
+
+
+                // Effectuer le rollback avec l'état correspondant
+                var rollbackContent = new StringContent(
+                    JsonSerializer.Serialize(new { lastStatus }),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var rollbackResponse = await _httpClient.PostAsync(rollbackUrl, rollbackContent);
+                if (!rollbackResponse.IsSuccessStatusCode)
+                {
+                    var errorContent = await rollbackResponse.Content.ReadAsStringAsync();
+                    throw new Exception($"Échec lors du rollback du statut de la commande : {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erreur dans la mise à jour du statut de la commande : {ex.Message}");
+            }
+        }
+
+
         // Endpoint pour vérifier et mettre à jour le statut de la commande
         [HttpPost("verifier-et-mettre-a-jour/{factureId}")]
         public async Task<ActionResult> VerifierEtMettreAJourCommande(int factureId)
@@ -357,6 +591,5 @@ namespace AppGateway.Controllers
                 return BadRequest($"Une erreur s'est produite : {ex.Message}");
             }
         }
-        
     }
 }

@@ -16,6 +16,6 @@ namespace Facturation.Services
         Task SupprimerEcheance(int echeanceId);
         Task<EcheanceResponseDTO> UpdateEcheance(int echeanceId, UpdateEcheanceDTO updateEcheanceDto);
         Task<byte[]> GenererFacturePdf(int factureId);
-        Task EnvoyerFactureParEmail(int factureId, string email);
+        Task EnvoyerFactureParEmail(int factureId);
     }
 }

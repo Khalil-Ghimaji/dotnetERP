@@ -14,5 +14,7 @@ public class Client
     public float note { get; set; }
     [Required]
     public bool estRestreint { get; set; }
+    [EmailAddress]
+    public string email { get; set; }
 
 }
