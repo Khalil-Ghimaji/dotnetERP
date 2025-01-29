@@ -293,7 +293,10 @@ public class CommandeService : ICommandeService
         {
             return commande;
         }
-        commande.articles = [];
+        foreach (var art in commande.articles)
+        {
+            art.produit = null;
+        }
         await _commandeRepo.Update(commande);
         return await _commandeRepo.Delete(id);
     }
