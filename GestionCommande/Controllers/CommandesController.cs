@@ -25,7 +25,7 @@ namespace GestionCommande.Controllers
         public async Task<ActionResult<IEnumerable<CommandeResponseDTO>>> GetCommandes()
         {
             var commandes = await _commandeService.getAllCommandes();
-            
+
             return _mapper.Map<List<CommandeResponseDTO>>(commandes.ToList());
         }
 
@@ -39,10 +39,12 @@ namespace GestionCommande.Controllers
             {
                 return NotFound($"Commande n{id} n'existe pas");
             }
+
             if (commande.Facture != null)
             {
                 return _mapper.Map<CommandeFactureeResponseDTO>(commande);
             }
+
             return _mapper.Map<CommandeResponseDTO>(commande);
         }
 
@@ -51,7 +53,6 @@ namespace GestionCommande.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<CommandeResponseDTO>> ModifierCommande(int id, CommandeRequestDTO commandeDto)
         {
-            
             if (!await _commandeService.commandeExists(id))
             {
                 return NotFound($"Commande n{id} n'existe pas");
@@ -92,7 +93,7 @@ namespace GestionCommande.Controllers
             {
                 return NotFound(e.Message);
             }
-            catch(BadHttpRequestException e)
+            catch (BadHttpRequestException e)
             {
                 return BadRequest(e.Message);
             }
@@ -111,11 +112,13 @@ namespace GestionCommande.Controllers
             {
                 return NotFound($"Commande n{id} n'existe pas");
             }
+
             return NoContent();
         }
-        
+
         [HttpPost("ajouterArticle/{idCommande}")]
-        public async Task<ActionResult<CommandeResponseDTO>> AjouterArticle(int idCommande, ArticleCommandeRequestDTO articleCommande)
+        public async Task<ActionResult<CommandeResponseDTO>> AjouterArticle(int idCommande,
+            ArticleCommandeRequestDTO articleCommande)
         {
             try
             {
@@ -136,11 +139,13 @@ namespace GestionCommande.Controllers
                 return BadRequest("Erreur lors de l'ajout de l'article");
             }
         }
-        
+
         [HttpPost("retirerArticle/{idCommande}")]
-        public async Task<ActionResult<CommandeResponseDTO>> RetirerArticle(int idCommande, ArticleCommandeRequestDTO articleCommande)
+        public async Task<ActionResult<CommandeResponseDTO>> RetirerArticle(int idCommande,
+            ArticleCommandeRequestDTO articleCommande)
         {
-            try{
+            try
+            {
                 var commande = await _commandeService.retirerArticle(idCommande, articleCommande.IdProduit,
                     articleCommande.Quantite);
                 return _mapper.Map<CommandeResponseDTO>(commande);
@@ -158,11 +163,12 @@ namespace GestionCommande.Controllers
                 return BadRequest("Erreur lors du retrait de l'article");
             }
         }
-        
+
         [HttpPost("valider/{id}")]
         public async Task<ActionResult<CommandeResponseDTO>> ValiderCommande(int id)
         {
-            try{
+            try
+            {
                 var commande = await _commandeService.validerCommande(id);
                 return _mapper.Map<CommandeResponseDTO>(commande);
             }
@@ -178,13 +184,13 @@ namespace GestionCommande.Controllers
             {
                 return BadRequest("Erreur lors de la validation");
             }
-            
         }
-        
+
         [HttpDelete("annuler/{id}")]
         public async Task<ActionResult<CommandeResponseDTO>> AnnulerCommande(int id)
         {
-            try{
+            try
+            {
                 var commande = await _commandeService.annulerCommande(id);
                 return _mapper.Map<CommandeResponseDTO>(commande);
             }
@@ -201,7 +207,7 @@ namespace GestionCommande.Controllers
                 return BadRequest("Erreur lors de l'annulation");
             }
         }
-        
+
         [HttpPost("reserver/{id}")]
         public async Task<ActionResult<CommandeResponseDTO>> ReserverCommande(int id)
         {
@@ -221,28 +227,6 @@ namespace GestionCommande.Controllers
             catch (Exception _)
             {
                 return BadRequest("Erreur lors de la réservation");
-            }
-        }
-        
-        [HttpPost("reserver/{id}")]
-        public async Task<ActionResult<CommandeResponseDTO>> ReserverCommande(int id)
-        {
-            if (!await _commandeService.commandeExists(id))
-            {
-                return NotFound($"Commande n{id} n'existe pas");
-            }
-
-            try{
-                var commande = await _commandeService.reserverCommande(id);
-                return _mapper.Map<CommandeResponseDTO>(commande);
-            }
-            catch (HttpRequestException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (BadHttpRequestException e)
-            {
-                return BadRequest(e.Message);
             }
         }
 
@@ -324,6 +308,7 @@ namespace GestionCommande.Controllers
                 {
                     return _mapper.Map<CommandeFactureeResponseDTO>(commande);
                 }
+
                 return _mapper.Map<CommandeResponseDTO>(commande);
             }
             catch (HttpRequestException e)
@@ -339,7 +324,7 @@ namespace GestionCommande.Controllers
                 return BadRequest("Erreur lors du rollback");
             }
         }
-        
+
 
         // [HttpPost("rembourser/{id}")]
         // public async Task<ActionResult<Commande>> RembourserCommande(int id)

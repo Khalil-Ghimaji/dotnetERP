@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Persistence.DTO.Facturation;
 using Persistence.entities.Commande;
@@ -9,6 +10,7 @@ namespace AppGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize("Admin,Comptable")]
     public class FacturationController : ControllerBase
     {
         private readonly HttpClient _httpClient;
