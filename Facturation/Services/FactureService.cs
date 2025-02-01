@@ -119,11 +119,12 @@ namespace Facturation.Services
             var totalPayé = echeancesExistantes.Sum(e => e.Montant);
 
             var montantRestant = facture.MontantTotal - facture.MontantPayé;
-            if (creerEcheanceDto.Montant + totalPayé > montantRestant)
+            if (creerEcheanceDto.Montant  > montantRestant)
             {
                 throw new Exception(
                     "Le montant total des échéances dépasse le montant restant à payer pour cette facture.");
             }
+            
 
             var echeance = _mapper.Map<Echeance>(creerEcheanceDto);
             echeance.FactureId = factureId;
@@ -135,7 +136,7 @@ namespace Facturation.Services
             }
 
 
-            VerifEtatFacture(facture.FactureId);
+            await VerifEtatFacture(facture.FactureId);
             var result = await _echeanceRepo.Add(echeance);
             return _mapper.Map<EcheanceResponseDTO>(result);
         }

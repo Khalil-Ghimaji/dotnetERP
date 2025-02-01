@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AppGateway.Controllers
 {
-    [Authorize(Roles = "Admin,GestionnaireClients")]
+    //[Authorize(Roles = "Admin,GestionnaireClients")]
     [Route("api/[controller]")]
     [ApiController]
     public class GestionClients : ControllerBase

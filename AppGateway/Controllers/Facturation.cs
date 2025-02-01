@@ -10,22 +10,24 @@ namespace AppGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize("Admin,Comptable")]
+    //[Authorize("Admin,Comptable")]
     public class FacturationController : ControllerBase
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _gestionFacturesClient;
+        private readonly HttpClient _gestionCommandesClient;
         private readonly string _facturationUrl = "http://localhost:5105/api/Facturation/";
         private readonly string _gestionCommandesUrl = "http://localhost:5012/api/Commandes/"; // URL mise à jour
 
         public FacturationController(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient("FacturationClient");
+            _gestionFacturesClient = httpClientFactory.CreateClient("GestionFacturesClient");
+            _gestionCommandesClient = httpClientFactory.CreateClient("GestionCommandesClient");
         }
 
         [HttpGet("factures")]
         public async Task<IActionResult> ListerFactures()
         {
-            var response = await _httpClient.GetAsync($"{_facturationUrl}");
+            var response = await _gestionFacturesClient.GetAsync($"{_facturationUrl}");
             var content = await response.Content.ReadAsStringAsync();
             return StatusCode((int)response.StatusCode, content);
         }
@@ -33,7 +35,7 @@ namespace AppGateway.Controllers
         [HttpGet("factures/{id}")]
         public async Task<IActionResult> ConsulterFacture(int id)
         {
-            var response = await _httpClient.GetAsync($"{_facturationUrl}{id}");
+            var response = await _gestionFacturesClient.GetAsync($"{_facturationUrl}{id}");
             var content = await response.Content.ReadAsStringAsync();
             return StatusCode((int)response.StatusCode, content);
         }
@@ -54,7 +56,7 @@ namespace AppGateway.Controllers
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 // Faire la requête PUT pour mettre à jour le statut de la facture
-                var response = await _httpClient.PutAsync($"{_facturationUrl}{factureId}", content);
+                var response = await _gestionFacturesClient.PutAsync($"{_facturationUrl}{factureId}", content);
 
                 // Vérifier si la mise à jour a réussi
                 if (response.IsSuccessStatusCode)
@@ -83,7 +85,7 @@ namespace AppGateway.Controllers
 
             var json = JsonSerializer.Serialize(creerFactureDTO);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_facturationUrl}", content);
+            var response = await _gestionFacturesClient.PostAsync($"{_facturationUrl}", content);
 
             // Vérification de la réponse de la création de la facture
             if (response.IsSuccessStatusCode)
@@ -92,7 +94,7 @@ namespace AppGateway.Controllers
                 var factureContent = await response.Content.ReadAsStringAsync();
                 using var document = JsonDocument.Parse(factureContent);
                 var root = document.RootElement;
-                int factureId = root.GetProperty("FactureId").GetInt32();
+                int factureId = root.GetProperty("factureId").GetInt32();
 
                 // Appel de la méthode pour vérifier et mettre à jour le statut de la commande
                 await VerifierEtMettreAJourStatutCommande(factureId);
@@ -111,7 +113,7 @@ namespace AppGateway.Controllers
 
             var json = JsonSerializer.Serialize(updateFactureDTO);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync($"{_facturationUrl}{id}", content);
+            var response = await _gestionFacturesClient.PutAsync($"{_facturationUrl}{id}", content);
 
             // Vérification de la réponse de la mise à jour de la facture
             if (response.IsSuccessStatusCode)
@@ -127,7 +129,7 @@ namespace AppGateway.Controllers
         [HttpDelete("factures/{id}")]
         public async Task<IActionResult> SupprimerFacture(int id)
         {
-            var response = await _httpClient.DeleteAsync($"{_facturationUrl}{id}");
+            var response = await _gestionFacturesClient.DeleteAsync($"{_facturationUrl}{id}");
             return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
         }
 
@@ -144,7 +146,7 @@ namespace AppGateway.Controllers
                 // Ajout de l'échéance
                 var json = JsonSerializer.Serialize(creerEcheanceDTO);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"{_facturationUrl}{factureId}/echeance", content);
+                var response = await _gestionFacturesClient.PostAsync($"{_facturationUrl}{factureId}/echeance", content);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -177,7 +179,7 @@ namespace AppGateway.Controllers
         [HttpGet("factures/{factureId}/echeances")]
         public async Task<IActionResult> ConsulterEcheances(int factureId)
         {
-            var response = await _httpClient.GetAsync($"{_facturationUrl}{factureId}/echeances");
+            var response = await _gestionFacturesClient.GetAsync($"{_facturationUrl}{factureId}/echeances");
             var content = await response.Content.ReadAsStringAsync();
             return StatusCode((int)response.StatusCode, content);
         }
@@ -185,7 +187,7 @@ namespace AppGateway.Controllers
         [HttpGet("echeances/{echeanceId}")]
         public async Task<IActionResult> ConsulterEcheance(int echeanceId)
         {
-            var response = await _httpClient.GetAsync($"{_facturationUrl}echeance/{echeanceId}");
+            var response = await _gestionFacturesClient.GetAsync($"{_facturationUrl}echeance/{echeanceId}");
             var content = await response.Content.ReadAsStringAsync();
             return StatusCode((int)response.StatusCode, content);
         }
@@ -199,7 +201,7 @@ namespace AppGateway.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response1 = await _httpClient.GetAsync($"{_facturationUrl}echeance/{echeanceId}");
+            var response1 = await _gestionFacturesClient.GetAsync($"{_facturationUrl}echeance/{echeanceId}");
             var content1 = await response1.Content.ReadAsStringAsync();
             using var jsonDoc = JsonDocument.Parse(content1);
             var root = jsonDoc.RootElement;
@@ -210,7 +212,7 @@ namespace AppGateway.Controllers
 
             var json = JsonSerializer.Serialize(updateEcheanceDTO);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync($"{_facturationUrl}echeance/{echeanceId}", content);
+            var response = await _gestionFacturesClient.PutAsync($"{_facturationUrl}echeance/{echeanceId}", content);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -234,12 +236,12 @@ namespace AppGateway.Controllers
         [HttpDelete("echeances/{echeanceId}")]
         public async Task<IActionResult> SupprimerEcheance(int echeanceId)
         {
-            var response1 = await _httpClient.GetAsync($"{_facturationUrl}echeance/{echeanceId}");
+            var response1 = await _gestionFacturesClient.GetAsync($"{_facturationUrl}echeance/{echeanceId}");
             var content1 = await response1.Content.ReadAsStringAsync();
             using var jsonDoc = JsonDocument.Parse(content1);
             var root = jsonDoc.RootElement;
             int factureId = root.GetProperty("factureId").GetInt32();
-            var response = await _httpClient.DeleteAsync($"{_facturationUrl}echeance/{echeanceId}");
+            var response = await _gestionFacturesClient.DeleteAsync($"{_facturationUrl}echeance/{echeanceId}");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -263,7 +265,7 @@ namespace AppGateway.Controllers
         [HttpGet("factures/{factureId}/pdf")]
         public async Task<IActionResult> GenererFacturePdf(int factureId)
         {
-            var response = await _httpClient.GetAsync($"{_facturationUrl}{factureId}/pdf");
+            var response = await _gestionFacturesClient.GetAsync($"{_facturationUrl}{factureId}/pdf");
             var content = await response.Content.ReadAsByteArrayAsync();
             return File(content, "application/pdf", $"Facture_{factureId}.pdf");
         }
@@ -272,7 +274,7 @@ namespace AppGateway.Controllers
         public async Task<IActionResult> EnvoyerFactureParEmail(int factureId)
         {
             string verifStatutFactureUrlValidee = $"{_facturationUrl}{factureId}/est_validée";
-            var checkValideeResponse = await _httpClient.GetAsync(verifStatutFactureUrlValidee);
+            var checkValideeResponse = await _gestionFacturesClient.GetAsync(verifStatutFactureUrlValidee);
 
             if (!checkValideeResponse.IsSuccessStatusCode)
             {
@@ -285,7 +287,7 @@ namespace AppGateway.Controllers
 
             if (isValidee)
             {
-                var response = await _httpClient.PostAsync($"{_facturationUrl}{factureId}/envoyer-email", null);
+                var response = await _gestionFacturesClient.PostAsync($"{_facturationUrl}{factureId}/envoyer-email", null);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -468,7 +470,7 @@ private async Task VerifierEtMettreAJourStatutCommande(int factureId)
             try
             {
                 // Récupérer la facture
-                var response = await _httpClient.GetAsync($"{_facturationUrl}{factureId}");
+                var response = await _gestionFacturesClient.GetAsync($"{_facturationUrl}{factureId}");
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception($"Erreur lors de la récupération de la facture : {response.ReasonPhrase}");
@@ -479,7 +481,7 @@ private async Task VerifierEtMettreAJourStatutCommande(int factureId)
                 var root = document.RootElement;
                 var commandeId = root.GetProperty("commandeId").GetInt32();
                 string getCommandeUrl = $"{_gestionCommandesUrl}{commandeId}";
-                var commandeResponse = await _httpClient.GetAsync(getCommandeUrl);
+                var commandeResponse = await _gestionCommandesClient.GetAsync(getCommandeUrl);
                 if (!commandeResponse.IsSuccessStatusCode)
                 {
                     throw new Exception(
@@ -490,8 +492,6 @@ private async Task VerifierEtMettreAJourStatutCommande(int factureId)
                 using var commandeDocument = JsonDocument.Parse(commandeContent);
                 var commandeRoot = commandeDocument.RootElement;
                 string statutCommande = commandeRoot.GetProperty("status").GetString();
-                Console.WriteLine("heeeeeeeeeeeey");
-                Console.WriteLine(statutCommande);
 
                 // Définir les URLs
                 string verifStatutFactureUrlPayee = $"{_facturationUrl}{factureId}/est_payée";
@@ -499,7 +499,7 @@ private async Task VerifierEtMettreAJourStatutCommande(int factureId)
                 string rollbackUrl = $"{_gestionCommandesUrl}rollback/{commandeId}";
 
                 // Vérification du statut de la facture (payée)
-                var checkPaymentResponse = await _httpClient.GetAsync(verifStatutFactureUrlPayee);
+                var checkPaymentResponse = await _gestionFacturesClient.GetAsync(verifStatutFactureUrlPayee);
                 if (!checkPaymentResponse.IsSuccessStatusCode)
                 {
                     throw new Exception(
@@ -510,7 +510,7 @@ private async Task VerifierEtMettreAJourStatutCommande(int factureId)
                 bool isPayee = bool.Parse(checkPaymentContent);
 
                 // Vérification du statut de la facture (validée)
-                var checkValideeResponse = await _httpClient.GetAsync(verifStatutFactureUrlValidee);
+                var checkValideeResponse = await _gestionFacturesClient.GetAsync(verifStatutFactureUrlValidee);
                 if (!checkValideeResponse.IsSuccessStatusCode)
                 {
                     throw new Exception(
@@ -561,11 +561,11 @@ private async Task VerifierEtMettreAJourStatutCommande(int factureId)
 
                 // Effectuer le rollback avec l'état correspondant
                 var rollbackContent = new StringContent(
-                    JsonSerializer.Serialize(new { lastStatus }),
+                    JsonSerializer.Serialize(new { lastStatus=lastStatus }),
                     Encoding.UTF8, "application/json"
                 );
 
-                var rollbackResponse = await _httpClient.PostAsync(rollbackUrl, rollbackContent);
+                var rollbackResponse = await _gestionCommandesClient.PostAsync(rollbackUrl, rollbackContent);
                 if (!rollbackResponse.IsSuccessStatusCode)
                 {
                     var errorContent = await rollbackResponse.Content.ReadAsStringAsync();

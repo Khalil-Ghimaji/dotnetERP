@@ -1,4 +1,5 @@
 using Persistence.entities.Commande;
+using Persistence.entities.Facturation;
 using Persistence.Repository.ClientRepositories;
 using Persistence.Repository.CommandeRepositories;
 using Persistence.Repository.StockRepositories.Contracts;
@@ -258,6 +259,11 @@ public class CommandeService : ICommandeService
         if (commande == null)
         {
             throw new HttpRequestException($"Commande n{id} n'existe pas");
+        }
+
+        if (commande.Facture.StatusFacture != StatusFacture.Validée)
+        {
+            throw new BadHttpRequestException("Facture invalide. Veuillez regler la facture avant d'expedier la commande.");
         }
 
         if (commande.status == StatusCommande.FACTUREE || commande.status == StatusCommande.RESERVEE)

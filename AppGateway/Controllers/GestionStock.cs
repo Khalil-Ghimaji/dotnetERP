@@ -12,7 +12,7 @@ namespace AppGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize("Admin,GestionnaireStock")]
+    //[Authorize("Admin,GestionnaireStock")]
     public class GestionStock : ControllerBase
     {
         private readonly HttpClient _gestionStockClient;
