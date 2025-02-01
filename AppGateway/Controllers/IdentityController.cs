@@ -1,10 +1,3 @@
-<<<<<<< Updated upstream
-namespace AppGateway.Controllers;
-
-public class IdentityController
-{
-    
-=======
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -452,5 +445,4 @@ namespace YourNamespace.Controllers
         public string? Provider { get; set; }
         public string? IdToken { get; set; }
     }
->>>>>>> Stashed changes
 }
