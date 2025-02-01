@@ -1,5 +1,7 @@
+using AppGateway.Models;
 using AppGateway.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
 using Persistence;
 using Persistence.Entities;
 using IEmailSender = Microsoft.AspNetCore.Identity.UI.Services.IEmailSender;
@@ -70,13 +72,13 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new List<string>
-        { "Admin", "GestionnaireStock", "GestionnaireClients", "GestionnaireCommandes", "Comptable" };
+    var roles = new List<Roles>
+        { Roles.ADMIN, Roles.GESTIONNAIRE_STOCK, Roles.GESTIONNAIRE_CLIENTS, Roles.GESTIONNAIRE_COMMANDES, Roles.COMPTABLE };
     foreach (var role in roles)
     {
-        if (!await roleManager.RoleExistsAsync(role))
+        if (!await roleManager.RoleExistsAsync(role.ToString()))
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            await roleManager.CreateAsync(new IdentityRole(role.ToString()));
         }
     }
 
@@ -84,11 +86,11 @@ using (var scope = app.Services.CreateScope())
     var user = await userManager.FindByEmailAsync("admin@gmail.com");
     if (user == null)
     {
-        user = new User { Email = "admin@gmail.com", UserName = "admin", EmailConfirmed = true };
-        var result = await userManager.CreateAsync(user, "Admin@123");
-        await userManager.AddToRoleAsync(user, "Admin");
+        user = new User { Email = "admin@gmail.com", UserName = "admin@gmail.com", EmailConfirmed = true };
+        await userManager.CreateAsync(user, "Admin@123");
+        await userManager.AddToRoleAsync(user, Roles.ADMIN.ToString());
     }
 }
 
-app.MapIdentityApi<User>();
+/*app.MapIdentityApi<User>();*/
 app.Run();

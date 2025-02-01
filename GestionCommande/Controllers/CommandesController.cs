@@ -304,7 +304,7 @@ namespace GestionCommande.Controllers
                 var statusCommande = Enum.Parse<StatusCommande>(JsonSerializer.Deserialize<JsonElement>(body)
                     .GetProperty("lastStatus").GetString());
                 var commande = await _commandeService.rollback(id, statusCommande);
-                if (commande.facture != null)
+                if (commande.Facture != null)
                 {
                     return _mapper.Map<CommandeFactureeResponseDTO>(commande);
                 }
