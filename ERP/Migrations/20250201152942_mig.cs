@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ERP.Migrations
 {
     /// <inheritdoc />
-    public partial class addedauth : Migration
+    public partial class mig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -78,7 +78,8 @@ namespace ERP.Migrations
                     sumNotes = table.Column<float>(type: "REAL", nullable: false),
                     nbNotes = table.Column<int>(type: "INTEGER", nullable: false),
                     note = table.Column<float>(type: "REAL", nullable: false),
-                    estRestreint = table.Column<bool>(type: "INTEGER", nullable: false)
+                    estRestreint = table.Column<bool>(type: "INTEGER", nullable: false),
+                    email = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -86,19 +87,20 @@ namespace ERP.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Paiements",
+                name: "Echeances",
                 columns: table => new
                 {
-                    PaiementId = table.Column<int>(type: "INTEGER", nullable: false)
+                    EcheanceId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Montant = table.Column<float>(type: "REAL", nullable: false),
                     MethodePaiement = table.Column<int>(type: "INTEGER", nullable: false),
-                    FactureId = table.Column<int>(type: "INTEGER", nullable: false)
+                    FactureId = table.Column<int>(type: "INTEGER", nullable: false),
+                    StatutEcheance = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Paiements", x => x.PaiementId);
+                    table.PrimaryKey("PK_Echeances", x => x.EcheanceId);
                 });
 
             migrationBuilder.CreateTable(
@@ -304,7 +306,8 @@ namespace ERP.Migrations
                     CommandeId = table.Column<int>(type: "INTEGER", nullable: false),
                     DateGeneration = table.Column<DateTime>(type: "TEXT", nullable: false),
                     MontantTotal = table.Column<float>(type: "REAL", nullable: false),
-                    StatusFacture = table.Column<int>(type: "INTEGER", nullable: false)
+                    StatusFacture = table.Column<int>(type: "INTEGER", nullable: false),
+                    MontantPayé = table.Column<float>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -379,12 +382,6 @@ namespace ERP.Migrations
                 name: "IX_Produits_CategorieId",
                 table: "Produits",
                 column: "CategorieId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Produits_Nom",
-                table: "Produits",
-                column: "Nom",
-                unique: true);
         }
 
         /// <inheritdoc />
@@ -412,10 +409,10 @@ namespace ERP.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Factures");
+                name: "Echeances");
 
             migrationBuilder.DropTable(
-                name: "Paiements");
+                name: "Factures");
 
             migrationBuilder.DropTable(
                 name: "Produits");
