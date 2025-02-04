@@ -4,6 +4,7 @@ using Persistence.entities.Facturation;
 using Persistence.Repository.CommandeRepositories;
 using Persistence.Repository.FacturationRepositories;
 using Persistence.entities.Commande;
+using System.Globalization;
 
 namespace Facturation.Services
 {
@@ -134,9 +135,8 @@ namespace Facturation.Services
                 await _factureRepo.Update(facture);
             }
 
-
-            await VerifEtatFacture(facture.FactureId);
             var result = await _echeanceRepo.Add(echeance);
+            await VerifEtatFacture(facture.FactureId);
             return _mapper.Map<EcheanceResponseDTO>(result);
         }
 
@@ -172,9 +172,10 @@ namespace Facturation.Services
                 facture.MontantPayé -= echeance.Montant;
                 await _factureRepo.Update(facture);
             }
-            VerifEtatFacture(facture.FactureId);
-
             await _echeanceRepo.Delete(echeanceId);
+            await VerifEtatFacture(facture.FactureId);
+
+            
         }
 
         public async Task<EcheanceResponseDTO> UpdateEcheance(int echeanceId, UpdateEcheanceDTO updateEcheanceDto)
@@ -225,9 +226,9 @@ namespace Facturation.Services
                 facture.MontantPayé -= ancienMontant;
                 await _factureRepo.Update(facture);
             }
-
-            VerifEtatFacture(facture.FactureId);
+            
             var result = await _echeanceRepo.Update(echeance);
+            await VerifEtatFacture(facture.FactureId);
             return _mapper.Map<EcheanceResponseDTO>(result);
         }
 
@@ -254,7 +255,7 @@ namespace Facturation.Services
             <h2>Facture #{factureId}</h2>
             <p>Bonjour,</p>
             <p>Veuillez trouver ci-joint votre facture #{factureId}.</p>
-            <p>Montant total : {facture.MontantTotal:C}</p>
+            <p>Montant total : {facture.MontantTotal.ToString("C", new CultureInfo("en-TN"){ NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } })}</p>
             <p>Date de génération : {facture.DateGeneration:dd/MM/yyyy}</p>
             <br/>
             <p>Cordialement,<br/>Mini-ERP</p>
@@ -272,11 +273,6 @@ namespace Facturation.Services
             var echeancesExistantes = await _echeanceRepo.GetEcheancesByFactureId(factureId);
 
             var total = echeancesExistantes.Sum(e => e.Montant);
-
-            Console.WriteLine("hhhhhhhhhhhhhhhhhhhhhhhh\nkkkkk");
-            Console.WriteLine(total);
-            Console.WriteLine("hhhhhhhhhhhhhhhhhhhhhhhh\nkkkkk");
-            Console.WriteLine(facture.MontantTotal);
 
             if (total == facture.MontantTotal)
             {

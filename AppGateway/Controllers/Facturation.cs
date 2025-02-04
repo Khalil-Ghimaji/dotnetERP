@@ -161,8 +161,7 @@ namespace AppGateway.Controllers
                 }
                 catch (Exception)
                 {
-                    // Ignorer l'erreur sans la traiter ni la relancer.
-                    // Pas de log ou d'action particulière ici, l'erreur est simplement ignorée.
+                    throw new Exception("Erreur lors de la vérification et de la mise à jour du statut de la commande.");
                 }
 
                 // Retourner la réponse en cas de succès

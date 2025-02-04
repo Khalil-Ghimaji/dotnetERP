@@ -6,6 +6,7 @@ namespace Facturation.Services;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using QuestPDF.Helpers;
+using System.Globalization;
 
 public class PDFService : IPDFService
 {
@@ -114,12 +115,12 @@ public class PDFService : IPDFService
                             {
                                 table.Cell().Element(CellStyle).Text(article.produit.Nom);
                                 table.Cell().Element(CellStyle).Text(article.quantite.ToString());
-                                table.Cell().Element(CellStyle).Text(article.prix.ToString("C"));
-                                table.Cell().Element(CellStyle).Text((article.quantite * article.prix).ToString("C"));
+                                table.Cell().Element(CellStyle).Text(article.prix.ToString("C", new CultureInfo("en-TN") { NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } }));
+                                table.Cell().Element(CellStyle).Text((article.quantite * article.prix).ToString("C", new CultureInfo("en-TN"){ NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } }));
                             }
 
                             // Total de la facture
-                            table.Cell().ColumnSpan(4).Element(TotalCellStyle).Text($"Total de la facture : {facture.MontantTotal:C}")
+                            table.Cell().ColumnSpan(4).Element(TotalCellStyle).Text($"Total de la facture : {facture.MontantTotal.ToString("C", new CultureInfo("en-TN") { NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } })}")                                
                                 .FontSize(14)
                                 .Bold();
 

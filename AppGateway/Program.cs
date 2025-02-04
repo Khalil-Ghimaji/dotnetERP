@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using Persistence.Entities;
+using Persistence.entities.Client;
 using IEmailSender = Microsoft.AspNetCore.Identity.UI.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -90,6 +91,85 @@ using (var scope = app.Services.CreateScope())
         await userManager.CreateAsync(user, "Admin@123");
         await userManager.AddToRoleAsync(user, Roles.ADMIN.ToString());
     }
+
+    // var gestionnaireCommandes = await userManager.FindByEmailAsync("khalil@gmail.com");
+    // if (gestionnaireCommandes == null)
+    // {
+    //     gestionnaireCommandes = new User { Email = "khalil@gmail.com", UserName = "khalil@gmail.com", EmailConfirmed = true };
+    //     await userManager.CreateAsync(gestionnaireCommandes, "khalil@123");
+    //     await userManager.AddToRoleAsync(gestionnaireCommandes, Roles.GESTIONNAIRE_COMMANDES.ToString());
+    // }
+    //
+    // var gestionnaireStock = await userManager.FindByEmailAsync("aziz@gmail.com");
+    // if (gestionnaireStock == null)
+    // {
+    //     gestionnaireStock = new User { Email = "aziz@gmail.com", UserName = "aziz@gmail.com", EmailConfirmed = true };
+    //     await userManager.CreateAsync(gestionnaireStock, "aziz@123");
+    //     await userManager.AddToRoleAsync(gestionnaireStock, Roles.GESTIONNAIRE_STOCK.ToString());
+    // }
+    //
+    // var comptable = await userManager.FindByEmailAsync("rayen@gmail.com");
+    // if (comptable == null)
+    // {
+    //     comptable = new User { Email = "rayen@gmail.com", UserName = "rayen@gmail.com", EmailConfirmed = true };
+    //     await userManager.CreateAsync(comptable, "rayen@123");
+    //     await userManager.AddToRoleAsync(comptable, Roles.COMPTABLE.ToString());
+    // }
+    //
+    // var gestionnaireClients = await userManager.FindByEmailAsync("oussema@gmail.com");
+    // if (gestionnaireClients == null)
+    // {
+    //     gestionnaireClients = new User { Email = "oussema@gmail.com", UserName = "oussema@gmail.com", EmailConfirmed = true };
+    //     await userManager.CreateAsync(gestionnaireClients, "oussema@123");
+    //     await userManager.AddToRoleAsync(gestionnaireClients, Roles.GESTIONNAIRE_CLIENTS.ToString());
+    // }
+    //
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var clientKhalil = context.Clients.FirstOrDefault(c => c.nom == "khalil");
+    if (clientKhalil == null)
+    {
+        var client = new Client()
+        {
+            nom = "khalil", address = "Tunis", email = "khalilghimaji@gmail.com", estRestreint = false, nbNotes = 1,
+            note = 10, sumNotes = 10, telephone = 12345678
+        };
+        context.Clients.Add(client);
+    }
+    else
+    {
+        clientKhalil.nbNotes = 1;
+        clientKhalil.note = 10;
+        clientKhalil.sumNotes = 10;
+        clientKhalil.telephone = 12345678;
+        clientKhalil.email = "khalilghimaji@gmail.com";
+        clientKhalil.address = "Tunis";
+        clientKhalil.estRestreint = false;
+        context.Clients.Update(clientKhalil);
+    }
+    
+    var clientOussema = context.Clients.FirstOrDefault(c => c.nom == "oussema");
+    if (clientOussema == null)
+    {
+        var client = new Client()
+        {
+            nom = "oussema", address = "Menzah", email = "oussema.guerami@insat.ucar.tn", estRestreint = true,
+            sumNotes = 0, nbNotes = 0, note = 0, telephone = 51844856
+        };
+        context.Clients.Add(client);
+    }
+    else
+    {
+        clientOussema.estRestreint = true;
+        clientOussema.sumNotes = 0;
+        clientOussema.nbNotes = 0;
+        clientOussema.note = 0;
+        clientOussema.telephone = 51844856;
+        clientOussema.email = "oussema.guerami@insat.ucar.tn";
+        clientOussema.address = "Menzah";
+        context.Clients.Update(clientOussema);
+    }
+
+    context.SaveChanges();
 }
 
 /*app.MapIdentityApi<User>();*/

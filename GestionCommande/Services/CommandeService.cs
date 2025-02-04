@@ -70,6 +70,10 @@ public class CommandeService : ICommandeService
             {
                 throw new HttpRequestException($"Client n{idClient} n'existe pas");
             }
+            if (client.estRestreint)
+            {
+                throw new BadHttpRequestException("Client Restreint");
+            }
             commande.client = client;
             if (dateCommande != null)
             {
