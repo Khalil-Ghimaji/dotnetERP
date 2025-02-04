@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+﻿/*using System.Security.Claims;
 using AppGateway.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -104,7 +104,7 @@ namespace WebApplication2.Controllers
             }
 
             return BadRequest(ModelState);
-        }*/
+        }#1#
         [HttpPost("logout"), Authorize]
         public async Task<IActionResult> Logout()
         {
@@ -155,7 +155,7 @@ namespace WebApplication2.Controllers
 
             return BadRequest("Invalid MFA code.");
         }
-        */
+        #1#
 
         [HttpPost("login-mfa")]
         public async Task<IActionResult> LoginMfa([FromBody] VerifyMfaModel model)
@@ -262,7 +262,7 @@ namespace WebApplication2.Controllers
 
             return Unauthorized("Invalid MFA token.");
         }
-        */
+        #1#
     }
 
     public class BaseAuth
@@ -282,7 +282,7 @@ namespace WebApplication2.Controllers
         public string Password { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-    }*/
+    }#1#
     public class LoginResponse
     {
         public bool RequiresMfa { get; set; } = false;
@@ -292,4 +292,4 @@ namespace WebApplication2.Controllers
     {
         public string Token { get; set; } = string.Empty;
     }
-}
+}*/

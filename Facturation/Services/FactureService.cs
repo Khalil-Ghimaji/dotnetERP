@@ -116,10 +116,9 @@ namespace Facturation.Services
 
             var echeancesExistantes = await _echeanceRepo.GetEcheancesByFactureId(factureId);
 
-            var totalPayé = echeancesExistantes.Sum(e => e.Montant);
+            var total = echeancesExistantes.Sum(e => e.Montant);
 
-            var montantRestant = facture.MontantTotal - facture.MontantPayé;
-            if (creerEcheanceDto.Montant  > montantRestant)
+            if (creerEcheanceDto.Montant + total  > facture.MontantTotal)
             {
                 throw new Exception(
                     "Le montant total des échéances dépasse le montant restant à payer pour cette facture.");
