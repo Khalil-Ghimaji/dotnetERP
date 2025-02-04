@@ -50,11 +50,17 @@ namespace Facturation.Controllers
                 {
                     return Conflict("La commande existe déjà avec ce même ID.");
                 }
-
                 return StatusCode(500, "Une erreur est survenue lors de la création de la facture.");
             }
+            catch (Exception ex) when (ex.Message.Contains("Impossible de créer une facture"))
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
-
 
         [HttpDelete("{factureId}")]
         public async Task<ActionResult> SupprimerFacture(int factureId)
@@ -75,8 +81,15 @@ namespace Facturation.Controllers
         [HttpPost("{factureId}/echeance")]
         public async Task<ActionResult<EcheanceResponseDTO>> AjouterEcheance(int factureId, [FromBody] CreerEcheanceDTO creerEcheanceDto)
         {
-            var echeance = await _factureService.AjouterEcheance(factureId, creerEcheanceDto);
-            return CreatedAtAction(nameof(ConsulterEcheance), new { echeanceId = echeance.EcheanceId }, echeance);
+            try
+            {
+                var echeance = await _factureService.AjouterEcheance(factureId, creerEcheanceDto);
+                return CreatedAtAction(nameof(ConsulterEcheance), new { echeanceId = echeance.EcheanceId }, echeance);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{factureId}/echeances")]
@@ -104,9 +117,16 @@ namespace Facturation.Controllers
         [HttpPut("echeance/{echeanceId}")]
         public async Task<ActionResult<EcheanceResponseDTO>> UpdateEcheance(int echeanceId, [FromBody] UpdateEcheanceDTO updateEcheanceDto)
         {
-            var echeance = await _factureService.UpdateEcheance(echeanceId, updateEcheanceDto);
-            if (echeance == null) return NotFound("Échéance non trouvée.");
-            return Ok(echeance);
+            try
+            {
+                var echeance = await _factureService.UpdateEcheance(echeanceId, updateEcheanceDto);
+                if (echeance == null) return NotFound("Échéance non trouvée.");
+                return Ok(echeance);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{factureId}/pdf")]
@@ -128,28 +148,24 @@ namespace Facturation.Controllers
         {
             try
             {
-
-
-                // Pas besoin de passer l'email en paramètre car il est défini dans le MailService
                 await _factureService.EnvoyerFactureParEmail(factureId);
-                return Ok("Facture envoyée par e-mail avec succès ");
+                return Ok("Facture envoyée par e-mail avec succès.");
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erreur lors de l'envoi de l'e-mail : {ex.Message}");
             }
         }
+
         [HttpGet("{factureId}/est_payée")]
         public async Task<ActionResult<bool>> VerifierPaiementFacture(int factureId)
         {
-            // Vérifie si la facture est payée
             return await VerifierStatutFacture(factureId, StatusFacture.Payée);
         }
 
         [HttpGet("{factureId}/est_validée")]
         public async Task<ActionResult<bool>> VerifierValiditeFacture(int factureId)
         {
-            // Vérifie si la facture est validée
             return await VerifierStatutFacture(factureId, StatusFacture.Validée);
         }
 
@@ -163,18 +179,13 @@ namespace Facturation.Controllers
                     return NotFound("Facture non trouvée.");
                 }
 
-                bool statutCorrespondant = facture.StatusFacture == statutAttendu;
+                bool statutCorrespondant = facture.StatusFacture == statutAttendu.ToString();
                 return Ok(statutCorrespondant);
             }
             catch (Exception ex)
             {
-                // Erreur lors de la vérification du statut de la facture
                 return StatusCode(500, $"Erreur : {ex.Message}");
             }
         }
-        
-
-    
-
     }
 }
