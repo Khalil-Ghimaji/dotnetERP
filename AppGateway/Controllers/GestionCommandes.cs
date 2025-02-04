@@ -9,7 +9,7 @@ namespace AppGateway.Controllers
 {
     [Route("api")]
     [ApiController]
-    [Authorize(Roles="Admin,GestionnaireCommandes")]
+    [Authorize(Roles="ADMIN,GESTIONNAIRE_COMMANDES")]
     public class GestionCommandes : ControllerBase
     {
         private readonly HttpClient _gestionCommandesClient;

@@ -10,7 +10,7 @@ namespace AppGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "ADMIN,Comptable")]
+    [Authorize(Roles = "ADMIN,COMPTABLE")]
     public class FacturationController : ControllerBase
     {
         private readonly HttpClient _gestionFacturesClient;

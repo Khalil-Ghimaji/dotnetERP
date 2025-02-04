@@ -1,20 +1,19 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
 using AppGateway.Models;
 using AppGateway.Services;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.OpenApi.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using Persistence.Entities;
 
-namespace YourNamespace.Controllers
+namespace AppGateway.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
