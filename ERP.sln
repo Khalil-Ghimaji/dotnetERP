@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ERP", "ERP\ERP.csproj", "{4D2F090C-E1AE-4E6A-ABA8-9F587B9C365E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence", "Persistence\Persistence.csproj", "{166FD6E2-FFF9-4B57-BE59-133EF65D90A2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facturation", "Facturation\Facturation.csproj", "{40178FD1-ED88-42BD-85F0-DA4AD0698CD7}"
