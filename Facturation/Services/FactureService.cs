@@ -1,3 +1,4 @@
+using System.Globalization;
 using AutoMapper;
 using Persistence.DTO.Facturation;
 using Persistence.entities.Facturation;
@@ -235,7 +236,7 @@ namespace Facturation.Services
             <h2>Facture #{factureId}</h2>
             <p>Bonjour,</p>
             <p>Veuillez trouver ci-joint votre facture #{factureId}.</p>
-            <p>Montant total : {facture.MontantTotal:C}</p>
+            <p>Montant total : {facture.MontantTotal.ToString("C", new CultureInfo("en-TN"){ NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } })}</p>
             <p>Date de génération : {facture.DateGeneration:dd/MM/yyyy}</p>
             <br/>
             <p>Cordialement,<br/>Mini-ERP</p>
