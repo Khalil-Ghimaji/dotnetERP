@@ -8,7 +8,7 @@ namespace Persistence.DTO.Facturation
         public int CommandeId { get; set; }
         public DateTime DateGeneration { get; set; }
         public float MontantTotal { get; set; }
-        public StatusFacture StatusFacture { get; set; }
+        public String StatusFacture { get; set; }
         public float MontantPayé { get; set; }
     }
 }
