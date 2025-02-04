@@ -8,10 +8,7 @@ namespace Facturation.Mapping
     {
         public FacturationMappingProfile()
         {
-            CreateMap<CreerFactureDTO, Facture>()
-                .ForMember(dest => dest.MontantTotal, opt => opt.MapFrom(src => src.MontantTotal))
-                .ForMember(dest => dest.StatusFacture, opt => opt.MapFrom(src => src.StatusFacture))
-                .ForMember(dest => dest.MontantPayé, opt => opt.MapFrom(src => src.MontantPayé));
+
 
             CreateMap<UpdateFactureDTO, Facture>()
                 .ForMember(dest => dest.MontantTotal, opt => opt.Condition(src => src.MontantTotal.HasValue))
@@ -20,8 +17,6 @@ namespace Facturation.Mapping
 
             CreateMap<CreerEcheanceDTO, Echeance>()
                 .ForMember(dest => dest.Montant, opt => opt.MapFrom(src => src.Montant))
-                .ForMember(dest => dest.StatutEcheance, opt => opt.MapFrom(src => src.StatutEcheance))
-                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
                 .ForMember(dest => dest.MethodePaiement, opt => opt.MapFrom(src => src.MethodePaiement));
 
             CreateMap<UpdateEcheanceDTO, Echeance>()
@@ -32,12 +27,12 @@ namespace Facturation.Mapping
 
             CreateMap<Facture, FactureResponseDTO>()
                 .ForMember(dest => dest.MontantTotal, opt => opt.MapFrom(src => src.MontantTotal))
-                .ForMember(dest => dest.StatusFacture, opt => opt.MapFrom(src => src.StatusFacture))
+                .ForMember(dest => dest.StatusFacture, opt => opt.MapFrom(src => src.StatusFacture.ToString()))
                 .ForMember(dest => dest.MontantPayé, opt => opt.MapFrom(src => src.MontantPayé));
 
             CreateMap<Echeance, EcheanceResponseDTO>()
                 .ForMember(dest => dest.Montant, opt => opt.MapFrom(src => src.Montant))
-                .ForMember(dest => dest.StatutEcheance, opt => opt.MapFrom(src => src.StatutEcheance))
+                .ForMember(dest => dest.StatutEcheance, opt => opt.MapFrom(src => src.StatutEcheance.ToString()))
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
                 .ForMember(dest => dest.MethodePaiement, opt => opt.MapFrom(src => src.MethodePaiement));
         }
