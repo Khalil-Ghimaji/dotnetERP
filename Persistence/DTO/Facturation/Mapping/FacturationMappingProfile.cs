@@ -8,7 +8,8 @@ namespace Facturation.Mapping
     {
         public FacturationMappingProfile()
         {
-
+            CreateMap<CreerFactureDTO, Facture>()
+                .ForMember(dest => dest.CommandeId, opt => opt.MapFrom(src => src.CommandeId));
 
             CreateMap<UpdateFactureDTO, Facture>()
                 .ForMember(dest => dest.MontantTotal, opt => opt.Condition(src => src.MontantTotal.HasValue))
