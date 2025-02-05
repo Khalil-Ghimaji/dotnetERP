@@ -20,7 +20,6 @@ public class PDFService : IPDFService
                 page.Margin(2, Unit.Centimetre);
                 page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Arial"));
 
-                // En-tête de la facture
                 page.Header().Column(column =>
                 {
                     column.Item().AlignCenter().Text("Facture")
@@ -38,12 +37,10 @@ public class PDFService : IPDFService
                         .FontColor(Colors.Grey.Darken1);
                 });
 
-                // Informations de la commande et du client
                 page.Content().Column(column =>
                 {
                     column.Spacing(10);
 
-                    // Informations de la commande
                     column.Item().Text("Informations de la commande")
                         .FontSize(18)
                         .Bold()
@@ -60,7 +57,6 @@ public class PDFService : IPDFService
                         column.Item().Text($"Statut de la commande : {facture.Commande.status}")
                             .FontSize(14);
 
-                        // Informations du client
                         column.Item().Text("Informations du client")
                             .FontSize(18)
                             .Bold()
@@ -75,7 +71,6 @@ public class PDFService : IPDFService
                         column.Item().Text($"Téléphone : {facture.Commande.client.telephone}")
                             .FontSize(14);
 
-                        // Tableau des articles de la commande
                         column.Item().Text("Détails des articles")
                             .FontSize(18)
                             .Bold()
@@ -91,7 +86,6 @@ public class PDFService : IPDFService
                                 columns.RelativeColumn(1); // Total
                             });
 
-                            // En-tête du tableau
                             table.Header(header =>
                             {
                                 header.Cell().Element(HeaderCellStyle).Text("Produit");
@@ -110,7 +104,6 @@ public class PDFService : IPDFService
                                 }
                             });
 
-                            // Corps du tableau
                             foreach (var article in facture.Commande.articles)
                             {
                                 table.Cell().Element(CellStyle).Text(article.produit.Nom);
@@ -119,7 +112,6 @@ public class PDFService : IPDFService
                                 table.Cell().Element(CellStyle).Text((article.quantite * article.prix).ToString("C", new CultureInfo("en-TN"){ NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } }));
                             }
 
-                            // Total de la facture
                             table.Cell().ColumnSpan(4).Element(TotalCellStyle).Text($"Total de la facture : {facture.MontantTotal.ToString("C", new CultureInfo("en-TN") { NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } })}")                                
                                 .FontSize(14)
                                 .Bold();
@@ -136,7 +128,6 @@ public class PDFService : IPDFService
                     }
                 });
 
-                // Pied de page
                 page.Footer().AlignCenter().Text(text =>
                 {
                     text.Span("Merci pour votre confiance !").Bold().FontColor(Colors.Blue.Darken3);

@@ -20,7 +20,6 @@ namespace GestionCommande.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Commandes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CommandeResponseDTO>>> GetCommandes()
         {
@@ -29,7 +28,6 @@ namespace GestionCommande.Controllers
             return _mapper.Map<List<CommandeResponseDTO>>(commandes.ToList());
         }
 
-        // GET: api/Commandes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CommandeResponseDTO>> GetCommande(int id)
         {
@@ -48,8 +46,7 @@ namespace GestionCommande.Controllers
             return _mapper.Map<CommandeResponseDTO>(commande);
         }
 
-        // PUT: api/Commandes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPut("{id}")]
         public async Task<ActionResult<CommandeResponseDTO>> ModifierCommande(int id, CommandeRequestDTO commandeDto)
         {
@@ -78,8 +75,7 @@ namespace GestionCommande.Controllers
             }
         }
 
-        // POST: api/Commandes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPost]
         public async Task<ActionResult<CommandeResponseDTO>> CreerCommande(CommandeRequestDTO commandeDto)
         {
@@ -103,7 +99,6 @@ namespace GestionCommande.Controllers
             }
         }
 
-        // DELETE: api/Commandes/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCommande(int id)
         {
@@ -326,30 +321,27 @@ namespace GestionCommande.Controllers
         }
 
 
-        // [HttpPost("rembourser/{id}")]
-        // public async Task<ActionResult<Commande>> RembourserCommande(int id)
-        // {
-        //     var commande = await _commandeService.getCommandeById(id);
-        //     if (commande == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //     commande.status = StatusCommande.REMBOURSEE;
-        //     await _context.SaveChangesAsync();
-        //     return commande;
-        // }
 
-        // [HttpPost("retourner/{id}")]
-        // public async Task<ActionResult<Commande>> RetournerCommande(int id)
-        // {
-        //     var commande = await _commandeService.getCommandeById(id);
-        //     if (commande == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //     commande.status = StatusCommande.RETOURNEE;
-        //     await _context.SaveChangesAsync();
-        //     return commande;
-        // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }

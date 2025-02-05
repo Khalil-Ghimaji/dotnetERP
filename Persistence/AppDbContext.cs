@@ -17,7 +17,7 @@ namespace Persistence
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlite("Data Source=../Persistence/app.db", x => x.MigrationsAssembly("ERP"));
+            optionsBuilder.UseSqlite("Data Source=../Persistence/app.db", x => x.MigrationsAssembly("AppGateway"));
             optionsBuilder.UseLazyLoadingProxies();
         }
 

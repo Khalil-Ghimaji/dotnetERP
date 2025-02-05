@@ -46,10 +46,12 @@ namespace Facturation.Controllers
             }
             catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
             {
-                if (ex.InnerException is Microsoft.Data.Sqlite.SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
+                if (ex.InnerException is Microsoft.Data.Sqlite.SqliteException sqliteEx &&
+                    sqliteEx.SqliteErrorCode == 19)
                 {
                     return Conflict("La commande existe déjà avec ce même ID.");
                 }
+
                 return StatusCode(500, "Une erreur est survenue lors de la création de la facture.");
             }
             catch (Exception ex) when (ex.Message.Contains("Impossible de créer une facture"))
@@ -70,7 +72,8 @@ namespace Facturation.Controllers
         }
 
         [HttpPut("{factureId}")]
-        public async Task<ActionResult<FactureResponseDTO>> UpdateFacture(int factureId, [FromBody] UpdateFactureDTO updateFactureDTO)
+        public async Task<ActionResult<FactureResponseDTO>> UpdateFacture(int factureId,
+            [FromBody] UpdateFactureDTO updateFactureDTO)
         {
             if (updateFactureDTO == null) return BadRequest("Données de mise à jour invalides.");
 
@@ -79,7 +82,8 @@ namespace Facturation.Controllers
         }
 
         [HttpPost("{factureId}/echeance")]
-        public async Task<ActionResult<EcheanceResponseDTO>> AjouterEcheance(int factureId, [FromBody] CreerEcheanceDTO creerEcheanceDto)
+        public async Task<ActionResult<EcheanceResponseDTO>> AjouterEcheance(int factureId,
+            [FromBody] CreerEcheanceDTO creerEcheanceDto)
         {
             try
             {
@@ -102,9 +106,15 @@ namespace Facturation.Controllers
         [HttpGet("echeance/{echeanceId}")]
         public async Task<ActionResult<EcheanceResponseDTO>> ConsulterEcheance(int echeanceId)
         {
-            var echeance = await _factureService.ConsulterEcheance(echeanceId);
-            if (echeance == null) return NotFound("Aucun échéance trouvé.");
-            return Ok(echeance);
+            try
+            {
+                var echeance = await _factureService.ConsulterEcheance(echeanceId);
+                return Ok(echeance);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpDelete("echeance/{echeanceId}")]
@@ -115,7 +125,8 @@ namespace Facturation.Controllers
         }
 
         [HttpPut("echeance/{echeanceId}")]
-        public async Task<ActionResult<EcheanceResponseDTO>> UpdateEcheance(int echeanceId, [FromBody] UpdateEcheanceDTO updateEcheanceDto)
+        public async Task<ActionResult<EcheanceResponseDTO>> UpdateEcheance(int echeanceId,
+            [FromBody] UpdateEcheanceDTO updateEcheanceDto)
         {
             try
             {

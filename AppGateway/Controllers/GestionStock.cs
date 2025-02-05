@@ -79,7 +79,6 @@ namespace AppGateway.Controllers
             HttpResponseMessage stockResponse;
             if (statusCommand == "FACTUREE")
             {
-                //var articles = JsonSerializer.Deserialize<CommandeResponseDTO>(commandcontent).articles;
                 stockResponse = await _gestionStockClient.PostAsync($"{_gestionStockUrl}expedierMarchandises",
                     new StringContent(JsonSerializer.Serialize(new { idCommande = CommandeId }), Encoding.UTF8,
                         "application/json"));
@@ -166,14 +165,6 @@ namespace AppGateway.Controllers
             return StatusCode((int)HttpStatusCode.OK,
                 $"{await responseStock.Content.ReadAsStringAsync()}\n{await responseCommande.Content.ReadAsStringAsync()}");
         }
-
-        // [HttpPost("confirmerCommande/{commandeId}")]
-        // public async Task<IActionResult> ConfirmerCommande(int commandeId)
-        // {
-        //     var response =
-        //         await _gestionStockClient.PostAsync($"{_gestionStockUrl}confirmerCommande/{commandeId}", null);
-        //     return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
-        // }
 
         [HttpDelete("supprimerProduit")]
         public async Task<IActionResult> SupprimerProduit(int produitId)

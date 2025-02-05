@@ -26,7 +26,7 @@ public class JwtHandler
         }
         catch (Exception ex)
         {
-            //log an exception
+
             return null;
         }
     }

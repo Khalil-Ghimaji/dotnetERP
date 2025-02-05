@@ -29,10 +29,9 @@ public class CommandeService : ICommandeService
         return await _commandeRepo.GetAll();
     }
 
-    // public async Task<List<Commande>> getCommandesByClient(Client client)
-    // {
-    //     return await _repo.getCommandesByClient(client);
-    // }
+
+
+
 
     public async Task<Commande?> getCommandeById(int id)
     {
@@ -279,22 +278,21 @@ public class CommandeService : ICommandeService
         throw new BadHttpRequestException($"Commande n{id} n'est pas facturée");
     }
 
-    // public async Task<Commande> livrerCommande(int id)
-    // {
-    //     var commande = await getCommandeById(id);
-    //     if (commande == null)
-    //     {
-    //         throw new HttpRequestException($"Commande n{id} n'existe pas");
-    //     }
-    //
-    //     if (commande.status == StatusCommande.EXPEDIEE)
-    //     {
-    //         commande.status = StatusCommande.LIVREE;
-    //         return await _commandeRepo.Update(commande);
-    //     }
-    //
-    //     throw new BadHttpRequestException($"Commande n{id} n'est pas expédiée");
-    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public async Task<Commande?> supprimerCommande(int id)
     {
@@ -345,21 +343,17 @@ public class CommandeService : ICommandeService
     }
 
 
-    // public async void rembourserCommande(Commande commande)
-    // {
-    //     commande.status = StatusCommande.REMBOURSEE;
-    //     await _repo.Update(commande);
-    // }
 
-    // public async void retournerCommande(Commande commande)
-    // {
-    //     commande.status = StatusCommande.RETOURNEE;
-    //     await _repo.Update(commande);
-    // }
 
-    // public async void modifierStatusCommande(Commande commande, StatusCommande status)
-    // {
-    //     commande.status = status;
-    //     await _repo.Update(commande);
-    // }
+
+
+
+
+
+
+
+
+
+
+
 }

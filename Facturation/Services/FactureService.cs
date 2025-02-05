@@ -55,7 +55,8 @@ namespace Facturation.Services
 
             if (commande.status != StatusCommande.VALIDEE)
             {
-                throw new Exception($"Impossible de créer une facture pour une commande dont l'état est {commande.status}. La commande doit être VALIDEE.");
+                throw new Exception(
+                    $"Impossible de créer une facture pour une commande dont l'état est {commande.status}. La commande doit être VALIDEE.");
             }
 
             var facture = _mapper.Map<Facture>(creerFactureDTO);
@@ -111,7 +112,8 @@ namespace Facturation.Services
 
             if (creerEcheanceDto.Montant + total > facture.MontantTotal)
             {
-                throw new Exception("Le montant total des échéances dépasse le montant restant à payer pour cette facture.");
+                throw new Exception(
+                    "Le montant total des échéances dépasse le montant restant à payer pour cette facture.");
             }
 
             var echeance = _mapper.Map<Echeance>(creerEcheanceDto);
@@ -140,6 +142,10 @@ namespace Facturation.Services
         public async Task<EcheanceResponseDTO> ConsulterEcheance(int echeanceId)
         {
             var echeance = await _echeanceRepo.GetById(echeanceId);
+            if (echeance == null)
+            {
+                throw new Exception("Échéance non trouvée.");
+            }
             return _mapper.Map<EcheanceResponseDTO>(echeance);
         }
 
@@ -184,7 +190,8 @@ namespace Facturation.Services
 
             if (montantTotalApresModification > facture.MontantTotal)
             {
-                throw new Exception("Le montant total des échéances dépasse le montant restant à payer pour cette facture.");
+                throw new Exception(
+                    "Le montant total des échéances dépasse le montant restant à payer pour cette facture.");
             }
 
             _mapper.Map(updateEcheanceDto, echeance);
@@ -199,6 +206,7 @@ namespace Facturation.Services
                 {
                     facture.MontantPayé += echeance.Montant;
                 }
+
                 await _factureRepo.Update(facture);
             }
 
@@ -236,7 +244,7 @@ namespace Facturation.Services
             <h2>Facture #{factureId}</h2>
             <p>Bonjour,</p>
             <p>Veuillez trouver ci-joint votre facture #{factureId}.</p>
-            <p>Montant total : {facture.MontantTotal.ToString("C", new CultureInfo("en-TN"){ NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } })}</p>
+            <p>Montant total : {facture.MontantTotal.ToString("C", new CultureInfo("en-TN") { NumberFormat = { CurrencySymbol = " TND", CurrencyPositivePattern = 3 } })}</p>
             <p>Date de génération : {facture.DateGeneration:dd/MM/yyyy}</p>
             <br/>
             <p>Cordialement,<br/>Mini-ERP</p>
@@ -262,6 +270,7 @@ namespace Facturation.Services
             {
                 facture.StatusFacture = StatusFacture.Créée;
             }
+
             if (facture.MontantPayé == facture.MontantTotal)
             {
                 facture.StatusFacture = StatusFacture.Payée;

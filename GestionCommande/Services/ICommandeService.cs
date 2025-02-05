@@ -19,5 +19,5 @@ public interface ICommandeService
     Task<Commande> facturerCommande(int id);
     Task<bool> commandeExists(int id);
     Task<Commande> rollback(int id, StatusCommande lastStatus);
-    //Task<Commande> livrerCommande(int id);
+
 }

@@ -404,7 +404,7 @@ namespace AppGateway.Controllers
             var principal = HttpContext.User;
             var principals = new ClaimsPrincipal(principal);
             var user = await _userManager.GetUserAsync(principals);
-            Console.WriteLine(user);
+            
             if (user != null)
             {
                 await _userManager.UpdateSecurityStampAsync(user);
@@ -437,11 +437,5 @@ namespace AppGateway.Controllers
                 IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user),
             };
         }
-    }
-
-    public class ExternalAuthDto
-    {
-        public string? Provider { get; set; }
-        public string? IdToken { get; set; }
     }
 }

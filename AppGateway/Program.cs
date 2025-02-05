@@ -1,7 +1,6 @@
 using AppGateway.Models;
 using AppGateway.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.OpenApi.Models;
 using Persistence;
 using Persistence.Entities;
 using Persistence.entities.Client;
@@ -9,12 +8,11 @@ using IEmailSender = Microsoft.AspNetCore.Identity.UI.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<JwtHandler>();
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>();
@@ -43,7 +41,7 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromMinutes(1);
 });
-// Configure HttpClient to add the API key header to all requests
+
 builder.Services.AddHttpClient("GestionStockClient",
     client => { client.DefaultRequestHeaders.Add("X-API-KEY", "Aziz-GestionStock-2025"); });
 
@@ -58,7 +56,7 @@ builder.Services.AddHttpClient("GestionFacturesClient",
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -74,7 +72,9 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var roles = new List<Roles>
-        { Roles.ADMIN, Roles.GESTIONNAIRE_STOCK, Roles.GESTIONNAIRE_CLIENTS, Roles.GESTIONNAIRE_COMMANDES, Roles.COMPTABLE };
+    {
+        Roles.ADMIN, Roles.GESTIONNAIRE_STOCK, Roles.GESTIONNAIRE_CLIENTS, Roles.GESTIONNAIRE_COMMANDES, Roles.COMPTABLE
+    };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role.ToString()))
@@ -92,38 +92,7 @@ using (var scope = app.Services.CreateScope())
         await userManager.AddToRoleAsync(user, Roles.ADMIN.ToString());
     }
 
-    // var gestionnaireCommandes = await userManager.FindByEmailAsync("khalil@gmail.com");
-    // if (gestionnaireCommandes == null)
-    // {
-    //     gestionnaireCommandes = new User { Email = "khalil@gmail.com", UserName = "khalil@gmail.com", EmailConfirmed = true };
-    //     await userManager.CreateAsync(gestionnaireCommandes, "khalil@123");
-    //     await userManager.AddToRoleAsync(gestionnaireCommandes, Roles.GESTIONNAIRE_COMMANDES.ToString());
-    // }
-    //
-    // var gestionnaireStock = await userManager.FindByEmailAsync("aziz@gmail.com");
-    // if (gestionnaireStock == null)
-    // {
-    //     gestionnaireStock = new User { Email = "aziz@gmail.com", UserName = "aziz@gmail.com", EmailConfirmed = true };
-    //     await userManager.CreateAsync(gestionnaireStock, "aziz@123");
-    //     await userManager.AddToRoleAsync(gestionnaireStock, Roles.GESTIONNAIRE_STOCK.ToString());
-    // }
-    //
-    // var comptable = await userManager.FindByEmailAsync("rayen@gmail.com");
-    // if (comptable == null)
-    // {
-    //     comptable = new User { Email = "rayen@gmail.com", UserName = "rayen@gmail.com", EmailConfirmed = true };
-    //     await userManager.CreateAsync(comptable, "rayen@123");
-    //     await userManager.AddToRoleAsync(comptable, Roles.COMPTABLE.ToString());
-    // }
-    //
-    // var gestionnaireClients = await userManager.FindByEmailAsync("oussema@gmail.com");
-    // if (gestionnaireClients == null)
-    // {
-    //     gestionnaireClients = new User { Email = "oussema@gmail.com", UserName = "oussema@gmail.com", EmailConfirmed = true };
-    //     await userManager.CreateAsync(gestionnaireClients, "oussema@123");
-    //     await userManager.AddToRoleAsync(gestionnaireClients, Roles.GESTIONNAIRE_CLIENTS.ToString());
-    // }
-    //
+
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var clientKhalil = context.Clients.FirstOrDefault(c => c.nom == "khalil");
     if (clientKhalil == null)
@@ -146,7 +115,7 @@ using (var scope = app.Services.CreateScope())
         clientKhalil.estRestreint = false;
         context.Clients.Update(clientKhalil);
     }
-    
+
     var clientOussema = context.Clients.FirstOrDefault(c => c.nom == "oussema");
     if (clientOussema == null)
     {

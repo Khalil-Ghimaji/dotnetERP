@@ -4,8 +4,8 @@ namespace GestionCommande.DTOs;
 
 public class ArticleCommandeResponseDTO
 {
-    //public int Id { get; set; }
-    //public ProduitResponseDTO produit { get; set; }
+
+
     public int IdProduit { get; set; }
     public string Nom { get; set; }
     public String Categorie { get; set; }
