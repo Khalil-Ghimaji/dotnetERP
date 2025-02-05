@@ -200,7 +200,6 @@ namespace AppGateway.Controllers
             using var jsonDoc = JsonDocument.Parse(content1);
             var root = jsonDoc.RootElement;
             int factureId = root.GetProperty("factureId").GetInt32();
-            /*int factureId = JsonSerializer.Deserialize<Facture>(content1).FactureId;*/
             var json = JsonSerializer.Serialize(updateEcheanceDTO);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _gestionFacturesClient.PutAsync($"{_facturationUrl}echeance/{echeanceId}", content);
