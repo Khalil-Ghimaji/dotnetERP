@@ -32,6 +32,7 @@ namespace GestionClients.Services
                 nom = dto.nom,
                 address = dto.address,
                 telephone = dto.telephone.Value,
+                email = dto.email , 
                 sumNotes = 0,
                 nbNotes = 0,
                 note = 0,
