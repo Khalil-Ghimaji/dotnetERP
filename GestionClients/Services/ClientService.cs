@@ -152,7 +152,14 @@ namespace GestionClients.Services
         }
         public async Task supprimerClient(int id)
         {
-           await _ClientRepo.Delete(id);
+            if (await _ClientRepo.GetById(id) != null)
+            {
+                await _ClientRepo.Delete(id);
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Client avec l'ID {id} introuvable.");
+            }
         }
 
     }
