@@ -39,23 +39,19 @@ namespace GestionStock.Services
             _context = context;
         }
 
-
-        //permet d'ajouter un produit avec son stock associé
         public async Task<int> AjouterProduit(AjouterProduitRequestDTO dto)
         {
-            //check if the product already exists
+
             if (await _produitRepo.ProduitExists(dto.Nom))
             {
                 throw new DuplicateNameException("Produit déjà existant.");
             }
 
-            //check if the category exists
             if (!await _categoryRepo.CategoryExists(dto.CategoryId))
             {
                 throw new KeyNotFoundException("Catégorie non trouvée.");
             }
 
-            //créer le produit avec l'ArticleStock
             var produit = new Produit()
             {
                 Nom = dto.Nom,
@@ -105,8 +101,6 @@ namespace GestionStock.Services
             return _mapper.Map<IEnumerable<ArticleStockDTO>>(articleStocks);
         }
 
-
-        //reste à remplacer Commande par un DTO
         public async Task ExpedierMarchandises(int idCommande)
         {
             var commande = await _commandeRepo.GetById(idCommande);
@@ -145,8 +139,6 @@ namespace GestionStock.Services
             }
         }
 
-
-        //cette méthode met à jour les informations d'un produit et de son stock
         public async Task ModifierProduit(ProduitDTO dto)
         {
             var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
@@ -167,57 +159,6 @@ namespace GestionStock.Services
                 throw new KeyNotFoundException("Article non trouvé.");
             }
         }
-
-
-        /*public async Task ReserverProduit(ReserverProduitRequestDTO dto)
-        {
-            var articleStock = await _stockRepo.GetArticleStockByProduitId(dto.ProduitId);
-            if (articleStock != null && articleStock.Quantite >= dto.Quantite)
-            {
-                articleStock.Quantite -= dto.Quantite;
-                await _stockRepo.Update(articleStock);
-                var cts = new CancellationTokenSource();
-                _reservationTasks[(dto.CommandeId, dto.ProduitId)] = (cts, dto.Quantite);
-
-                if (TimeSpan.TryParse(dto.ReservationDuration, out var reservationDuration))
-                {
-                    _ = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await Task.Delay(reservationDuration, cts.Token);
-                            cts.Token.ThrowIfCancellationRequested();
-                            using (var scope = _scopeFactory.CreateScope())
-                            {
-                                var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
-                                articleStock.Quantite += dto.Quantite;
-                                await scopedStockRepo.Update(articleStock);
-                            }
-                        }
-                        catch (TaskCanceledException)
-                        {
-                        }
-                        finally
-                        {
-                            _reservationTasks.TryRemove((dto.CommandeId, dto.ProduitId), out _);
-                        }
-                    });
-                }
-                else
-                {
-                    throw new InvalidOperationException("Timespan invalide.");
-                }
-            }
-            else
-            {
-                if (articleStock == null)
-                {
-                    throw new KeyNotFoundException("Article non trouvé.");
-                }
-
-                throw new InvalidOperationException("Quantité insuffisante");
-            }
-        }*/
 
         public async Task ReserverCommande(ReserverCommandeRequestDTO reserverCommande)
         {
@@ -258,7 +199,6 @@ namespace GestionStock.Services
                     {
                         using (var scope = _scopeFactory.CreateScope())
                         {
-                            var scopedContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                             var scopedStockRepo = scope.ServiceProvider.GetRequiredService<IArticleStockRepo>();
                             var scopedCommandeRepo = scope.ServiceProvider.GetRequiredService<ICommandeRepo>();
 
@@ -267,7 +207,7 @@ namespace GestionStock.Services
                                 await Task.Delay(reservationDuration, cts.Token);
                                 cts.Token.ThrowIfCancellationRequested();
                                 commande = await scopedCommandeRepo.GetById(reserverCommande.idCommande);
-                                commande.status = StatusCommande.ANNULEE;
+                                commande.status = StatusCommande.FACTUREE;
                                 foreach (var article in articles)
                                 {
                                     var articleStock =

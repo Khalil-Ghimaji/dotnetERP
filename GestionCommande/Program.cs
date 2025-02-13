@@ -15,16 +15,16 @@ builder.Services.AddScoped<IArticleStockRepo,ArticleStockRepo>();
 builder.Services.AddScoped<IClientRepo,ClientRepo>();
 builder.Services.AddScoped<ICommandeService, CommandeService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-// Add services to the container.
+
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -36,5 +36,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-//app.UseMiddleware<APIKeyMiddleware>();
+app.UseMiddleware<APIKeyMiddleware>();
 app.Run();

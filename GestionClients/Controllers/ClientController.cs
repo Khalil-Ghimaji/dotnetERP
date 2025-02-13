@@ -1,7 +1,5 @@
 ﻿using GestionClients.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Persistence.DTO.GestionClients;
 using Persistence.entities.Client;
 
@@ -17,6 +15,7 @@ namespace GestionClients.Controllers
         {
             _clientService = stockService;
         }
+
         [HttpPost("ajouterClient")]
         public async Task<IActionResult> AjouterClient(ClientIn client)
         {
@@ -28,9 +27,10 @@ namespace GestionClients.Controllers
                 {
                     if (c.nom == client.nom && c.telephone == client.telephone && c.address == client.address)
                     {
-                        return CreatedAtAction("ConsulterClient", new { id = c.Id });
+                        return CreatedAtAction("ConsulterClient", new { id = c.Id }, c);
                     }
                 }
+
                 return BadRequest(new { message = "Aucun client correspondant trouvé après l'ajout." });
             }
             catch (InvalidOperationException ex)
@@ -45,11 +45,12 @@ namespace GestionClients.Controllers
 
 
         [HttpGet("consulterClient")]
-        public IActionResult ConsulterClient(int id)
+        public async Task<ActionResult> ConsulterClient(int id)
         {
-            var client = _clientService.consulterClient(id);
-            return Ok(client);
+            var client = await _clientService.consulterClient(id);
+            return client == null ? NotFound("Client non trouvé.") : Ok(client);
         }
+
         [HttpGet("listerClients")]
         public async Task<IActionResult> ListerClients()
         {
@@ -60,6 +61,7 @@ namespace GestionClients.Controllers
                 {
                     return NotFound("Aucun client trouvé.");
                 }
+
                 return Ok(clients);
             }
             catch (Exception ex)
@@ -70,7 +72,7 @@ namespace GestionClients.Controllers
         }
 
         [HttpPut("modifierClient")]
-        public async Task<IActionResult> ModifierClient( int id, ClientIn client)
+        public async Task<IActionResult> ModifierClient(int id, ClientIn client)
         {
             try
             {
@@ -84,11 +86,16 @@ namespace GestionClients.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { message = "Une erreur est survenue lors de la modification du client.", details = ex.Message });
+                    new
+                    {
+                        message = "Une erreur est survenue lors de la modification du client.", details = ex.Message
+                    });
             }
         }
+
         [HttpGet("FiltrerClients")]
-        public async Task<IActionResult> FiltrerClients([FromQuery] string? nom = null, [FromQuery] bool? estRestreint = null, [FromQuery] float? note = null, [FromQuery] string? adresse = null)
+        public async Task<IActionResult> FiltrerClients([FromQuery] string? nom = null,
+            [FromQuery] bool? estRestreint = null, [FromQuery] float? note = null, [FromQuery] string? adresse = null)
         {
             try
             {
@@ -97,37 +104,42 @@ namespace GestionClients.Controllers
                     bool match = true;
                     if (!string.IsNullOrEmpty(nom))
                     {
-                        match &= client.nom != null && client.nom.Contains(nom, StringComparison.OrdinalIgnoreCase);
+                        match &= client.nom.Contains(nom, StringComparison.OrdinalIgnoreCase);
                     }
+
                     if (estRestreint.HasValue)
                     {
                         match &= client.estRestreint == estRestreint.Value;
                     }
+
                     if (note.HasValue)
                     {
                         match &= client.note >= note.Value;
                     }
-                    if(!string.IsNullOrEmpty(adresse))
+
+                    if (!string.IsNullOrEmpty(adresse))
                     {
-                        match &= client.address != null && client.address.Contains(adresse, StringComparison.OrdinalIgnoreCase);
+                        match &=
+                            client.address.Contains(adresse, StringComparison.OrdinalIgnoreCase);
                     }
 
                     return match;
                 };
                 var filteredClients = await _clientService.filtrerClients(condition);
-                if (filteredClients == null || !filteredClients.Any())
+                if (!filteredClients.Any())
                 {
                     return NotFound(new { message = "Aucun client ne correspond aux critères fournis." });
                 }
+
                 return Ok(filteredClients);
             }
             catch (Exception ex)
             {
-             
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { message = "Une erreur est survenue lors du filtrage des clients.", details = ex.Message });
             }
         }
+
         [HttpPut("evaluerClient")]
         public async Task<IActionResult> EvaluerClient(int id, int note)
         {
@@ -146,6 +158,7 @@ namespace GestionClients.Controllers
                     new { message = "Une erreur est survenue lors de l'évaluation du client.", details = ex.Message });
             }
         }
+
         [HttpPatch("RestaurerClient/{id}")]
         public async Task<IActionResult> RestaurerClient(int id)
         {
@@ -155,13 +168,16 @@ namespace GestionClients.Controllers
                 return Ok(new { message = $"Le client avec l'ID {id} a été restauré avec succès." });
             }
             catch (KeyNotFoundException ex)
-            { 
+            {
                 return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { message = "Une erreur est survenue lors de la restauration du client.", details = ex.Message });
+                    new
+                    {
+                        message = "Une erreur est survenue lors de la restauration du client.", details = ex.Message
+                    });
             }
         }
 
@@ -180,10 +196,14 @@ namespace GestionClients.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { message = "Une erreur est survenue lors de la restriction du client.", details = ex.Message });
+                    new
+                    {
+                        message = "Une erreur est survenue lors de la restriction du client.", details = ex.Message
+                    });
             }
         }
-        [HttpDelete("SupprimerClient/{id}")]
+
+        /*[HttpDelete("SupprimerClient/{id}")]
         public async Task<IActionResult> SupprimerClient(int id)
         {
             try
@@ -191,19 +211,18 @@ namespace GestionClients.Controllers
                 await _clientService.supprimerClient(id);
                 return Ok(new { message = $"Le client avec l'ID {id} a été supprimé avec succès." });
             }
-            catch (KeyNotFoundException ex) 
-            { 
-            
+            catch (KeyNotFoundException ex)
+            {
                 return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { message = "Une erreur est survenue lors de la suppression du client.", details = ex.Message });
+                    new
+                    {
+                        message = "Une erreur est survenue lors de la suppression du client.", details = ex.Message
+                    });
             }
-        }
-
-
-
+        }*/
     }
 }
